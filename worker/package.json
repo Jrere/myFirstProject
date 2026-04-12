@@ -7,11 +7,5 @@
     "deploy": "wrangler deploy",
     "db:init": "wrangler d1 execute bailuyuan-portfolio --local --file=schema.sql",
     "db:init:prod": "wrangler d1 execute bailuyuan-portfolio --remote --file=schema.sql"
-  },
-  "dependencies": {
-    "hono": "^4.0.0"
-  },
-  "devDependencies": {
-    "wrangler": "^3.0.0"
   }
 }
