@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>白鹿缘摄影 · 作品管理后台</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--surface3:#2e2e2e;
+  --border:#333;--border-light:#444;
+  --text:#e0e0e0;--text-dim:#888;--text-muted:#555;
+  --gold:#b8976a;--gold-light:#d4bc96;--gold-dark:#9a7d52;
+  --red:#e74c3c;--red-dark:#c0392b;
+  --green:#2ecc71;--green-dark:#27ae60;
+  --blue:#3498db;--blue-dark:#2980b9;
+  --radius:8px;--radius-lg:12px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --transition:all .25s ease;
+}
+body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* Header */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-logo{width:32px;height:32px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.header h1{font-size:1rem;font-weight:500;letter-spacing:2px}
+.header h1 span{color:var(--gold);font-weight:300;margin-left:8px;font-size:.85rem}
+.header-actions{display:flex;gap:12px}
+
+/* Buttons */
+.btn{padding:10px 24px;border-radius:var(--radius);font-size:.8rem;font-weight:500;letter-spacing:1px;cursor:pointer;border:none;transition:var(--transition);display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--gold);color:#fff}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-secondary{background:var(--surface3);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:var(--red-dark)}
+.btn-sm{padding:6px 14px;font-size:.72rem}
+
+/* Layout */
+.container{max-width:1200px;margin:0 auto;padding:40px 24px}
+
+/* Stats Bar */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:600;color:var(--gold);margin-bottom:4px}
+.stat-card .label{font-size:.72rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase}
+
+/* Filter Bar */
+.filter-bar{display:flex;gap:12px;margin-bottom:24px;align-items:center;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:var(--radius);font-size:.82rem;outline:none;transition:var(--transition)}
+.filter-bar select:focus,.filter-bar input:focus{border-color:var(--gold)}
+.filter-bar input{flex:1;min-width:200px}
+
+/* Grid */
+.works-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.work-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition);position:relative}
+.work-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:var(--shadow)}
+.work-thumb{width:100%;height:200px;object-fit:cover;background:var(--surface2);display:block}
+.work-thumb-placeholder{width:100%;height:200px;background:linear-gradient(135deg,var(--surface2),var(--surface3));display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.8rem}
+.work-body{padding:20px}
+.work-body h3{font-size:.95rem;font-weight:500;margin-bottom:4px}
+.work-body .cn{font-size:.8rem;color:var(--gold);margin-bottom:8px}
+.work-body .meta{font-size:.72rem;color:var(--text-dim);margin-bottom:12px}
+.work-body .category-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;background:rgba(184,151,106,.15);color:var(--gold);margin-bottom:12px}
+.work-actions{display:flex;gap:8px;padding:0 20px 20px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-header{padding:24px 28px 0;display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-size:1.1rem;font-weight:500}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface3);border:none;color:var(--text);cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.modal-close:hover{background:var(--red);color:#fff}
+.modal-body{padding:24px 28px}
+
+/* Form */
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:.75rem;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:var(--radius);font-size:.88rem;outline:none;transition:var(--transition);font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
+.form-group textarea{resize:vertical;min-height:80px}
+
+/* Image Upload */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;cursor:pointer;transition:var(--transition);position:relative;overflow:hidden}
+.upload-zone:hover{border-color:var(--gold);background:rgba(184,151,106,.05)}
+.upload-zone.has-image{padding:0;border-style:solid}
+.upload-zone img{width:100%;height:200px;object-fit:cover}
+.upload-zone .upload-icon{font-size:2rem;margin-bottom:8px;color:var(--text-muted)}
+.upload-zone .upload-text{font-size:.82rem;color:var(--text-dim)}
+.upload-zone .upload-hint{font-size:.7rem;color:var(--text-muted);margin-top:4px}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone .change-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--transition);color:#fff;font-size:.82rem}
+.upload-zone:hover .change-overlay{opacity:1}
+
+.modal-footer{padding:0 28px 24px;display:flex;gap:12px;justify-content:flex-end}
+
+/* Toast */
+.toast-container{position:fixed;top:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 24px;border-radius:var(--radius);font-size:.82rem;color:#fff;box-shadow:var(--shadow);animation:toastIn .3s ease;min-width:240px}
+.toast.success{background:var(--green-dark)}
+.toast.error{background:var(--red-dark)}
+.toast.info{background:var(--blue-dark)}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+/* Confirm */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:250;display:none;align-items:center;justify-content:center}
+.confirm-overlay.active{display:flex}
+.confirm-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;max-width:400px}
+.confirm-box h3{margin-bottom:12px;font-size:1rem}
+.confirm-box p{color:var(--text-dim);font-size:.85rem;margin-bottom:24px}
+.confirm-box .actions{display:flex;gap:12px;justify-content:center}
+
+/* Empty State */
+.empty{text-align:center;padding:80px 20px;color:var(--text-muted)}
+.empty .icon{font-size:3rem;margin-bottom:16px}
+.empty p{font-size:.9rem;margin-bottom:20px}
+
+/* Loading */
+.loading{text-align:center;padding:60px;color:var(--text-dim)}
+
+/* Sort Handle */
+.sort-handle{cursor:grab;color:var(--text-muted);font-size:1.2rem;padding:4px}
+.sort-handle:active{cursor:grabbing}
+
+/* Responsive */
+@media(max-width:768px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .header{padding:16px 20px}
+  .container{padding:24px 16px}
+  .works-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">B</div>
+    <h1>白鹿缘摄影 <span>作品管理</span></h1>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick="loadWorks()">🔄 刷新</button>
+    <button class="btn btn-primary" onclick="openModal()">＋ 添加作品</button>
+  </div>
+</header>
+
+<!-- Main -->
+<div class="container">
+  <!-- Stats -->
+  <div class="stats" id="stats"></div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <select id="filterCategory" onchange="renderGrid()">
+      <option value="all">全部分类</option>
+      <option value="corporate">企业宣传</option>
+      <option value="portrait">人像摄像</option>
+      <option value="silver">银发团</option>
+      <option value="headshot">肖像</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="搜索作品名称..." oninput="renderGrid()">
+  </div>
+
+  <!-- Grid -->
+  <div class="works-grid" id="worksGrid">
+    <div class="loading">加载中...</div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">添加作品</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>作品图片</label>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div id="uploadPlaceholder">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">点击或拖拽上传图片</div>
+            <div class="upload-hint">支持 JPG、PNG、WebP，建议尺寸 1200×800 以上</div>
+          </div>
+          <div id="uploadPreview" style="display:none">
+            <img id="previewImg" src="" alt="">
+            <div class="change-overlay">点击更换图片</div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>英文名称</label>
+        <input type="text" id="inputName" placeholder="Brand Rising">
+      </div>
+      <div class="form-group">
+        <label>中文名称</label>
+        <input type="text" id="inputCn" placeholder="品牌崛起">
+      </div>
+      <div class="form-group">
+        <label>分类</label>
+        <select id="inputCategory">
+          <option value="corporate">企业宣传</option>
+          <option value="portrait">人像摄像</option>
+          <option value="silver">银发团</option>
+          <option value="headshot">肖像</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea id="inputDetail" placeholder="企业形象 · 品牌宣传片"></textarea>
+      </div>
+      <div class="form-group">
+        <label>排序（数字越小越靠前）</label>
+        <input type="number" id="inputSort" value="0" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="btnSave" onclick="saveWork()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>确认删除</h3>
+    <p id="confirmText">确定要删除这个作品吗？此操作不可撤销。</p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-danger" id="confirmBtn">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// ⚠️  部署后请修改此地址为你的 Worker 地址
+// ══════════════════════════════════════════════
+const API_BASE = 'https://bailuyuan-portfolio-api.YOUR_SUBDOMAIN.workers.dev';
+
+let works = [];
+let selectedFile = null;
+let selectedFileUrl = '';
+
+// ─── API ───
+async function api(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, options);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(err.error || 'Request failed');
+  }
+  return res.json();
+}
+
+// ─── Load Works ───
+async function loadWorks() {
+  try {
+    works = await api('/api/works');
+    renderStats();
+    renderGrid();
+  } catch (e) {
+    toast('加载失败: ' + e.message, 'error');
+  }
+}
+
+// ─── Render Stats ───
+function renderStats() {
+  const total = works.length;
+  const cats = {};
+  works.forEach(w => { cats[w.category] = (cats[w.category] || 0) + 1; });
+  const catLabels = { corporate: '企业宣传', portrait: '人像摄像', silver: '银发团', headshot: '肖像' };
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="label">总作品数</div></div>
+    <div class="stat-card"><div class="num">${cats.corporate || 0}</div><div class="label">企业宣传</div></div>
+    <div class="stat-card"><div class="num">${cats.portrait || 0}</div><div class="label">人像摄像</div></div>
+    <div class="stat-card"><div class="num">${(cats.silver || 0) + (cats.headshot || 0)}</div><div class="label">银发 + 肖像</div></div>
+  `;
+}
+
+// ─── Render Grid ───
+function renderGrid() {
+  const cat = document.getElementById('filterCategory').value;
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  let filtered = works;
+  if (cat !== 'all') filtered = filtered.filter(w => w.category === cat);
+  if (q) filtered = filtered.filter(w =>
+    w.name.toLowerCase().includes(q) || w.cn.includes(q) || w.detail.toLowerCase().includes(q)
+  );
+
+  if (filtered.length === 0) {
+    document.getElementById('worksGrid').innerHTML = `
+      <div class="empty" style="grid-column:1/-1">
+        <div class="icon">📷</div>
+        <p>${works.length === 0 ? '还没有作品，点击上方「添加作品」开始吧' : '没有匹配的作品'}</p>
+        ${works.length === 0 ? '<button class="btn btn-primary" onclick="openModal()">＋ 添加第一个作品</button>' : ''}
+      </div>`;
+    return;
+  }
+
+  const catLabels = { corporate: '企业宣传', portrait: '人像摄像', silver: '银发团', headshot: '肖像' };
+
+  document.getElementById('worksGrid').innerHTML = filtered.map(w => `
+    <div class="work-card" data-id="${w.id}">
+      ${w.image_key
+        ? `<img class="work-thumb" src="${API_BASE}/api/image/${encodeURIComponent(w.image_key)}" alt="${w.name}" loading="lazy" onerror="this.outerHTML='<div class=work-thumb-placeholder>图片加载失败</div>'">`
+        : `<div class="work-thumb-placeholder">暂无图片</div>`
+      }
+      <div class="work-body">
+        <div class="category-badge">${catLabels[w.category] || w.category}</div>
+        <h3>${esc(w.name)}</h3>
+        <div class="cn">${esc(w.cn)}</div>
+        <div class="meta">${esc(w.detail)} · 排序: ${w.sort_order}</div>
+      </div>
+      <div class="work-actions">
+        <button class="btn btn-secondary btn-sm" onclick="editWork('${w.id}')">✏️ 编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteWork('${w.id}','${esc(w.name)}')">🗑️ 删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ─── Modal ───
+function openModal(work = null) {
+  document.getElementById('editId').value = work ? work.id : '';
+  document.getElementById('modalTitle').textContent = work ? '编辑作品' : '添加作品';
+  document.getElementById('inputName').value = work ? work.name : '';
+  document.getElementById('inputCn').value = work ? work.cn : '';
+  document.getElementById('inputCategory').value = work ? work.category : 'corporate';
+  document.getElementById('inputDetail').value = work ? work.detail : '';
+  document.getElementById('inputSort').value = work ? work.sort_order : works.length;
+
+  // Reset upload
+  selectedFile = null;
+  selectedFileUrl = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadPlaceholder').style.display = '';
+  document.getElementById('uploadPreview').style.display = 'none';
+
+  // If editing and has image, show current
+  if (work && work.image_key) {
+    selectedFileUrl = `${API_BASE}/api/image/${encodeURIComponent(work.image_key)}`;
+    document.getElementById('previewImg').src = selectedFileUrl;
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+    document.getElementById('uploadPreview').style.display = '';
+  }
+
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === e.currentTarget) closeModal();
+}
+
+// ─── File Upload ───
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  selectedFile = file;
+  selectedFileUrl = URL.createObjectURL(file);
+  document.getElementById('previewImg').src = selectedFileUrl;
+  document.getElementById('uploadPlaceholder').style.display = 'none';
+  document.getElementById('uploadPreview').style.display = '';
+}
+
+// ─── Save ───
+async function saveWork() {
+  const id = document.getElementById('editId').value;
+  const isNew = !id;
+  const fd = new FormData();
+  fd.append('name', document.getElementById('inputName').value);
+  fd.append('cn', document.getElementById('inputCn').value);
+  fd.append('category', document.getElementById('inputCategory').value);
+  fd.append('detail', document.getElementById('inputDetail').value);
+  fd.append('sort_order', document.getElementById('inputSort').value);
+  if (selectedFile) fd.append('image', selectedFile);
+
+  if (isNew && !selectedFile) {
+    toast('请上传一张图片', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+
+  try {
+    if (isNew) {
+      await api('/api/works', { method: 'POST', body: fd });
+      toast('作品已添加', 'success');
+    } else {
+      await api(`/api/works/${id}`, { method: 'PUT', body: fd });
+      toast('作品已更新', 'success');
+    }
+    closeModal();
+    await loadWorks();
+  } catch (e) {
+    toast('保存失败: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '保存';
+  }
+}
+
+// ─── Edit ───
+function editWork(id) {
+  const work = works.find(w => w.id === id);
+  if (work) openModal(work);
+}
+
+// ─── Delete ───
+function deleteWork(id, name) {
+  document.getElementById('confirmText').textContent = `确定要删除「${name}」吗？图片也将被永久删除。`;
+  document.getElementById('confirmOverlay').classList.add('active');
+  document.getElementById('confirmBtn').onclick = async () => {
+    closeConfirm();
+    try {
+      await api(`/api/works/${id}`, { method: 'DELETE' });
+      toast('已删除', 'success');
+      await loadWorks();
+    } catch (e) {
+      toast('删除失败: ' + e.message, 'error');
+    }
+  };
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('active');
+}
+
+// ─── Toast ───
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ─── Init ───
+loadWorks();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+name = "bailuyuan-portfolio-api"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+# ─── D1 数据库 ───
+[[d1_databases]]
+binding = "DB"
+database_name = "bailuyuan-portfolio"
+database_id = "YOUR_D1_DATABASE_ID"
+
+# ─── R2 存储桶 ───
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "bailuyuan-images"
+
+# ─── 自定义域名（可选）───
+# [routes]
+# pattern = "api.bailuyuan.com"
+# zone_name = "bailuyuan.com"
