@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>白鹿缘摄影 · BAILUYUAN STUDIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ivory:#faf8f3;--cream:#f3ede4;--warm:#ebe3d5;
+  --gold:#b8976a;--gold-light:#d4bc96;--gold-dark:#9a7d52;
+  --rose:#c9a0a0;--rose-light:#e0c4c4;
+  --charcoal:#1a1a1a;--soft-black:#2d2d2d;
+  --text:#6b6b6b;--text-light:#999;--text-dark:#444;
+  --white:#fff;
+  --font-display:'Playfair Display','Noto Serif SC',serif;
+  --font-serif:'Cormorant Garamond','Noto Serif SC',serif;
+  --font-cn:'Noto Serif SC',serif;
+  --font-sans:'Inter','Noto Serif SC',sans-serif;
+  --ease:cubic-bezier(.25,.46,.45,.94);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--gold-light) transparent}
+body{font-family:var(--font-serif);background:var(--ivory);color:var(--charcoal);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--gold-light);border-radius:3px}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+
+/* Loader */
+.loader{position:fixed;inset:0;background:var(--charcoal);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 1s var(--ease),visibility 1s}
+.loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loader-inner{text-align:center}
+.loader-brand{font-family:var(--font-display);font-size:1.8rem;font-weight:400;letter-spacing:12px;color:var(--gold-light);margin-bottom:24px}
+.loader-bar{width:120px;height:1px;background:rgba(255,255,255,.1);margin:0 auto;position:relative;overflow:hidden}
+.loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:var(--gold);animation:loaderFill 1.8s var(--ease) forwards}
+@keyframes loaderFill{to{width:100%}}
+
+/* Cursor glow effect */
+.cursor-glow{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(184,151,106,.06) 0%,transparent 70%);pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:opacity .3s;opacity:0}
+body:hover .cursor-glow{opacity:1}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:28px 60px;display:flex;align-items:center;justify-content:space-between;transition:all .6s var(--ease)}
+.nav.scrolled{background:rgba(250,248,243,.92);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);padding:16px 60px;box-shadow:0 1px 0 rgba(184,151,106,.1)}
+.nav-logo{display:flex;align-items:center;gap:14px}
+.nav-logo-icon{width:36px;height:36px;position:relative}
+.nav-logo-icon svg{width:100%;height:100%}
+.nav-logo-text{display:flex;flex-direction:column}
+.nav-logo-en{font-family:var(--font-display);font-size:1.1rem;font-weight:500;letter-spacing:4px;color:var(--charcoal)}
+.nav-logo-cn{font-family:var(--font-cn);font-size:.65rem;font-weight:300;letter-spacing:6px;color:var(--gold);margin-top:1px}
+.nav-links{display:flex;gap:40px;list-style:none}
+.nav-links a{font-family:var(--font-sans);font-size:.72rem;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:var(--soft-black);position:relative;padding:6px 0;transition:color .3s}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:1px;background:var(--gold);transition:all .4s var(--ease);transform:translateX(-50%)}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{font-family:var(--font-sans);font-size:.68rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;padding:12px 32px;border:1px solid var(--gold);color:var(--gold);transition:all .4s var(--ease);position:relative;overflow:hidden}
+.nav-cta::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);z-index:-1}
+.nav-cta:hover{color:var(--white)}
+.nav-cta:hover::before{transform:scaleX(1)}
+.nav-hamburger{display:none;flex-direction:column;gap:6px;width:28px;cursor:pointer;z-index:1001}
+.nav-hamburger span{display:block;height:1px;background:var(--charcoal);transition:all .4s var(--ease);transform-origin:center}
+.nav-hamburger.active span:nth-child(1){transform:rotate(45deg) translateY(5px)}
+.nav-hamburger.active span:nth-child(2){opacity:0}
+.nav-hamburger.active span:nth-child(3){transform:rotate(-45deg) translateY(-5px)}
+
+/* Mobile Menu */
+.mobile-menu{position:fixed;inset:0;background:var(--charcoal);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;opacity:0;visibility:hidden;transition:all .6s var(--ease)}
+.mobile-menu.active{opacity:1;visibility:visible}
+.mobile-menu a{font-family:var(--font-display);font-size:1.5rem;letter-spacing:8px;text-transform:uppercase;color:var(--gold-light);transition:color .3s;position:relative}
+.mobile-menu a::before{content:attr(data-cn);position:absolute;top:24px;left:50%;transform:translateX(-50%);font-family:var(--font-cn);font-size:.7rem;letter-spacing:4px;color:var(--text-light)}
+
+/* Hero */
+.hero{height:100vh;min-height:750px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(160deg,#1a1714 0%,#2a2520 25%,#1f1c18 50%,#252119 75%,#1a1714 100%)}
+.hero-grain{position:absolute;inset:0;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+.hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.4) 100%)}
+.hero-light{position:absolute;top:-20%;right:-10%;width:70%;height:120%;background:radial-gradient(ellipse at 70% 30%,rgba(184,151,106,.08) 0%,transparent 60%);pointer-events:none}
+.hero-content{position:relative;text-align:center;z-index:2;padding:0 20px;max-width:900px}
+.hero-badge{display:inline-flex;align-items:center;gap:12px;font-family:var(--font-sans);font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold-light);margin-bottom:40px;opacity:0;transform:translateY(20px);animation:fadeUp .8s var(--ease) .6s forwards}
+.hero-badge::before,.hero-badge::after{content:'';width:30px;height:1px;background:var(--gold);opacity:.4}
+.hero-title{font-family:var(--font-display);font-size:clamp(3rem,8vw,6.5rem);font-weight:400;letter-spacing:clamp(6px,2vw,20px);line-height:1.1;color:var(--white);margin-bottom:8px;opacity:0;transform:translateY(40px);animation:fadeUp 1.2s var(--ease) .8s forwards}
+.hero-title-cn{font-family:var(--font-cn);font-size:clamp(1.1rem,2.5vw,1.8rem);font-weight:200;letter-spacing:clamp(10px,3vw,24px);color:var(--gold-light);margin-bottom:40px;opacity:0;transform:translateY(30px);animation:fadeUp 1s var(--ease) 1s forwards}
+.hero-divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 40px;opacity:0;transform:scaleX(0);animation:scaleIn 1s var(--ease) 1.2s forwards}
+.hero-subtitle{font-family:var(--font-serif);font-size:clamp(.9rem,1.5vw,1.15rem);font-weight:300;letter-spacing:1.5px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto 56px;line-height:2;opacity:0;transform:translateY(20px);animation:fadeUp .8s var(--ease) 1.4s forwards}
+.hero-cta{display:inline-flex;align-items:center;gap:12px;padding:18px 52px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;transition:all .5s var(--ease);opacity:0;transform:translateY(20px);animation:fadeUp .8s var(--ease) 1.6s forwards}
+.hero-cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5;transition:transform .3s var(--ease)}
+.hero-cta:hover{background:var(--gold);color:var(--white);border-color:var(--gold);transform:translateY(-2px);box-shadow:0 16px 48px rgba(184,151,106,.25)}
+.hero-cta:hover svg{transform:translateX(4px)}
+.hero-scroll{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;animation:fadeUp .8s var(--ease) 2s forwards}
+.hero-scroll span{font-family:var(--font-sans);font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.hero-scroll-line{width:1px;height:48px;background:rgba(255,255,255,.1);position:relative;overflow:hidden}
+.hero-scroll-line::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:var(--gold);animation:scrollLine 2.5s var(--ease) infinite}
+@keyframes scrollLine{0%{top:-100%}50%{top:100%}100%{top:100%}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{to{opacity:1;transform:scaleX(1)}}
+
+/* Floating particles */
+.hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;opacity:0;animation:float linear infinite}
+@keyframes float{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.4}90%{opacity:.4}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+
+/* Section Common */
+.section{padding:140px 60px;position:relative}
+.section-eyebrow{font-family:var(--font-sans);font-size:.65rem;letter-spacing:6px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:16px}
+.section-title{font-family:var(--font-display);font-size:clamp(2rem,4.5vw,3.5rem);font-weight:400;text-align:center;letter-spacing:4px;margin-bottom:8px}
+.section-title-cn{font-family:var(--font-cn);font-size:.85rem;font-weight:200;letter-spacing:8px;color:var(--text-light);text-align:center;margin-bottom:24px}
+.section-divider{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 48px}
+.section-desc{max-width:620px;margin:0 auto;text-align:center;font-size:1rem;line-height:2;color:var(--text);font-weight:300;letter-spacing:.5px}
+
+/* Stats Bar */
+.stats{background:var(--charcoal);padding:60px;display:flex;justify-content:center;gap:80px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:400;color:var(--gold-light);letter-spacing:2px}
+.stat-num span{font-size:.6em;color:var(--gold);opacity:.6}
+.stat-label{font-family:var(--font-sans);font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:8px}
+
+/* Philosophy */
+.philosophy{background:var(--white)}
+.philosophy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;max-width:1200px;margin:80px auto 0;position:relative}
+.philosophy-item{text-align:center;padding:60px 40px;position:relative}
+.philosophy-item:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:linear-gradient(180deg,transparent,var(--warm),transparent)}
+.philosophy-num{font-family:var(--font-display);font-size:.7rem;letter-spacing:4px;color:var(--gold);opacity:.5;margin-bottom:24px}
+.philosophy-icon{width:64px;height:64px;margin:0 auto 28px;position:relative}
+.philosophy-icon svg{width:100%;height:100%;stroke:var(--gold);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
+.philosophy-icon::after{content:'';position:absolute;inset:-8px;border:1px solid var(--gold-light);border-radius:50%;opacity:.2;transition:all .5s var(--ease)}
+.philosophy-item:hover .philosophy-icon::after{inset:-12px;opacity:.4}
+.philosophy-item h3{font-family:var(--font-display);font-size:1.15rem;font-weight:500;letter-spacing:4px;margin-bottom:6px}
+.philosophy-item .cn{font-family:var(--font-cn);font-size:.72rem;color:var(--text-light);letter-spacing:4px;margin-bottom:20px}
+.philosophy-item p{font-size:.9rem;line-height:1.9;color:var(--text);font-weight:300}
+
+/* Portfolio / Collections */
+.portfolio{background:var(--ivory);padding-bottom:100px}
+.portfolio-filter{display:flex;justify-content:center;gap:32px;margin-bottom:64px;flex-wrap:wrap}
+.filter-btn{font-family:var(--font-sans);font-size:.7rem;letter-spacing:3px;text-transform:uppercase;padding:10px 4px;color:var(--text-light);position:relative;transition:all .3s var(--ease)}
+.filter-btn::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .3s var(--ease)}
+.filter-btn.active,.filter-btn:hover{color:var(--gold)}
+.filter-btn.active::after,.filter-btn:hover::after{transform:scaleX(1)}
+
+/* Masonry-style grid */
+.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1300px;margin:0 auto}
+.portfolio-card{position:relative;overflow:hidden;cursor:pointer;border-radius:2px;opacity:0;transform:translateY(30px);transition:all .6s var(--ease)}
+.portfolio-card.visible{opacity:1;transform:translateY(0)}
+.portfolio-card:nth-child(2),.portfolio-card:nth-child(5){grid-row:span 2}
+.portfolio-img{width:100%;height:100%;min-height:300px;position:relative;overflow:hidden;transition:transform .8s var(--ease)}
+.portfolio-card:nth-child(2) .portfolio-img,.portfolio-card:nth-child(5) .portfolio-img{min-height:620px}
+.portfolio-card:hover .portfolio-img{transform:scale(1.05)}
+
+/* Photo placeholders with artistic gradients */
+.photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.photo-placeholder::before{content:'';position:absolute;inset:0;transition:transform 1.2s var(--ease)}
+.portfolio-card:hover .photo-placeholder::before{transform:scale(1.1)}
+
+.photo-1::before{background:linear-gradient(135deg,#2c2420 0%,#4a3828 40%,#6b5240 70%,#3d2e22 100%)}
+.photo-2::before{background:linear-gradient(160deg,#1a2332 0%,#2a3a4f 30%,#4a6070 60%,#1f2d3d 100%)}
+.photo-3::before{background:linear-gradient(145deg,#2a1f2d 0%,#4a3548 40%,#6b4a68 70%,#352638 100%)}
+.photo-4::before{background:linear-gradient(130deg,#1f2a1f 0%,#2d4a2d 40%,#4a6b4a 70%,#253525 100%)}
+.photo-5::before{background:linear-gradient(155deg,#2c2020 0%,#5a3838 35%,#8a5555 65%,#3d2828 100%)}
+.photo-6::before{background:linear-gradient(140deg,#2a2520 0%,#5a4a38 40%,#8a7a60 70%,#3d3528 100%)}
+.photo-7::before{background:linear-gradient(150deg,#1a1a2a 0%,#2d2d4a 40%,#45456b 70%,#222235 100%)}
+.photo-8::before{background:linear-gradient(135deg,#2c1a1a 0%,#6b3a3a 40%,#a05555 70%,#3d2222 100%)}
+.photo-9::before{background:linear-gradient(160deg,#1f2520 0%,#354a35 40%,#4a6b48 70%,#283528 100%)}
+
+.photo-icon{position:relative;z-index:2;text-align:center;opacity:.6;transition:all .5s var(--ease)}
+.portfolio-card:hover .photo-icon{opacity:.9;transform:scale(1.05)}
+.photo-icon svg{width:48px;height:48px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px}
+.photo-icon span{display:block;font-family:var(--font-sans);font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+
+.portfolio-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,26,26,.85) 0%,rgba(26,26,26,.2) 40%,transparent 60%);opacity:0;transition:opacity .5s var(--ease);display:flex;flex-direction:column;justify-content:flex-end;padding:32px}
+.portfolio-card:hover .portfolio-overlay{opacity:1}
+.portfolio-overlay .tag{font-family:var(--font-sans);font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px}
+.portfolio-overlay h3{font-family:var(--font-display);color:var(--white);font-size:1.3rem;font-weight:400;letter-spacing:2px;margin-bottom:4px}
+.portfolio-overlay .cn{color:var(--gold-light);font-family:var(--font-cn);font-size:.75rem;letter-spacing:3px;margin-bottom:10px}
+.portfolio-overlay .detail{color:rgba(255,255,255,.55);font-size:.82rem;font-weight:300;line-height:1.7}
+.portfolio-overlay .view{margin-top:16px;font-family:var(--font-sans);font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);display:flex;align-items:center;gap:8px;transition:all .3s}
+.portfolio-overlay .view svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;transition:transform .3s}
+.portfolio-card:hover .portfolio-overlay .view:hover{color:var(--white)}
+.portfolio-card:hover .portfolio-overlay .view:hover svg{transform:translateX(4px)}
+
+/* Showcase Parallax */
+.showcase{height:85vh;min-height:550px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.showcase-bg{position:absolute;inset:0;background:linear-gradient(160deg,#1a1714 0%,#2a2520 50%,#1a1714 100%)}
+.showcase-light{position:absolute;top:0;left:30%;width:40%;height:100%;background:radial-gradient(ellipse at 50% 40%,rgba(184,151,106,.06) 0%,transparent 70%)}
+.showcase-content{position:relative;z-index:2;text-align:center;padding:0 20px;max-width:700px}
+.showcase-content .quote-mark{font-family:var(--font-display);font-size:6rem;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-20px}
+.showcase-content blockquote{font-family:var(--font-serif);font-size:clamp(1.1rem,2.5vw,1.5rem);font-weight:300;font-style:italic;letter-spacing:1px;color:rgba(255,255,255,.7);line-height:2.2;margin-bottom:32px}
+.showcase-content cite{font-family:var(--font-cn);font-size:.8rem;letter-spacing:4px;color:var(--gold-light);font-style:normal}
+
+/* Services */
+.services{background:var(--white)}
+.services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;max-width:1100px;margin:80px auto 0;border:1px solid var(--warm)}
+.service-card{padding:56px 48px;position:relative;overflow:hidden;transition:all .5s var(--ease);border:1px solid transparent}
+.service-card:hover{background:var(--ivory);border-color:var(--warm)}
+.service-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--gold);transition:height .5s var(--ease)}
+.service-card:hover::before{height:100%}
+.service-num{font-family:var(--font-display);font-size:.65rem;letter-spacing:4px;color:var(--gold);opacity:.5;margin-bottom:20px}
+.service-icon{width:44px;height:44px;margin-bottom:24px}
+.service-icon svg{width:100%;height:100%;stroke:var(--gold);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
+.service-card h3{font-family:var(--font-display);font-size:1.2rem;font-weight:500;letter-spacing:3px;margin-bottom:6px}
+.service-card .cn{font-family:var(--font-cn);font-size:.72rem;color:var(--text-light);letter-spacing:3px;margin-bottom:18px}
+.service-card p{font-size:.88rem;line-height:1.9;color:var(--text);font-weight:300}
+.service-price{margin-top:20px;font-family:var(--font-sans);font-size:.72rem;letter-spacing:2px;color:var(--gold)}
+.service-price span{font-family:var(--font-display);font-size:1.4rem;font-weight:400;letter-spacing:0}
+
+/* Process */
+.process{background:var(--ivory);overflow:hidden}
+.process-track{display:flex;max-width:1200px;margin:80px auto 0;position:relative}
+.process-track::before{content:'';position:absolute;top:40px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold-light),var(--gold-light),transparent);opacity:.3}
+.process-step{flex:1;text-align:center;padding:0 24px;position:relative}
+.process-num{width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-light);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-family:var(--font-display);font-size:1.1rem;color:var(--gold);background:var(--ivory);position:relative;z-index:2;transition:all .4s var(--ease)}
+.process-step:hover .process-num{background:var(--gold);color:var(--white);border-color:var(--gold);transform:scale(1.1)}
+.process-step h4{font-family:var(--font-display);font-size:.95rem;font-weight:500;letter-spacing:3px;margin-bottom:4px}
+.process-step .cn{font-family:var(--font-cn);font-size:.7rem;color:var(--text-light);letter-spacing:3px;margin-bottom:12px}
+.process-step p{font-size:.82rem;line-height:1.8;color:var(--text);font-weight:300}
+
+/* Testimonials */
+.testimonials{background:var(--charcoal);text-align:center;overflow:hidden}
+.testimonials .section-eyebrow{color:var(--gold-light)}
+.testimonials .section-title{color:var(--white)}
+.testimonials .section-title-cn{color:rgba(255,255,255,.3)}
+.testimonials .section-divider{background:linear-gradient(90deg,transparent,var(--gold-light),transparent)}
+.testimonial-slider{max-width:750px;margin:64px auto 0;position:relative;min-height:260px}
+.testimonial-item{position:absolute;inset:0;opacity:0;transition:opacity 1s var(--ease);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px}
+.testimonial-item.active{opacity:1}
+.testimonial-stars{color:var(--gold);font-size:.6rem;letter-spacing:6px;margin-bottom:20px}
+.testimonial-quote{font-family:var(--font-serif);font-size:clamp(1rem,2vw,1.25rem);font-weight:300;font-style:italic;line-height:2.2;letter-spacing:.5px;color:rgba(255,255,255,.7);position:relative;padding-top:24px}
+.testimonial-quote::before{content:'"';position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-family:var(--font-display);font-size:4.5rem;color:var(--gold);opacity:.3;line-height:1;font-style:normal}
+.testimonial-author{font-family:var(--font-sans);font-size:.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold-light);margin-top:28px}
+.testimonial-detail{font-family:var(--font-cn);font-size:.72rem;color:rgba(255,255,255,.3);margin-top:6px;letter-spacing:3px}
+.testimonial-dots{display:flex;gap:12px;justify-content:center;margin-top:36px}
+.testimonial-dot{width:32px;height:2px;background:rgba(255,255,255,.15);cursor:pointer;transition:all .4s var(--ease);border-radius:1px}
+.testimonial-dot.active{background:var(--gold);width:48px}
+
+/* Booking */
+.booking{background:var(--white)}
+.booking-wrapper{display:grid;grid-template-columns:1fr 1fr;gap:100px;max-width:1100px;margin:80px auto 0}
+.booking-info{display:flex;flex-direction:column;gap:40px}
+.booking-info-item{display:flex;gap:20px;align-items:flex-start}
+.booking-info-icon{width:48px;height:48px;border:1px solid var(--gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .4s var(--ease)}
+.booking-info-item:hover .booking-info-icon{background:var(--gold);border-color:var(--gold)}
+.booking-info-item:hover .booking-info-icon svg{stroke:var(--white)}
+.booking-info-icon svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .4s}
+.booking-info-text h4{font-family:var(--font-sans);font-size:.72rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;color:var(--charcoal)}
+.booking-info-text p{font-size:.85rem;color:var(--text);line-height:1.7;font-weight:300}
+.booking-form{display:flex;flex-direction:column;gap:28px}
+.form-group{position:relative}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:16px 0;border:none;border-bottom:1px solid #ddd;background:transparent;font-family:var(--font-cn);font-size:.9rem;color:var(--charcoal);outline:none;transition:border-color .3s;-webkit-appearance:none}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-bottom-color:var(--gold)}
+.form-group label{position:absolute;top:16px;left:0;font-size:.82rem;color:var(--text-light);letter-spacing:1px;pointer-events:none;transition:all .3s var(--ease);font-family:var(--font-cn)}
+.form-group input:focus+label,.form-group input:not(:placeholder-shown)+label,
+.form-group textarea:focus+label,.form-group textarea:not(:placeholder-shown)+label{top:-10px;font-size:.65rem;color:var(--gold)}
+.form-group textarea{resize:none;height:90px}
+.form-group select{cursor:pointer}
+.form-submit{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;padding:16px 52px;border:1px solid var(--gold);color:var(--gold);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;transition:all .4s var(--ease);margin-top:12px;position:relative;overflow:hidden}
+.form-submit::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);z-index:-1}
+.form-submit:hover{color:var(--white)}
+.form-submit:hover::before{transform:scaleX(1)}
+
+/* Footer */
+.footer{background:var(--charcoal);color:rgba(255,255,255,.5);padding:100px 60px 48px}
+.footer-top{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr;gap:60px;max-width:1200px;margin:0 auto 72px}
+.footer-brand h3{font-family:var(--font-display);font-size:1.4rem;font-weight:400;letter-spacing:6px;color:var(--white);margin-bottom:4px}
+.footer-brand .cn{font-family:var(--font-cn);font-size:.68rem;letter-spacing:5px;color:var(--gold);margin-bottom:20px}
+.footer-brand p{font-size:.82rem;line-height:1.9;font-weight:300;max-width:300px}
+.footer-col h4{font-family:var(--font-sans);font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:24px}
+.footer-col a{display:block;font-size:.82rem;padding:5px 0;transition:all .3s;font-weight:300;position:relative}
+.footer-col a:hover{color:var(--white);padding-left:8px}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:28px;display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto;font-family:var(--font-sans);font-size:.68rem;letter-spacing:2px}
+.footer-social{display:flex;gap:12px}
+.footer-social a{width:36px;height:36px;border:1px solid rgba(255,255,255,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;transition:all .3s;color:rgba(255,255,255,.4)}
+.footer-social a:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+
+/* Back to Top */
+.back-top{position:fixed;bottom:36px;right:36px;width:48px;height:48px;border:1px solid var(--gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;opacity:0;visibility:hidden;transition:all .4s var(--ease);z-index:100;background:var(--ivory)}
+.back-top.show{opacity:1;visibility:visible}
+.back-top:hover{background:var(--gold);color:var(--white);border-color:var(--gold);transform:translateY(-2px)}
+
+/* Scroll Animations */
+.reveal{opacity:0;transform:translateY(40px);transition:all .9s var(--ease-out)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.12s}
+.reveal-delay-2{transition-delay:.24s}
+.reveal-delay-3{transition-delay:.36s}
+.reveal-delay-4{transition-delay:.48s}
+
+/* Responsive */
+@media(max-width:1024px){
+  .philosophy-grid{grid-template-columns:1fr;gap:0}
+  .philosophy-item::after{display:none}
+  .philosophy-item:not(:last-child){border-bottom:1px solid var(--warm)}
+  .portfolio-grid{grid-template-columns:repeat(2,1fr)}
+  .portfolio-card:nth-child(2),.portfolio-card:nth-child(5){grid-row:span 1}
+  .portfolio-card:nth-child(2) .portfolio-img,.portfolio-card:nth-child(5) .portfolio-img{min-height:300px}
+  .services-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px}
+  .process-track{flex-wrap:wrap;gap:40px}
+  .process-track::before{display:none}
+  .process-step{flex:0 0 calc(50% - 20px)}
+}
+@media(max-width:768px){
+  .nav{padding:20px 28px}
+  .nav.scrolled{padding:14px 28px}
+  .nav-links,.nav-cta{display:none}
+  .nav-hamburger{display:flex}
+  .section{padding:100px 24px}
+  .stats{padding:48px 24px;gap:40px}
+  .portfolio-grid{grid-template-columns:1fr;gap:16px}
+  .portfolio-img{min-height:280px!important}
+  .service-card{padding:40px 28px}
+  .booking-wrapper{grid-template-columns:1fr;gap:56px}
+  .footer-top{grid-template-columns:1fr;gap:32px}
+  .footer-bottom{flex-direction:column;gap:16px;text-align:center}
+  .showcase{height:65vh}
+  .hero-light{display:none}
+  .process-step{flex:0 0 100%}
+}
+@media(max-width:480px){
+  .hero-cta{padding:16px 40px}
+  .portfolio-filter{gap:16px}
+  .filter-btn{font-size:.62rem;padding:8px 4px}
+  .booking-form .form-submit{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor Glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <div class="loader-brand">白鹿缘</div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="14" r="6" stroke="#b8976a" stroke-width="1"/>
+        <path d="M14 14 Q12 8 14 4 Q16 0 20 2 Q24 0 26 4 Q28 8 26 14" stroke="#b8976a" stroke-width="0.8" fill="none"/>
+        <path d="M16 20 L14 36 L20 32 L26 36 L24 20" stroke="#b8976a" stroke-width="0.8" fill="none"/>
+        <path d="M12 28 Q8 32 10 38" stroke="#b8976a" stroke-width="0.5" fill="none" opacity=".4"/>
+        <path d="M28 28 Q32 32 30 38" stroke="#b8976a" stroke-width="0.5" fill="none" opacity=".4"/>
+      </svg>
+    </div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-en">BAILUYUAN</span>
+      <span class="nav-logo-cn">白鹿缘摄影</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#philosophy">理念</a></li>
+    <li><a href="#portfolio">作品</a></li>
+    <li><a href="#services">服务</a></li>
+    <li><a href="#testimonials">口碑</a></li>
+    <li><a href="#booking">预约</a></li>
+  </ul>
+  <a href="#booking" class="nav-cta">咨询合作</a>
+  <div class="nav-hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#philosophy" data-cn="品牌理念">理念</a>
+  <a href="#portfolio" data-cn="摄影作品">作品</a>
+  <a href="#services" data-cn="服务项目">服务</a>
+  <a href="#testimonials" data-cn="客户口碑">口碑</a>
+  <a href="#booking" data-cn="咨询合作">预约</a>
+</div>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-light"></div>
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Est. 2016 · 高端摄影</div>
+    <h1 class="hero-title">BAILUYUAN</h1>
+    <p class="hero-title-cn">白 鹿 缘 摄 影 工 作 室</p>
+    <div class="hero-divider"></div>
+    <p class="hero-subtitle">以光影为笔，以镜头为墨<br>企业宣传 · 人像摄像 · 银发团 · 专业肖像</p>
+    <a href="#portfolio" class="hero-cta">
+      查看作品
+      <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-item reveal">
+    <div class="stat-num">8<span>+</span></div>
+    <div class="stat-label">Years of Excellence</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-1">
+    <div class="stat-num">500<span>+</span></div>
+    <div class="stat-label">Corporate Clients</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-2">
+    <div class="stat-num">98<span>%</span></div>
+    <div class="stat-label">Client Satisfaction</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-3">
+    <div class="stat-num">3000<span>+</span></div>
+    <div class="stat-label">Stories Captured</div>
+  </div>
+</div>
+
+<!-- Philosophy -->
+<section class="section philosophy" id="philosophy">
+  <p class="section-eyebrow reveal">Our Philosophy</p>
+  <h2 class="section-title reveal">Why Choose Us</h2>
+  <p class="section-title-cn reveal">为 什 么 选 择 白 鹿 缘</p>
+  <div class="section-divider reveal"></div>
+  <p class="section-desc reveal">我们不只是按下快门——我们用十年磨一剑的匠心，为您捕捉每一个值得铭记的瞬间，无论商业、家庭还是个人。</p>
+  <div class="philosophy-grid">
+    <div class="philosophy-item reveal reveal-delay-1">
+      <div class="philosophy-num">01</div>
+      <div class="philosophy-icon">
+        <svg viewBox="0 0 48 48"><path d="M24 4 L28 16 L40 18 L30 26 L34 38 L24 32 L14 38 L18 26 L8 18 L20 16Z"/></svg>
+      </div>
+      <h3>PROFESSIONAL</h3>
+      <p class="cn">专业品质</p>
+      <p>从企业宣传片到个人肖像，我们以电影级的标准对待每一次拍摄，确保每一帧画面都经得起时间的检验。</p>
+    </div>
+    <div class="philosophy-item reveal reveal-delay-2">
+      <div class="philosophy-icon">
+        <svg viewBox="0 0 48 48"><circle cx="18" cy="18" r="8"/><circle cx="32" cy="18" r="8"/><path d="M10 44 C10 36 13 30 18 30 C21 30 24 32 24 32 C24 32 27 30 30 30 C35 30 38 36 38 44"/></svg>
+      </div>
+      <h3>WARMTH</h3>
+      <p class="cn">温暖记录</p>
+      <p>尤其擅长银发团拍摄，用耐心与温度捕捉长辈们最自然的笑容，让每一张合影都成为家庭的珍贵记忆。</p>
+    </div>
+    <div class="philosophy-item reveal reveal-delay-3">
+      <div class="philosophy-icon">
+        <svg viewBox="0 0 48 48"><rect x="4" y="10" width="40" height="26" rx="3"/><polygon points="19,17 19,31 32,24"/><circle cx="40" cy="12" r="2"/></svg>
+      </div>
+      <h3>CINEMATIC</h3>
+      <p class="cn">影像叙事</p>
+      <p>以导演思维策划每一支企业宣传片，用影像讲故事、树品牌。4K电影级画质，专业团队全程执行。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Portfolio -->
+<section class="section portfolio" id="portfolio">
+  <p class="section-eyebrow reveal">Portfolio</p>
+  <h2 class="section-title reveal">Our Works</h2>
+  <p class="section-title-cn reveal">精 选 作 品</p>
+  <div class="section-divider reveal"></div>
+  <div class="portfolio-filter reveal">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="corporate">企业宣传</button>
+    <button class="filter-btn" data-filter="portrait">人像摄像</button>
+    <button class="filter-btn" data-filter="silver">银发团</button>
+    <button class="filter-btn" data-filter="headshot">肖像</button>
+  </div>
+  <div class="portfolio-grid" id="portfolioGrid"></div>
+</section>
+
+<!-- Showcase -->
+<section class="showcase">
+  <div class="showcase-bg"></div>
+  <div class="showcase-light"></div>
+  <div class="showcase-content reveal">
+    <div class="quote-mark">"</div>
+    <blockquote>每一次拍摄都是一次对话——与品牌对话，与岁月对话，与镜头前最真实的自己对话。我们用影像，让这些对话被看见。</blockquote>
+    <cite>— 白鹿缘摄影 · 创始理念</cite>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="section services" id="services">
+  <p class="section-eyebrow reveal">Services</p>
+  <h2 class="section-title reveal">What We Offer</h2>
+  <p class="section-title-cn reveal">我 们 的 服 务</p>
+  <div class="section-divider reveal"></div>
+  <div class="services-grid">
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">01</div>
+      <div class="service-icon">
+        <svg viewBox="0 0 48 48"><rect x="4" y="10" width="40" height="26" rx="3"/><polygon points="19,17 19,31 32,24"/><circle cx="40" cy="12" r="2"/></svg>
+      </div>
+      <h3>CORPORATE FILM</h3>
+      <p class="cn">企业宣传片</p>
+      <p>从创意策划到成片交付，一站式企业影像服务。品牌故事、产品发布、企业文化，用影像提升品牌价值与影响力。</p>
+      <div class="service-price">¥<span>12,800</span> 起</div>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">02</div>
+      <div class="service-icon">
+        <svg viewBox="0 0 48 48"><circle cx="24" cy="20" r="10"/><path d="M14 44 C14 36 18 30 24 30 C30 30 34 36 34 44"/><circle cx="24" cy="20" r="4"/><path d="M30 10 L34 6"/></svg>
+      </div>
+      <h3>PORTRAIT VIDEO</h3>
+      <p class="cn">人像摄像</p>
+      <p>动态记录最真实的你。个人形象片、生活纪录、成长影像，用影像留住当下的温度与故事。</p>
+      <div class="service-price">¥<span>2,680</span> 起</div>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">03</div>
+      <div class="service-icon">
+        <svg viewBox="0 0 48 48"><circle cx="18" cy="16" r="7"/><circle cx="32" cy="16" r="7"/><path d="M10 44 C10 36 13 30 18 30 C21 30 24 32 24 32 C24 32 27 30 30 30 C35 30 38 36 38 44"/><path d="M18 10 Q18 6 22 8" stroke-width=".6"/><path d="M32 10 Q32 6 36 8" stroke-width=".6"/></svg>
+      </div>
+      <h3>SILVER GROUP</h3>
+      <p class="cn">银发团</p>
+      <p>为银发族量身定制的温暖影像服务。家庭合影、金婚纪念、退休留念，用镜头传递岁月沉淀的美好与温情。</p>
+      <div class="service-price">¥<span>1,980</span> 起</div>
+    </div>
+    <div class="service-card reveal reveal-delay-4">
+      <div class="service-num">04</div>
+      <div class="service-icon">
+        <svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="28" rx="3"/><circle cx="24" cy="22" r="7"/><circle cx="24" cy="22" r="3"/><path d="M32 14 L36 10"/><path d="M10 36 L10 42 L18 42"/><path d="M38 36 L38 42 L30 42"/></svg>
+      </div>
+      <h3>HEADSHOT</h3>
+      <p class="cn">肖像</p>
+      <p>专业商务肖像、职业形象照、个人品牌照。精准布光，捕捉最具说服力的面容，助力职业形象升级。</p>
+      <div class="service-price">¥<span>880</span> 起</div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="section process">
+  <p class="section-eyebrow reveal">Process</p>
+  <h2 class="section-title reveal">How It Works</h2>
+  <p class="section-title-cn reveal">拍 摄 流 程</p>
+  <div class="section-divider reveal"></div>
+  <div class="process-track">
+    <div class="process-step reveal reveal-delay-1">
+      <div class="process-num">1</div>
+      <h4>CONSULT</h4>
+      <p class="cn">需求沟通</p>
+      <p>深入了解您的拍摄需求、风格偏好与期望，量身定制拍摄方案。</p>
+    </div>
+    <div class="process-step reveal reveal-delay-2">
+      <div class="process-num">2</div>
+      <h4>DESIGN</h4>
+      <p class="cn">方案设计</p>
+      <p>确定场景、服装、造型与拍摄脚本，确保每个细节都尽善尽美。</p>
+    </div>
+    <div class="process-step reveal reveal-delay-3">
+      <div class="process-num">3</div>
+      <h4>SHOOT</h4>
+      <p class="cn">执行拍摄</p>
+      <p>专属团队全程服务，捕捉最自然、最动人的瞬间。</p>
+    </div>
+    <div class="process-step reveal reveal-delay-4">
+      <div class="process-num">4</div>
+      <h4>DELIVER</h4>
+      <p class="cn">精修交付</p>
+      <p>专业后期精修，15个工作日内交付成品，含精装相册。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section testimonials" id="testimonials">
+  <p class="section-eyebrow reveal">Testimonials</p>
+  <h2 class="section-title reveal">Client Stories</h2>
+  <p class="section-title-cn reveal">客 户 心 声</p>
+  <div class="section-divider reveal"></div>
+  <div class="testimonial-slider reveal">
+    <div class="testimonial-item active">
+      <div class="testimonial-stars">★ ★ ★ ★ ★</div>
+      <p class="testimonial-quote">白鹿缘为我们公司拍的企业宣传片效果远超预期。从脚本策划到拍摄执行非常专业，成片在行业展会上播放时反响很好，品牌形象提升了一个档次。</p>
+      <p class="testimonial-author">Zhang Wei · 科技公司 CEO</p>
+      <p class="testimonial-detail">2025年11月 · 企业宣传片</p>
+    </div>
+    <div class="testimonial-item">
+      <div class="testimonial-stars">★ ★ ★ ★ ★</div>
+      <p class="testimonial-quote">给爸妈拍了一组银发团纪念照，摄影师特别耐心，逗得两位老人笑得很自然。看到成片那一刻特别感动，谢谢白鹿缘留住了这么温暖的画面。</p>
+      <p class="testimonial-author">Liu Fang</p>
+      <p class="testimonial-detail">2025年9月 · 银发团</p>
+    </div>
+    <div class="testimonial-item">
+      <div class="testimonial-stars">★ ★ ★ ★ ★</div>
+      <p class="testimonial-quote">公司需要给团队统一拍职业肖像，白鹿缘上门服务，效率高、出片好。每张照片都很专业又有亲和力，同事们都非常满意。</p>
+      <p class="testimonial-author">Chen Jie · 人力资源总监</p>
+      <p class="testimonial-detail">2025年持续合作 · 肖像</p>
+    </div>
+  </div>
+  <div class="testimonial-dots reveal">
+    <div class="testimonial-dot active" data-index="0"></div>
+    <div class="testimonial-dot" data-index="1"></div>
+    <div class="testimonial-dot" data-index="2"></div>
+  </div>
+</section>
+
+<!-- Booking -->
+<section class="section booking" id="booking">
+  <p class="section-eyebrow reveal">Book Now</p>
+  <h2 class="section-title reveal">Start Your Story</h2>
+  <p class="section-title-cn reveal">咨 询 合 作</p>
+  <div class="section-divider reveal"></div>
+  <div class="booking-wrapper">
+    <div class="booking-info reveal">
+      <div class="booking-info-item">
+        <div class="booking-info-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="booking-info-text">
+          <h4>EMAIL</h4>
+          <p>hello@bailuyuan.com</p>
+        </div>
+      </div>
+      <div class="booking-info-item">
+        <div class="booking-info-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div class="booking-info-text">
+          <h4>PHONE</h4>
+          <p>400-920-8866</p>
+        </div>
+      </div>
+      <div class="booking-info-item">
+        <div class="booking-info-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="booking-info-text">
+          <h4>STUDIO</h4>
+          <p>上海市黄浦区外滩金融中心<br>S2幢 36层</p>
+        </div>
+      </div>
+      <div class="booking-info-item">
+        <div class="booking-info-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="booking-info-text">
+          <h4>HOURS</h4>
+          <p>每日 09:00 - 20:00<br>全年无休（需提前预约）</p>
+        </div>
+      </div>
+    </div>
+    <form class="booking-form reveal" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <input type="text" placeholder=" " required>
+        <label>您的姓名</label>
+      </div>
+      <div class="form-group">
+        <input type="tel" placeholder=" " required>
+        <label>联系电话</label>
+      </div>
+      <div class="form-group">
+        <input type="text" placeholder=" ">
+        <label>期望拍摄日期</label>
+      </div>
+      <div class="form-group">
+        <select required>
+          <option value="" disabled selected>选择拍摄类型</option>
+          <option>企业宣传片</option>
+          <option>人像摄像</option>
+          <option>银发团</option>
+          <option>肖像</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <textarea placeholder=" "></textarea>
+        <label>您的想法与需求</label>
+      </div>
+      <button type="submit" class="form-submit">提交预约</button>
+    </form>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <h3>BAILUYUAN</h3>
+      <p class="cn">白鹿缘摄影工作室</p>
+      <p>企业宣传片、人像摄像、银发团、专业肖像。用影像讲述每一个值得被看见的故事。</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <a href="#philosophy">品牌理念</a>
+      <a href="#portfolio">摄影作品</a>
+      <a href="#services">服务项目</a>
+      <a href="#booking">咨询合作</a>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="#">企业宣传片</a>
+      <a href="#">人像摄像</a>
+      <a href="#">银发团</a>
+      <a href="#">肖像</a>
+    </div>
+    <div class="footer-col">
+      <h4>Follow</h4>
+      <a href="#">小红书</a>
+      <a href="#">抖音</a>
+      <a href="#">微博</a>
+      <a href="#">Instagram</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 白鹿缘摄影 BAILUYUAN STUDIO. All rights reserved.</span>
+    <div class="footer-social">
+      <a href="#" title="小红书">红</a>
+      <a href="#" title="抖音">抖</a>
+      <a href="#" title="微博">微</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-top" id="backTop">↑</button>
+
+<script>
+// ===== Photo SVG Templates =====
+function photoSVG(category) {
+  const icons = {
+    corporate: `<svg viewBox="0 0 48 48"><rect x="4" y="10" width="40" height="26" rx="3" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><polygon points="19,17 19,31 32,24" stroke="rgba(255,255,255,.3)" fill="none" stroke-width="1"/><circle cx="40" cy="12" r="2" stroke="rgba(255,255,255,.2)" fill="none" stroke-width=".8"/></svg>`,
+    portrait: `<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="9" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><path d="M12 44 C12 34 17 28 24 28 C31 28 36 34 36 44" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><circle cx="24" cy="18" r="3.5" stroke="rgba(255,255,255,.2)" fill="none" stroke-width=".8"/></svg>`,
+    silver: `<svg viewBox="0 0 48 48"><circle cx="18" cy="16" r="7" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><circle cx="32" cy="16" r="7" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><path d="M10 44 C10 36 13 30 18 30 C21 30 24 32 24 32 C24 32 27 30 30 30 C35 30 38 36 38 44" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/></svg>`,
+    headshot: `<svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="28" rx="3" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><circle cx="24" cy="22" r="7" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="1"/><circle cx="24" cy="22" r="3" stroke="rgba(255,255,255,.2)" fill="none" stroke-width=".8"/><path d="M32 14 L36 10" stroke="rgba(255,255,255,.2)" fill="none" stroke-width=".8"/></svg>`
+  };
+  return icons[category] || icons.portrait;
+}
+
+// ===== Portfolio Data =====
+const works = [
+  { name:'Brand Rising', cn:'品牌崛起', category:'corporate', detail:'企业形象 · 品牌宣传片', cls:'photo-1' },
+  { name:'True Self', cn:'真我', category:'portrait', detail:'个人形象 · 生活纪录', cls:'photo-2' },
+  { name:'Golden Years', cn:'金色年华', category:'silver', detail:'银发家庭 · 金婚纪念', cls:'photo-3' },
+  { name:'Professional', cn:'专业形象', category:'headshot', detail:'商务肖像 · 职业形象照', cls:'photo-4' },
+  { name:'Visionary', cn:'远见', category:'corporate', detail:'企业文化 · CEO访谈', cls:'photo-5' },
+  { name:'Moments', cn:'流年', category:'portrait', detail:'成长影像 · 亲子纪录', cls:'photo-6' },
+  { name:'Together', cn:'在一起', category:'silver', detail:'家庭合影 · 退休纪念', cls:'photo-7' },
+  { name:'First Impression', cn:'第一印象', category:'headshot', detail:'个人品牌 · 社交形象', cls:'photo-8' },
+  { name:'Impact', cn:'影响力', category:'corporate', detail:'产品发布 · 活动纪录', cls:'photo-9' },
+];
+
+// ===== Render Portfolio =====
+function renderPortfolio(filter='all') {
+  const grid = document.getElementById('portfolioGrid');
+  const filtered = filter === 'all' ? works : works.filter(w => w.category === filter);
+  grid.innerHTML = filtered.map((w, i) => `
+    <div class="portfolio-card" data-category="${w.category}" style="transition-delay:${i * .08}s">
+      <div class="portfolio-img">
+        <div class="photo-placeholder ${w.cls}">
+          <div class="photo-icon">
+            ${photoSVG(w.category)}
+            <span>${w.category}</span>
+          </div>
+        </div>
+        <div class="portfolio-overlay">
+          <span class="tag">${w.category.toUpperCase()}</span>
+          <h3>${w.name}</h3>
+          <p class="cn">${w.cn}</p>
+          <p class="detail">${w.detail}</p>
+          <span class="view">
+            View Project
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  // Re-observe
+  setTimeout(() => {
+    document.querySelectorAll('.portfolio-card').forEach(el => observer.observe(el));
+  }, 50);
+}
+
+// ===== Particles =====
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = Math.random() * 10 + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
+    container.appendChild(p);
+  }
+}
+
+// ===== Cursor Glow =====
+const cursorGlow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => {
+  cursorGlow.style.left = e.clientX + 'px';
+  cursorGlow.style.top = e.clientY + 'px';
+});
+
+// ===== Loader =====
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hide'), 1200);
+  createParticles();
+  renderPortfolio();
+});
+
+// ===== Nav Scroll =====
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+  document.getElementById('backTop').classList.toggle('show', window.scrollY > 600);
+});
+
+// ===== Hamburger =====
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileMenu.classList.toggle('active');
+  document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+});
+document.querySelectorAll('.mobile-menu a').forEach(a => {
+  a.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    mobileMenu.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+});
+
+// ===== Back to Top =====
+document.getElementById('backTop').addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ===== Filter =====
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPortfolio(btn.dataset.filter);
+  });
+});
+
+// ===== Testimonial Slider =====
+const testimonials = document.querySelectorAll('.testimonial-item');
+const dots = document.querySelectorAll('.testimonial-dot');
+let currentSlide = 0;
+function showSlide(n) {
+  testimonials.forEach(t => t.classList.remove('active'));
+  dots.forEach(d => d.classList.remove('active'));
+  currentSlide = n;
+  testimonials[n].classList.add('active');
+  dots[n].classList.add('active');
+}
+dots.forEach(d => d.addEventListener('click', () => showSlide(+d.dataset.index)));
+setInterval(() => showSlide((currentSlide + 1) % testimonials.length), 6000);
+
+// ===== Scroll Reveal =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ===== Form Submit =====
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.textContent = '提交成功 ✓';
+  btn.style.background = 'var(--gold)';
+  btn.style.color = 'var(--white)';
+  btn.style.borderColor = 'var(--gold)';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '提交预约';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    btn.disabled = false;
+    e.target.reset();
+  }, 3000);
+}
+
+// ===== Smooth anchor offset =====
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>
