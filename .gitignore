@@ -26,3 +26,7 @@ npm-debug.log*
 
 # Wrangler
 .dev.vars
+
+.dev.vars*
+!.dev.vars.example
+!.env.example
