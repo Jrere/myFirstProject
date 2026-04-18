@@ -114,6 +114,76 @@ body:hover .cursor-glow{opacity:1}
 .section-divider{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 48px}
 .section-desc{max-width:620px;margin:0 auto;text-align:center;font-size:1rem;line-height:2;color:var(--text);font-weight:300;letter-spacing:.5px}
 
+/* ═══ Banner Carousel ═══ */
+.carousel-section{position:relative;width:100%}
+.carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal)}
+.carousel-track{display:flex;height:100%;transition:transform .9s cubic-bezier(.65,0,.35,1)}
+.carousel-slide{flex:0 0 100%;height:100%;position:relative;overflow:hidden}
+.carousel-slide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 6s linear;opacity:0}
+.carousel-slide.active .carousel-slide-img{opacity:1;transform:scale(1.08)}
+.carousel-slide-prev .carousel-slide-img{opacity:.5;transform:scale(1)}
+.carousel-slide-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.carousel-slide-placeholder .photo-placeholder{width:100%;height:100%}
+
+/* Ken Burns alternate */
+.carousel-slide:nth-child(even) .carousel-slide-img{transition:transform 8s cubic-bezier(.25,.46,.45,.94)}
+.carousel-slide:nth-child(even).active .carousel-slide-img{transform:scale(1.04) translateY(-1.5%)}
+
+/* Overlays */
+.carousel-overlay-top{position:absolute;top:0;left:0;right:0;height:30%;background:linear-gradient(to bottom,rgba(26,26,26,.5),transparent);z-index:2;pointer-events:none}
+.carousel-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to top,rgba(26,26,26,.7) 0%,rgba(26,26,26,.3) 40%,transparent 100%);z-index:2;pointer-events:none}
+
+/* Content */
+.carousel-content{position:absolute;bottom:14%;left:60px;z-index:3;max-width:600px}
+.carousel-label{font-family:var(--font-sans);font-size:.6rem;letter-spacing:6px;text-transform:uppercase;color:var(--gold-light);margin-bottom:16px;opacity:0;transform:translateY(20px);animation:carouselFadeIn .8s var(--ease) .3s forwards}
+.carousel-title{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:400;color:var(--white);letter-spacing:4px;line-height:1.2;margin-bottom:12px;opacity:0;transform:translateY(30px);animation:carouselFadeIn 1s var(--ease) .5s forwards}
+.carousel-subtitle{font-family:var(--font-serif);font-size:clamp(.9rem,1.5vw,1.1rem);font-weight:300;color:rgba(255,255,255,.6);letter-spacing:1px;line-height:1.8;margin-bottom:32px;opacity:0;transform:translateY(20px);animation:carouselFadeIn .8s var(--ease) .7s forwards}
+.carousel-cta{display:inline-flex;align-items:center;gap:10px;padding:14px 40px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--font-sans);font-size:.68rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;transition:all .4s var(--ease);opacity:0;transform:translateY(20px);animation:carouselFadeIn .8s var(--ease) .9s forwards}
+.carousel-cta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;transition:transform .3s var(--ease)}
+.carousel-cta:hover{background:var(--gold);color:var(--white);border-color:var(--gold);box-shadow:0 12px 36px rgba(184,151,106,.3)}
+.carousel-cta:hover svg{transform:translateX(4px)}
+@keyframes carouselFadeIn{to{opacity:1;transform:translateY(0)}}
+
+/* Reset animation on slide change */
+.carousel-content.slide-enter .carousel-label{animation:carouselFadeIn .6s var(--ease) .1s forwards;opacity:0;transform:translateY(15px)}
+.carousel-content.slide-enter .carousel-title{animation:carouselFadeIn .8s var(--ease) .2s forwards;opacity:0;transform:translateY(25px)}
+.carousel-content.slide-enter .carousel-subtitle{animation:carouselFadeIn .6s var(--ease) .35s forwards;opacity:0;transform:translateY(15px)}
+.carousel-content.slide-enter .carousel-cta{animation:carouselFadeIn .6s var(--ease) .5s forwards;opacity:0;transform:translateY(15px)}
+
+/* Navigation buttons */
+.carousel-btn{position:absolute;top:50%;z-index:4;width:52px;height:52px;border:1px solid rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);background:rgba(0,0,0,.2);backdrop-filter:blur(8px);cursor:pointer;transition:all .4s var(--ease);transform:translateY(-50%)}
+.carousel-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5}
+.carousel-btn:hover{background:var(--gold);border-color:var(--gold);transform:translateY(-50%) scale(1.1)}
+.carousel-prev{left:32px}
+.carousel-next{right:32px}
+
+/* Dots */
+.carousel-dots{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:12px;align-items:center}
+.carousel-dot{width:32px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;cursor:pointer;transition:all .5s var(--ease);position:relative;overflow:hidden}
+.carousel-dot.active{width:56px;background:rgba(255,255,255,.15)}
+.carousel-dot.active::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:var(--gold);animation:dotFill var(--carousel-interval,5s) linear forwards}
+@keyframes dotFill{to{width:100%}}
+.carousel-dot:hover{background:rgba(255,255,255,.35)}
+
+/* Progress bar */
+.carousel-progress{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.06);z-index:4}
+.carousel-progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));transition:width .1s linear}
+
+/* Counter */
+.carousel-counter{position:absolute;bottom:6%;right:60px;z-index:4;font-family:var(--font-display);font-size:.85rem;letter-spacing:3px;color:rgba(255,255,255,.4)}
+.carousel-counter #carouselCurrent{font-size:1.4rem;color:var(--gold-light);font-weight:500}
+.carousel-counter-sep{margin:0 6px}
+
+/* Responsive carousel */
+@media(max-width:768px){
+  .carousel-viewport{height:70vh;min-height:450px}
+  .carousel-content{left:24px;right:24px;bottom:18%}
+  .carousel-btn{width:40px;height:40px}
+  .carousel-prev{left:16px}
+  .carousel-next{right:16px}
+  .carousel-counter{right:24px;display:none}
+}
+
 /* Stats Bar */
 .stats{background:var(--charcoal);padding:60px;display:flex;justify-content:center;gap:80px;flex-wrap:wrap}
 .stat-item{text-align:center}
@@ -401,6 +471,45 @@ body:hover .cursor-glow{opacity:1}
   <div class="hero-scroll">
     <span>Scroll</span>
     <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══ Banner Carousel ═══ -->
+<section class="carousel-section" id="carousel">
+  <div class="carousel-viewport">
+    <div class="carousel-track" id="carouselTrack">
+      <!-- Slides rendered by JS -->
+    </div>
+    <!-- Overlay gradient -->
+    <div class="carousel-overlay-top"></div>
+    <div class="carousel-overlay-bottom"></div>
+    <!-- Text content -->
+    <div class="carousel-content" id="carouselContent">
+      <div class="carousel-label">Featured</div>
+      <h2 class="carousel-title" id="carouselTitle"></h2>
+      <p class="carousel-subtitle" id="carouselSubtitle"></p>
+      <a href="#portfolio" class="carousel-cta" id="carouselCta">
+        探索更多
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <!-- Controls -->
+    <button class="carousel-btn carousel-prev" id="carouselPrev" aria-label="上一张">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="carousel-btn carousel-next" id="carouselNext" aria-label="下一张">
+      <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
+    <!-- Progress dots -->
+    <div class="carousel-dots" id="carouselDots"></div>
+    <!-- Progress bar -->
+    <div class="carousel-progress"><div class="carousel-progress-bar" id="carouselProgressBar"></div></div>
+    <!-- Slide counter -->
+    <div class="carousel-counter">
+      <span id="carouselCurrent">01</span>
+      <span class="carousel-counter-sep">/</span>
+      <span id="carouselTotal">01</span>
+    </div>
   </div>
 </section>
 
@@ -794,6 +903,186 @@ function renderPortfolio(filter='all') {
   }, 50);
 }
 
+// ===== Banner Carousel =====
+const AUTOPLAY_INTERVAL = 5000;
+let banners = [];
+let carouselIndex = 0;
+let carouselTimer = null;
+let carouselProgressRAF = null;
+let carouselStartTime = 0;
+
+// Fallback banners when API is empty
+const bannersFallback = [
+  { title: '品牌视觉大片', subtitle: '电影级画面，定义品牌新高度', cls: 'photo-1' },
+  { title: '真实与温度', subtitle: '捕捉银发岁月最动人的瞬间', cls: 'photo-3' },
+  { title: '专业肖像定制', subtitle: '一张照片，胜过千言万语', cls: 'photo-5' },
+];
+
+function renderCarousel() {
+  const track = document.getElementById('carouselTrack');
+  const dots = document.getElementById('carouselDots');
+  const source = banners.length > 0 ? banners : bannersFallback;
+
+  // Build slides
+  track.innerHTML = source.map((b, i) => {
+    const hasImage = b.image_key;
+    const imgSrc = hasImage ? `${API_BASE}/api/image/${encodeURIComponent(b.image_key)}` : '';
+    const content = hasImage
+      ? `<img class="carousel-slide-img" src="${imgSrc}" alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}">`
+      : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
+    return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
+  }).join('');
+
+  // Build dots
+  dots.innerHTML = source.map((_, i) =>
+    `<div class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
+  ).join('');
+
+  document.getElementById('carouselTotal').textContent = String(source.length).padStart(2, '0');
+  document.getElementById('carouselCurrent').textContent = '01';
+
+  // Set CSS interval for dot animation
+  document.documentElement.style.setProperty('--carousel-interval', AUTOPLAY_INTERVAL + 'ms');
+
+  updateCarouselContent(0);
+  startAutoplay();
+
+  // Dot click
+  dots.querySelectorAll('.carousel-dot').forEach(dot => {
+    dot.addEventListener('click', () => goToSlide(+dot.dataset.index));
+  });
+}
+
+function updateCarouselContent(index) {
+  const source = banners.length > 0 ? banners : bannersFallback;
+  const b = source[index];
+  const titleEl = document.getElementById('carouselTitle');
+  const subtitleEl = document.getElementById('carouselSubtitle');
+  const ctaEl = document.getElementById('carouselCta');
+
+  titleEl.textContent = b.title || '白鹿缘摄影';
+  subtitleEl.textContent = b.subtitle || '以光影为笔，以镜头为墨';
+  if (b.link) {
+    ctaEl.href = b.link;
+  } else {
+    ctaEl.href = '#portfolio';
+  }
+
+  // Trigger re-animation
+  const content = document.getElementById('carouselContent');
+  content.classList.remove('slide-enter');
+  void content.offsetWidth; // reflow
+  content.classList.add('slide-enter');
+}
+
+function goToSlide(index) {
+  const source = banners.length > 0 ? banners : bannersFallback;
+  const total = source.length;
+  if (index < 0) index = total - 1;
+  if (index >= total) index = 0;
+
+  const track = document.getElementById('carouselTrack');
+  track.style.transform = `translateX(-${index * 100}%)`;
+
+  // Update active states
+  document.querySelectorAll('.carousel-slide').forEach((s, i) => {
+    s.classList.toggle('active', i === index);
+    s.classList.toggle('carousel-slide-prev', i === carouselIndex && i !== index);
+  });
+  document.querySelectorAll('.carousel-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === index);
+    // Restart dot fill animation
+    if (i === index) {
+      d.style.animation = 'none';
+      void d.offsetWidth;
+      d.style.animation = '';
+    }
+  });
+
+  carouselIndex = index;
+  document.getElementById('carouselCurrent').textContent = String(index + 1).padStart(2, '0');
+  updateCarouselContent(index);
+  resetProgress();
+}
+
+function startAutoplay() {
+  stopAutoplay();
+  carouselStartTime = Date.now();
+  carouselTimer = setInterval(() => goToSlide(carouselIndex + 1), AUTOPLAY_INTERVAL);
+  animateProgress();
+}
+
+function stopAutoplay() {
+  clearInterval(carouselTimer);
+  cancelAnimationFrame(carouselProgressRAF);
+}
+
+function resetProgress() {
+  carouselStartTime = Date.now();
+  const bar = document.getElementById('carouselProgressBar');
+  bar.style.width = '0%';
+}
+
+function animateProgress() {
+  const bar = document.getElementById('carouselProgressBar');
+  function tick() {
+    const elapsed = Date.now() - carouselStartTime;
+    const pct = Math.min((elapsed / AUTOPLAY_INTERVAL) * 100, 100);
+    bar.style.width = pct + '%';
+    carouselProgressRAF = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// Pause on hover
+document.getElementById('carousel').addEventListener('mouseenter', () => {
+  stopAutoplay();
+  const elapsed = Date.now() - carouselStartTime;
+  const bar = document.getElementById('carouselProgressBar');
+  bar.style.width = ((elapsed / AUTOPLAY_INTERVAL) * 100) + '%';
+});
+document.getElementById('carousel').addEventListener('mouseleave', () => startAutoplay());
+
+// Nav buttons
+document.getElementById('carouselPrev').addEventListener('click', () => {
+  goToSlide(carouselIndex - 1);
+  startAutoplay();
+});
+document.getElementById('carouselNext').addEventListener('click', () => {
+  goToSlide(carouselIndex + 1);
+  startAutoplay();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') { goToSlide(carouselIndex - 1); startAutoplay(); }
+  if (e.key === 'ArrowRight') { goToSlide(carouselIndex + 1); startAutoplay(); }
+});
+
+// Touch / swipe
+let touchStartX = 0;
+const carouselVP = document.querySelector('.carousel-viewport');
+carouselVP.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+carouselVP.addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) {
+    goToSlide(carouselIndex + (diff > 0 ? 1 : -1));
+    startAutoplay();
+  }
+}, { passive: true });
+
+// Fetch banners from API
+async function fetchBanners() {
+  try {
+    const res = await fetch(`${API_BASE}/api/banners?active=1`);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    if (data && data.length > 0) banners = data;
+  } catch (e) {
+    console.log('Banners API unavailable, using fallback:', e.message);
+  }
+}
+
 // ===== Fetch Works from API =====
 async function fetchWorks() {
   try {
@@ -834,7 +1123,8 @@ document.addEventListener('mousemove', e => {
 window.addEventListener('load', async () => {
   setTimeout(() => document.getElementById('loader').classList.add('hide'), 1200);
   createParticles();
-  await fetchWorks();
+  await Promise.all([fetchBanners(), fetchWorks()]);
+  renderCarousel();
   renderPortfolio();
 });
 

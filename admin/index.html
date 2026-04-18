@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>白鹿缘摄影 · 作品管理后台</title>
+<title>白鹿缘摄影 · 管理后台</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -131,7 +131,46 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
   .header{padding:16px 20px}
   .container{padding:24px 16px}
   .works-grid{grid-template-columns:1fr}
+  .banner-grid{grid-template-columns:1fr}
 }
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:32px;border-bottom:2px solid var(--border)}
+.tab{padding:14px 32px;font-size:.8rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);cursor:pointer;position:relative;transition:var(--transition);border:none;background:none}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold)}
+.tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--gold)}
+.tab .badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--surface3);font-size:.65rem;margin-left:8px;color:var(--text-dim)}
+.tab.active .badge{background:rgba(184,151,106,.2);color:var(--gold)}
+
+/* Tab Content */
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Banner Grid */
+.banner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.banner-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition)}
+.banner-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow)}
+.banner-thumb{width:100%;height:180px;object-fit:cover;background:var(--surface2);display:block}
+.banner-thumb-placeholder{width:100%;height:180px;background:linear-gradient(135deg,var(--surface2),var(--surface3));display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.8rem}
+.banner-body{padding:20px}
+.banner-body h3{font-size:.95rem;font-weight:500;margin-bottom:4px}
+.banner-body .subtitle{font-size:.8rem;color:var(--gold);margin-bottom:8px}
+.banner-body .meta{font-size:.72rem;color:var(--text-dim);margin-bottom:12px}
+.banner-status{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;margin-right:8px}
+.banner-status.active{background:rgba(46,204,113,.15);color:var(--green)}
+.banner-status.inactive{background:rgba(231,76,60,.15);color:var(--red)}
+.banner-actions{display:flex;gap:8px;padding:0 20px 20px}
+
+/* Toggle Switch */
+.toggle-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.toggle-label{font-size:.82rem;color:var(--text)}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface3);border-radius:12px;transition:var(--transition)}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--text-dim);top:3px;left:3px;transition:var(--transition)}
+.toggle input:checked+.toggle-slider{background:var(--gold)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:#fff}
 </style>
 </head>
 <body>
@@ -140,9 +179,9 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
 <header class="header">
   <div class="header-left">
     <div class="header-logo">B</div>
-    <h1>白鹿缘摄影 <span>作品管理</span></h1>
+    <h1>白鹿缘摄影 <span>管理后台</span></h1>
   </div>
-  <div class="header-actions">
+  <div class="header-actions" id="headerActions">
     <button class="btn btn-secondary" onclick="loadWorks()">🔄 刷新</button>
     <button class="btn btn-primary" onclick="openModal()">＋ 添加作品</button>
   </div>
@@ -150,24 +189,48 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
 
 <!-- Main -->
 <div class="container">
-  <!-- Stats -->
-  <div class="stats" id="stats"></div>
-
-  <!-- Filter -->
-  <div class="filter-bar">
-    <select id="filterCategory" onchange="renderGrid()">
-      <option value="all">全部分类</option>
-      <option value="corporate">企业宣传</option>
-      <option value="portrait">人像摄像</option>
-      <option value="silver">银发团</option>
-      <option value="headshot">肖像</option>
-    </select>
-    <input type="text" id="searchInput" placeholder="搜索作品名称..." oninput="renderGrid()">
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="works" onclick="switchTab('works')">
+      📷 作品管理 <span class="badge" id="worksBadge">0</span>
+    </div>
+    <div class="tab" data-tab="banners" onclick="switchTab('banners')">
+      🖼️ 轮播图 <span class="badge" id="bannersBadge">0</span>
+    </div>
   </div>
 
-  <!-- Grid -->
-  <div class="works-grid" id="worksGrid">
-    <div class="loading">加载中...</div>
+  <!-- Tab: Works -->
+  <div class="tab-content active" id="tabWorks">
+    <!-- Stats -->
+    <div class="stats" id="stats"></div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <select id="filterCategory" onchange="renderGrid()">
+        <option value="all">全部分类</option>
+        <option value="corporate">企业宣传</option>
+        <option value="portrait">人像摄像</option>
+        <option value="silver">银发团</option>
+        <option value="headshot">肖像</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="搜索作品名称..." oninput="renderGrid()">
+    </div>
+
+    <!-- Grid -->
+    <div class="works-grid" id="worksGrid">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Tab: Banners -->
+  <div class="tab-content" id="tabBanners">
+    <div class="filter-bar">
+      <button class="btn btn-primary" onclick="openBannerModal()">＋ 添加轮播图</button>
+      <button class="btn btn-secondary" onclick="loadBanners()">🔄 刷新</button>
+    </div>
+    <div class="banner-grid" id="bannerGrid">
+      <div class="loading">加载中...</div>
+    </div>
   </div>
 </div>
 
@@ -228,6 +291,61 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
   </div>
 </div>
 
+<!-- Banner Add/Edit Modal -->
+<div class="modal-overlay" id="bannerModalOverlay" onclick="handleBannerOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="bannerModalTitle">添加轮播图</h2>
+      <button class="modal-close" onclick="closeBannerModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bannerEditId">
+      <div class="form-group">
+        <label>轮播图片</label>
+        <div class="upload-zone" id="bannerUploadZone" onclick="document.getElementById('bannerFileInput').click()">
+          <div id="bannerUploadPlaceholder">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">点击或拖拽上传图片</div>
+            <div class="upload-hint">建议尺寸 1920×800 以上，支持 JPG、PNG、WebP</div>
+          </div>
+          <div id="bannerUploadPreview" style="display:none">
+            <img id="bannerPreviewImg" src="" alt="">
+            <div class="change-overlay">点击更换图片</div>
+          </div>
+          <input type="file" id="bannerFileInput" accept="image/*" onchange="handleBannerFileSelect(event)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>标题（可选）</label>
+        <input type="text" id="bannerTitle" placeholder="品牌视觉大片">
+      </div>
+      <div class="form-group">
+        <label>副标题（可选）</label>
+        <input type="text" id="bannerSubtitle" placeholder="专业 · 高端 · 定制">
+      </div>
+      <div class="form-group">
+        <label>链接（可选）</label>
+        <input type="text" id="bannerLink" placeholder="点击跳转的 URL，留空不跳转">
+      </div>
+      <div class="form-group">
+        <label>排序（数字越小越靠前）</label>
+        <input type="number" id="bannerSort" value="0" min="0">
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="bannerActive" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">启用此轮播图（前台可见）</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeBannerModal()">取消</button>
+      <button class="btn btn-primary" id="bannerBtnSave" onclick="saveBanner()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm Dialog -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
@@ -250,8 +368,30 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
 const API_BASE = 'https://bailuyuan-portfolio-api.2415537946.workers.dev';
 
 let works = [];
+let banners = [];
 let selectedFile = null;
 let selectedFileUrl = '';
+let bannerSelectedFile = null;
+let bannerSelectedFileUrl = '';
+
+// ═══ Tab Switching ═══
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('tabWorks').classList.toggle('active', tab === 'works');
+  document.getElementById('tabBanners').classList.toggle('active', tab === 'banners');
+  const actions = document.getElementById('headerActions');
+  if (tab === 'works') {
+    actions.innerHTML = `
+      <button class="btn btn-secondary" onclick="loadWorks()">🔄 刷新</button>
+      <button class="btn btn-primary" onclick="openModal()">＋ 添加作品</button>
+    `;
+  } else {
+    actions.innerHTML = `
+      <button class="btn btn-secondary" onclick="loadBanners()">🔄 刷新</button>
+      <button class="btn btn-primary" onclick="openBannerModal()">＋ 添加轮播图</button>
+    `;
+  }
+}
 
 // ─── API ───
 async function api(path, options = {}) {
@@ -267,6 +407,7 @@ async function api(path, options = {}) {
 async function loadWorks() {
   try {
     works = await api('/api/works');
+    document.getElementById('worksBadge').textContent = works.length;
     renderStats();
     renderGrid();
   } catch (e) {
@@ -458,8 +599,167 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 3500);
 }
 
+// ═══════════════════════════════════════════════
+// ═══ Banner CRUD ═══
+// ═══════════════════════════════════════════════
+
+// ─── Load Banners ───
+async function loadBanners() {
+  try {
+    banners = await api('/api/banners');
+    document.getElementById('bannersBadge').textContent = banners.length;
+    renderBannerGrid();
+  } catch (e) {
+    toast('加载轮播图失败: ' + e.message, 'error');
+  }
+}
+
+// ─── Render Banner Grid ───
+function renderBannerGrid() {
+  const grid = document.getElementById('bannerGrid');
+  if (banners.length === 0) {
+    grid.innerHTML = `
+      <div class="empty" style="grid-column:1/-1">
+        <div class="icon">🖼️</div>
+        <p>还没有轮播图，点击上方「添加轮播图」开始吧</p>
+        <button class="btn btn-primary" onclick="openBannerModal()">＋ 添加第一张轮播图</button>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = banners.map(b => {
+    const statusClass = b.active ? 'active' : 'inactive';
+    const statusText = b.active ? '已启用' : '已禁用';
+    return `
+    <div class="banner-card" data-id="${b.id}">
+      ${b.image_key
+        ? `<img class="banner-thumb" src="${API_BASE}/api/image/${encodeURIComponent(b.image_key)}" alt="${b.title}" loading="lazy" onerror="this.outerHTML='<div class=banner-thumb-placeholder>图片加载失败</div>'">`
+        : `<div class="banner-thumb-placeholder">暂无图片</div>`
+      }
+      <div class="banner-body">
+        <span class="banner-status ${statusClass}">${statusText}</span>
+        <span class="banner-status" style="background:rgba(255,255,255,.05);color:var(--text-dim)">排序: ${b.sort_order}</span>
+        <h3 style="margin-top:12px">${esc(b.title || '(无标题)')}</h3>
+        <div class="subtitle">${esc(b.subtitle)}</div>
+        ${b.link ? `<div class="meta">🔗 ${esc(b.link)}</div>` : ''}
+      </div>
+      <div class="banner-actions">
+        <button class="btn btn-secondary btn-sm" onclick="editBanner('${b.id}')">✏️ 编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBanner('${b.id}','${esc(b.title)}')">🗑️ 删除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Banner Modal ───
+function openBannerModal(banner = null) {
+  document.getElementById('bannerEditId').value = banner ? banner.id : '';
+  document.getElementById('bannerModalTitle').textContent = banner ? '编辑轮播图' : '添加轮播图';
+  document.getElementById('bannerTitle').value = banner ? banner.title : '';
+  document.getElementById('bannerSubtitle').value = banner ? banner.subtitle : '';
+  document.getElementById('bannerLink').value = banner ? banner.link : '';
+  document.getElementById('bannerSort').value = banner ? banner.sort_order : banners.length;
+  document.getElementById('bannerActive').checked = banner ? !!banner.active : true;
+
+  bannerSelectedFile = null;
+  bannerSelectedFileUrl = '';
+  document.getElementById('bannerFileInput').value = '';
+  document.getElementById('bannerUploadPlaceholder').style.display = '';
+  document.getElementById('bannerUploadPreview').style.display = 'none';
+
+  if (banner && banner.image_key) {
+    bannerSelectedFileUrl = `${API_BASE}/api/image/${encodeURIComponent(banner.image_key)}`;
+    document.getElementById('bannerPreviewImg').src = bannerSelectedFileUrl;
+    document.getElementById('bannerUploadPlaceholder').style.display = 'none';
+    document.getElementById('bannerUploadPreview').style.display = '';
+  }
+
+  document.getElementById('bannerModalOverlay').classList.add('active');
+}
+
+function closeBannerModal() {
+  document.getElementById('bannerModalOverlay').classList.remove('active');
+}
+
+function handleBannerOverlayClick(e) {
+  if (e.target === e.currentTarget) closeBannerModal();
+}
+
+// ─── Banner File Upload ───
+function handleBannerFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  bannerSelectedFile = file;
+  bannerSelectedFileUrl = URL.createObjectURL(file);
+  document.getElementById('bannerPreviewImg').src = bannerSelectedFileUrl;
+  document.getElementById('bannerUploadPlaceholder').style.display = 'none';
+  document.getElementById('bannerUploadPreview').style.display = '';
+}
+
+// ─── Save Banner ───
+async function saveBanner() {
+  const id = document.getElementById('bannerEditId').value;
+  const isNew = !id;
+  const fd = new FormData();
+  fd.append('title', document.getElementById('bannerTitle').value);
+  fd.append('subtitle', document.getElementById('bannerSubtitle').value);
+  fd.append('link', document.getElementById('bannerLink').value);
+  fd.append('sort_order', document.getElementById('bannerSort').value);
+  fd.append('active', document.getElementById('bannerActive').checked ? '1' : '0');
+  if (bannerSelectedFile) fd.append('image', bannerSelectedFile);
+
+  if (isNew && !bannerSelectedFile) {
+    toast('请上传一张图片', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('bannerBtnSave');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+
+  try {
+    if (isNew) {
+      await api('/api/banners', { method: 'POST', body: fd });
+      toast('轮播图已添加', 'success');
+    } else {
+      await api(`/api/banners/${id}`, { method: 'PUT', body: fd });
+      toast('轮播图已更新', 'success');
+    }
+    closeBannerModal();
+    await loadBanners();
+  } catch (e) {
+    toast('保存失败: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '保存';
+  }
+}
+
+// ─── Edit Banner ───
+function editBanner(id) {
+  const banner = banners.find(b => b.id === id);
+  if (banner) openBannerModal(banner);
+}
+
+// ─── Delete Banner ───
+function deleteBanner(id, name) {
+  document.getElementById('confirmText').textContent = `确定要删除轮播图「${name || '无标题'}」吗？图片也将被永久删除。`;
+  document.getElementById('confirmOverlay').classList.add('active');
+  document.getElementById('confirmBtn').onclick = async () => {
+    closeConfirm();
+    try {
+      await api(`/api/banners/${id}`, { method: 'DELETE' });
+      toast('已删除', 'success');
+      await loadBanners();
+    } catch (e) {
+      toast('删除失败: ' + e.message, 'error');
+    }
+  };
+}
+
 // ─── Init ───
 loadWorks();
+loadBanners();
 </script>
 </body>
 </html>
