@@ -230,6 +230,139 @@ export default {
         return json({ success: true }, corsHeaders);
       }
 
+      // ═══════════════════════════════════════════
+      // ─── 预约 (Bookings) ───
+      // ═══════════════════════════════════════════
+
+      // ─── 提交预约（前台） ───
+      if (pathname === '/api/bookings' && method === 'POST') {
+        const body = await request.json();
+        const name = (body.name || '').trim().slice(0, 100);
+        const phone = (body.phone || '').trim().slice(0, 30);
+        const date = (body.date || '').trim().slice(0, 50);
+        const type = (body.type || '').trim().slice(0, 100);
+        const message = (body.message || '').trim().slice(0, 2000);
+
+        if (!name || !phone) {
+          return json({ error: '姓名和联系电话为必填' }, corsHeaders, 400);
+        }
+
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          'INSERT INTO bookings (id, name, phone, date, type, message) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(id, name, phone, date, type, message).run();
+
+        return json({ success: true, id }, corsHeaders, 201);
+      }
+
+      // ─── 获取所有预约（后台） ───
+      if (pathname === '/api/bookings' && method === 'GET') {
+        const status = url.searchParams.get('status');
+        let query = 'SELECT * FROM bookings';
+        const params = [];
+        if (status) {
+          query += ' WHERE status = ?';
+          params.push(status);
+        }
+        query += ' ORDER BY created_at DESC';
+        const stmt = params.length
+          ? env.DB.prepare(query).bind(...params)
+          : env.DB.prepare(query);
+        const { results } = await stmt.all();
+        return json(results, corsHeaders);
+      }
+
+      // ─── 更新预约状态（后台） ───
+      const bookingUpdateMatch = pathname.match(/^\/api\/bookings\/([^/]+)$/);
+      if (bookingUpdateMatch && method === 'PUT') {
+        const id = bookingUpdateMatch[1];
+        const existing = await env.DB.prepare('SELECT * FROM bookings WHERE id = ?').bind(id).first();
+        if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
+
+        const body = await request.json();
+        const status = body.status || existing.status;
+
+        await env.DB.prepare(
+          'UPDATE bookings SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+        ).bind(status, id).run();
+
+        const row = await env.DB.prepare('SELECT * FROM bookings WHERE id = ?').bind(id).first();
+        return json(row, corsHeaders);
+      }
+
+      // ─── 删除预约（后台） ───
+      const bookingDeleteMatch = pathname.match(/^\/api\/bookings\/([^/]+)$/);
+      if (bookingDeleteMatch && method === 'DELETE') {
+        const id = bookingDeleteMatch[1];
+        await env.DB.prepare('DELETE FROM bookings WHERE id = ?').bind(id).run();
+        return json({ success: true }, corsHeaders);
+      }
+
+      // ═══════════════════════════════════════════
+      // ─── 建议 (Suggestions) ───
+      // ═══════════════════════════════════════════
+
+      // ─── 提交建议（前台） ───
+      if (pathname === '/api/suggestions' && method === 'POST') {
+        const body = await request.json();
+        const contact = (body.contact || '').trim().slice(0, 200);
+        const content = (body.content || '').trim().slice(0, 5000);
+
+        if (!content) {
+          return json({ error: '建议内容不能为空' }, corsHeaders, 400);
+        }
+
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          'INSERT INTO suggestions (id, contact, content) VALUES (?, ?, ?)'
+        ).bind(id, contact, content).run();
+
+        return json({ success: true, id }, corsHeaders, 201);
+      }
+
+      // ─── 获取所有建议（后台） ───
+      if (pathname === '/api/suggestions' && method === 'GET') {
+        const status = url.searchParams.get('status');
+        let query = 'SELECT * FROM suggestions';
+        const params = [];
+        if (status) {
+          query += ' WHERE status = ?';
+          params.push(status);
+        }
+        query += ' ORDER BY created_at DESC';
+        const stmt = params.length
+          ? env.DB.prepare(query).bind(...params)
+          : env.DB.prepare(query);
+        const { results } = await stmt.all();
+        return json(results, corsHeaders);
+      }
+
+      // ─── 更新建议状态（后台） ───
+      const suggestionUpdateMatch = pathname.match(/^\/api\/suggestions\/([^/]+)$/);
+      if (suggestionUpdateMatch && method === 'PUT') {
+        const id = suggestionUpdateMatch[1];
+        const existing = await env.DB.prepare('SELECT * FROM suggestions WHERE id = ?').bind(id).first();
+        if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
+
+        const body = await request.json();
+        const status = body.status || existing.status;
+
+        await env.DB.prepare(
+          'UPDATE suggestions SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+        ).bind(status, id).run();
+
+        const row = await env.DB.prepare('SELECT * FROM suggestions WHERE id = ?').bind(id).first();
+        return json(row, corsHeaders);
+      }
+
+      // ─── 删除建议（后台） ───
+      const suggestionDeleteMatch = pathname.match(/^\/api\/suggestions\/([^/]+)$/);
+      if (suggestionDeleteMatch && method === 'DELETE') {
+        const id = suggestionDeleteMatch[1];
+        await env.DB.prepare('DELETE FROM suggestions WHERE id = ?').bind(id).run();
+        return json({ success: true }, corsHeaders);
+      }
+
       return json({ error: 'Not found' }, corsHeaders, 404);
     } catch (err) {
       return json({ error: err.message }, corsHeaders, 500);

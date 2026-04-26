@@ -396,6 +396,24 @@ body:hover .cursor-glow{opacity:1}
   .filter-btn{font-size:.62rem;padding:8px 4px}
   .booking-form .form-submit{width:100%;justify-content:center}
 }
+
+/* Suggestions */
+.suggestions{background:var(--cream)}
+.suggestions-wrapper{max-width:640px;margin:0 auto}
+.suggestion-form .form-group{margin-bottom:28px}
+.suggestion-form .form-group input,
+.suggestion-form .form-group textarea{width:100%;padding:16px 20px;border:1px solid var(--warm);background:var(--white);font-family:var(--font-serif);font-size:.95rem;color:var(--charcoal);transition:all .4s var(--ease);outline:none}
+.suggestion-form .form-group input:focus,
+.suggestion-form .form-group textarea:focus{border-color:var(--gold)}
+.suggestion-form .form-group label{position:absolute;top:50%;left:20px;font-family:var(--font-serif);font-size:.9rem;color:var(--text-light);pointer-events:none;transition:all .3s var(--ease);transform:translateY(-50%)}
+.suggestion-form .form-group textarea ~ label{top:20px;transform:none}
+.suggestion-form .form-group input:focus ~ label,
+.suggestion-form .form-group input:not(:placeholder-shown) ~ label,
+.suggestion-form .form-group textarea:focus ~ label,
+.suggestion-form .form-group textarea:not(:placeholder-shown) ~ label{top:-10px;left:16px;font-size:.72rem;color:var(--gold);background:var(--white);padding:0 6px;transform:none}
+.suggestion-form .form-group textarea{min-height:140px;resize:vertical}
+.suggestion-form .form-submit{display:inline-flex;align-items:center;gap:12px;padding:18px 52px;border:1px solid var(--gold);color:var(--gold);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;background:none;cursor:pointer;transition:all .5s var(--ease)}
+.suggestion-form .form-submit:hover{background:var(--gold);color:var(--white)}
 </style>
 </head>
 <body>
@@ -785,6 +803,27 @@ body:hover .cursor-glow{opacity:1}
         <label>您的想法与需求</label>
       </div>
       <button type="submit" class="form-submit">提交预约</button>
+    </form>
+  </div>
+</section>
+
+<!-- Suggestions -->
+<section class="section suggestions" id="suggestions">
+  <p class="section-eyebrow reveal">Your Voice</p>
+  <h2 class="section-title reveal">对我们的建议</h2>
+  <p class="section-title-cn reveal">您 的 声 音 很 重 要</p>
+  <div class="section-divider reveal"></div>
+  <div class="suggestions-wrapper reveal">
+    <form class="suggestion-form" onsubmit="handleSuggestion(event)">
+      <div class="form-group">
+        <input type="text" class="suggestion-contact" placeholder=" ">
+        <label>联系方式（选填，方便我们回复您）</label>
+      </div>
+      <div class="form-group">
+        <textarea class="suggestion-content" placeholder=" " required></textarea>
+        <label>您的建议、意见或想法…</label>
+      </div>
+      <button type="submit" class="form-submit">提交建议</button>
     </form>
   </div>
 </section>
@@ -1199,22 +1238,89 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ===== Form Submit =====
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
-  const btn = e.target.querySelector('.form-submit');
-  btn.textContent = '提交成功 ✓';
-  btn.style.background = 'var(--gold)';
-  btn.style.color = 'var(--white)';
-  btn.style.borderColor = 'var(--gold)';
+  const form = e.target;
+  const btn = form.querySelector('.form-submit');
+  const inputs = form.querySelectorAll('input, select, textarea');
+  const name = inputs[0].value.trim();
+  const phone = inputs[1].value.trim();
+  const date = inputs[2].value.trim();
+  const type = inputs[3].value;
+  const message = inputs[4].value.trim();
+
+  if (!name || !phone || !type) { alert('请填写姓名、电话和拍摄类型'); return; }
+  btn.textContent = '提交中...';
   btn.disabled = true;
-  setTimeout(() => {
-    btn.textContent = '提交预约';
-    btn.style.background = '';
-    btn.style.color = '';
-    btn.style.borderColor = '';
-    btn.disabled = false;
-    e.target.reset();
-  }, 3000);
+  try {
+    const res = await fetch(`${API_BASE}/api/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, date, type, message })
+    });
+    if (!res.ok) throw new Error('提交失败');
+    btn.textContent = '预约成功 ✓';
+    btn.style.background = 'var(--gold)';
+    btn.style.color = 'var(--white)';
+    btn.style.borderColor = 'var(--gold)';
+    setTimeout(() => {
+      btn.textContent = '提交预约';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+      form.reset();
+    }, 3000);
+  } catch (err) {
+    btn.textContent = '提交失败，请重试';
+    btn.style.borderColor = 'var(--rose)';
+    setTimeout(() => {
+      btn.textContent = '提交预约';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+    }, 3000);
+  }
+}
+
+// ===== Suggestion Submit =====
+async function handleSuggestion(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('.form-submit');
+  const contact = form.querySelector('.suggestion-contact').value.trim();
+  const content = form.querySelector('.suggestion-content').value.trim();
+
+  if (!content) { alert('请输入您的建议'); return; }
+  btn.textContent = '提交中...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/suggestions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contact, content })
+    });
+    if (!res.ok) throw new Error('提交失败');
+    btn.textContent = '感谢您的建议 ✓';
+    btn.style.background = 'var(--gold)';
+    btn.style.color = 'var(--white)';
+    btn.style.borderColor = 'var(--gold)';
+    setTimeout(() => {
+      btn.textContent = '提交建议';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+      form.reset();
+    }, 3000);
+  } catch (err) {
+    btn.textContent = '提交失败，请重试';
+    btn.style.borderColor = 'var(--rose)';
+    setTimeout(() => {
+      btn.textContent = '提交建议';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+    }, 3000);
+  }
 }
 
 // ===== Smooth anchor offset =====

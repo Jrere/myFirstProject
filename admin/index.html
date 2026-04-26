@@ -171,6 +171,25 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
 .toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--text-dim);top:3px;left:3px;transition:var(--transition)}
 .toggle input:checked+.toggle-slider{background:var(--gold)}
 .toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:#fff}
+
+/* Booking & Suggestion Cards */
+.list-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:12px;transition:var(--transition)}
+.list-card:hover{border-color:var(--gold)}
+.list-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.list-card-header h3{font-size:.95rem;font-weight:500}
+.list-card-body{font-size:.85rem;color:var(--text-dim);line-height:1.7}
+.list-card-body .field{margin-bottom:6px}
+.list-card-body .field strong{color:var(--text);font-weight:500;min-width:70px;display:inline-block}
+.list-card-body .message{margin-top:12px;padding:12px 16px;background:var(--bg);border-radius:var(--radius);font-size:.85rem;color:var(--text);line-height:1.8;white-space:pre-wrap}
+.list-card-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.status-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.65rem;letter-spacing:1px;text-transform:uppercase}
+.status-badge.pending{background:rgba(241,196,15,.15);color:#f1c40f}
+.status-badge.confirmed{background:rgba(52,152,219,.15);color:#3498db}
+.status-badge.done{background:rgba(46,204,113,.15);color:#2ecc71}
+.status-badge.cancelled{background:rgba(231,76,60,.15);color:#e74c3c}
+.status-badge.unread{background:rgba(241,196,15,.15);color:#f1c40f}
+.status-badge.read{background:rgba(52,152,219,.15);color:#3498db}
+.status-badge.replied{background:rgba(46,204,113,.15);color:#2ecc71}
 </style>
 </head>
 <body>
@@ -196,6 +215,12 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
     </div>
     <div class="tab" data-tab="banners" onclick="switchTab('banners')">
       🖼️ 轮播图 <span class="badge" id="bannersBadge">0</span>
+    </div>
+    <div class="tab" data-tab="bookings" onclick="switchTab('bookings')">
+      📅 预约管理 <span class="badge" id="bookingsBadge">0</span>
+    </div>
+    <div class="tab" data-tab="suggestions" onclick="switchTab('suggestions')">
+      💡 建议反馈 <span class="badge" id="suggestionsBadge">0</span>
     </div>
   </div>
 
@@ -229,6 +254,39 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
       <button class="btn btn-secondary" onclick="loadBanners()">🔄 刷新</button>
     </div>
     <div class="banner-grid" id="bannerGrid">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Tab: Bookings -->
+  <div class="tab-content" id="tabBookings">
+    <div class="filter-bar">
+      <select id="bookingStatusFilter" onchange="renderBookings()">
+        <option value="all">全部状态</option>
+        <option value="pending">待处理</option>
+        <option value="confirmed">已确认</option>
+        <option value="done">已完成</option>
+        <option value="cancelled">已取消</option>
+      </select>
+      <button class="btn btn-secondary" onclick="loadBookings()">🔄 刷新</button>
+    </div>
+    <div id="bookingsList">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Tab: Suggestions -->
+  <div class="tab-content" id="tabSuggestions">
+    <div class="filter-bar">
+      <select id="suggestionStatusFilter" onchange="renderSuggestions()">
+        <option value="all">全部状态</option>
+        <option value="unread">未读</option>
+        <option value="read">已读</option>
+        <option value="replied">已回复</option>
+      </select>
+      <button class="btn btn-secondary" onclick="loadSuggestions()">🔄 刷新</button>
+    </div>
+    <div id="suggestionsList">
       <div class="loading">加载中...</div>
     </div>
   </div>
@@ -369,6 +427,8 @@ const API_BASE = 'https://api.bailuyuan.fun';
 
 let works = [];
 let banners = [];
+let bookings = [];
+let suggestions = [];
 let selectedFile = null;
 let selectedFileUrl = '';
 let bannerSelectedFile = null;
@@ -377,20 +437,15 @@ let bannerSelectedFileUrl = '';
 // ═══ Tab Switching ═══
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.getElementById('tabWorks').classList.toggle('active', tab === 'works');
-  document.getElementById('tabBanners').classList.toggle('active', tab === 'banners');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1)));
   const actions = document.getElementById('headerActions');
-  if (tab === 'works') {
-    actions.innerHTML = `
-      <button class="btn btn-secondary" onclick="loadWorks()">🔄 刷新</button>
-      <button class="btn btn-primary" onclick="openModal()">＋ 添加作品</button>
-    `;
-  } else {
-    actions.innerHTML = `
-      <button class="btn btn-secondary" onclick="loadBanners()">🔄 刷新</button>
-      <button class="btn btn-primary" onclick="openBannerModal()">＋ 添加轮播图</button>
-    `;
-  }
+  const tabActions = {
+    works: `<button class="btn btn-secondary" onclick="loadWorks()">🔄 刷新</button><button class="btn btn-primary" onclick="openModal()">＋ 添加作品</button>`,
+    banners: `<button class="btn btn-secondary" onclick="loadBanners()">🔄 刷新</button><button class="btn btn-primary" onclick="openBannerModal()">＋ 添加轮播图</button>`,
+    bookings: `<button class="btn btn-secondary" onclick="loadBookings()">🔄 刷新</button>`,
+    suggestions: `<button class="btn btn-secondary" onclick="loadSuggestions()">🔄 刷新</button>`
+  };
+  actions.innerHTML = tabActions[tab] || '';
 }
 
 // ─── API ───
@@ -760,6 +815,179 @@ function deleteBanner(id, name) {
 // ─── Init ───
 loadWorks();
 loadBanners();
+loadBookings();
+loadSuggestions();
+
+// ═══════════════════════════════════════════════
+// ═══ Bookings CRUD ═══
+// ═══════════════════════════════════════════════
+
+async function loadBookings() {
+  try {
+    bookings = await api('/api/bookings');
+    document.getElementById('bookingsBadge').textContent = bookings.length;
+    renderBookings();
+  } catch (e) {
+    toast('加载预约失败: ' + e.message, 'error');
+  }
+}
+
+function renderBookings() {
+  const status = document.getElementById('bookingStatusFilter').value;
+  let filtered = bookings;
+  if (status !== 'all') filtered = filtered.filter(b => b.status === status);
+
+  const list = document.getElementById('bookingsList');
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="icon">📅</div>
+        <p>${bookings.length === 0 ? '暂无预约记录' : '没有匹配的预约'}</p>
+      </div>`;
+    return;
+  }
+
+  const statusLabels = { pending: '待处理', confirmed: '已确认', done: '已完成', cancelled: '已取消' };
+  const typeLabels = { '企业宣传片': '🎬 企业宣传片', '人像摄像': '🎥 人像摄像', '银发团': '👴 银发团', '肖像': '📸 肖像' };
+
+  list.innerHTML = filtered.map(b => `
+    <div class="list-card" data-id="${b.id}">
+      <div class="list-card-header">
+        <h3>${esc(b.name)}</h3>
+        <span class="status-badge ${b.status}">${statusLabels[b.status] || b.status}</span>
+      </div>
+      <div class="list-card-body">
+        <div class="field"><strong>电话：</strong>${esc(b.phone)}</div>
+        <div class="field"><strong>类型：</strong>${typeLabels[b.type] || esc(b.type)}</div>
+        ${b.date ? `<div class="field"><strong>日期：</strong>${esc(b.date)}</div>` : ''}
+        <div class="field"><strong>时间：</strong>${b.created_at}</div>
+        ${b.message ? `<div class="message">${esc(b.message)}</div>` : ''}
+      </div>
+      <div class="list-card-actions">
+        ${b.status === 'pending' ? `
+          <button class="btn btn-primary btn-sm" onclick="updateBooking('${b.id}','confirmed')">✅ 确认</button>
+          <button class="btn btn-danger btn-sm" onclick="updateBooking('${b.id}','cancelled')">❌ 取消</button>
+        ` : ''}
+        ${b.status === 'confirmed' ? `
+          <button class="btn btn-primary btn-sm" onclick="updateBooking('${b.id}','done')">✅ 完成</button>
+        ` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="deleteBooking('${b.id}','${esc(b.name)}')">🗑️ 删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updateBooking(id, status) {
+  try {
+    await api(`/api/bookings/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    toast('状态已更新', 'success');
+    await loadBookings();
+  } catch (e) {
+    toast('更新失败: ' + e.message, 'error');
+  }
+}
+
+function deleteBooking(id, name) {
+  document.getElementById('confirmText').textContent = `确定要删除「${name}」的预约记录吗？`;
+  document.getElementById('confirmOverlay').classList.add('active');
+  document.getElementById('confirmBtn').onclick = async () => {
+    closeConfirm();
+    try {
+      await api(`/api/bookings/${id}`, { method: 'DELETE' });
+      toast('已删除', 'success');
+      await loadBookings();
+    } catch (e) {
+      toast('删除失败: ' + e.message, 'error');
+    }
+  };
+}
+
+// ═══════════════════════════════════════════════
+// ═══ Suggestions CRUD ═══
+// ═══════════════════════════════════════════════
+
+async function loadSuggestions() {
+  try {
+    suggestions = await api('/api/suggestions');
+    document.getElementById('suggestionsBadge').textContent = suggestions.length;
+    renderSuggestions();
+  } catch (e) {
+    toast('加载建议失败: ' + e.message, 'error');
+  }
+}
+
+function renderSuggestions() {
+  const status = document.getElementById('suggestionStatusFilter').value;
+  let filtered = suggestions;
+  if (status !== 'all') filtered = filtered.filter(s => s.status === status);
+
+  const list = document.getElementById('suggestionsList');
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="icon">💡</div>
+        <p>${suggestions.length === 0 ? '暂无建议反馈' : '没有匹配的建议'}</p>
+      </div>`;
+    return;
+  }
+
+  const statusLabels = { unread: '未读', read: '已读', replied: '已回复' };
+
+  list.innerHTML = filtered.map(s => `
+    <div class="list-card" data-id="${s.id}">
+      <div class="list-card-header">
+        <h3>${s.contact ? esc(s.contact) : '匿名用户'}</h3>
+        <span class="status-badge ${s.status}">${statusLabels[s.status] || s.status}</span>
+      </div>
+      <div class="list-card-body">
+        <div class="message">${esc(s.content)}</div>
+        <div class="field" style="margin-top:10px"><strong>时间：</strong>${s.created_at}</div>
+      </div>
+      <div class="list-card-actions">
+        ${s.status === 'unread' ? `
+          <button class="btn btn-primary btn-sm" onclick="updateSuggestion('${s.id}','read')">👁️ 标为已读</button>
+        ` : ''}
+        ${s.status !== 'replied' ? `
+          <button class="btn btn-primary btn-sm" onclick="updateSuggestion('${s.id}','replied')">💬 已回复</button>
+        ` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="deleteSuggestion('${s.id}')">🗑️ 删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updateSuggestion(id, status) {
+  try {
+    await api(`/api/suggestions/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    toast('状态已更新', 'success');
+    await loadSuggestions();
+  } catch (e) {
+    toast('更新失败: ' + e.message, 'error');
+  }
+}
+
+function deleteSuggestion(id) {
+  document.getElementById('confirmText').textContent = '确定要删除这条建议吗？';
+  document.getElementById('confirmOverlay').classList.add('active');
+  document.getElementById('confirmBtn').onclick = async () => {
+    closeConfirm();
+    try {
+      await api(`/api/suggestions/${id}`, { method: 'DELETE' });
+      toast('已删除', 'success');
+      await loadSuggestions();
+    } catch (e) {
+      toast('删除失败: ' + e.message, 'error');
+    }
+  };
+}
 </script>
 </body>
 </html>
