@@ -351,6 +351,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="nav-item" data-page="suggestions" onclick="switchPage('suggestions')">
         <span class="icon">💬</span> 建议反馈 <span class="badge" id="suggestionsBadge">0</span>
       </div>
+      <div class="sidebar-section">展示</div>
+      <div class="nav-item" data-page="sections" onclick="switchPage('sections')">
+        <span class="icon">📝</span> 内容管理
+      </div>
       <div class="sidebar-section">系统</div>
       <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
         <span class="icon">⚙️</span> 网站设置
@@ -470,6 +474,88 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <button class="chip" onclick="filterSuggestions('replied',this)">已回复</button>
         </div>
         <div class="list-view" id="suggestionsList"></div>
+      </div>
+    </div>
+
+    <!-- Sections Content -->
+    <div class="content page" id="pageSections">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📝 模块内容管理</span>
+          <button class="btn btn-primary btn-sm" onclick="saveSectionContent()">💾 全部保存</button>
+        </div>
+        <div style="padding:24px">
+          <!-- 品牌理念 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">💡 品牌理念</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secPhilEyebrow" placeholder="Our Philosophy"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secPhilTitle" placeholder="Why Choose Us"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secPhilTitleCn" placeholder="为 什 么 选 择 白 鹿 缘"></div>
+            <div class="form-group"><label>简介描述</label><textarea id="secPhilDesc" rows="3" placeholder="我们不只是按下快门..."></textarea></div>
+          </div>
+          <!-- 精选作品 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">📷 精选作品</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secPortEyebrow" placeholder="Portfolio"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secPortTitle" placeholder="Our Works"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secPortTitleCn" placeholder="精 选 作 品"></div>
+          </div>
+          <!-- 影像叙事 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">🎬 影像叙事（引用区）</h3>
+            <div class="form-group"><label>引言</label><textarea id="secShowcaseQuote" rows="3" placeholder="每一次拍摄都是一次对话..."></textarea></div>
+            <div class="form-group"><label>署名</label><input type="text" id="secShowcaseCite" placeholder="— 白鹿缘摄影 · 创始理念"></div>
+          </div>
+          <!-- 服务项目 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">🎯 服务项目</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secSvcEyebrow" placeholder="Services"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secSvcTitle" placeholder="What We Offer"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secSvcTitleCn" placeholder="我 们 的 服 务"></div>
+          </div>
+          <!-- 拍摄流程 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">🔄 拍摄流程</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secProcEyebrow" placeholder="Process"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secProcTitle" placeholder="How It Works"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secProcTitleCn" placeholder="拍 摄 流 程"></div>
+          </div>
+          <!-- 客户口碑 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">⭐ 客户口碑</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secTestiEyebrow" placeholder="Testimonials"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secTestiTitle" placeholder="Client Stories"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secTestiTitleCn" placeholder="客 户 心 声"></div>
+          </div>
+          <!-- 咨询合作 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">📅 咨询合作</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secBookEyebrow" placeholder="Book Now"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secBookTitle" placeholder="Start Your Story"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secBookTitleCn" placeholder="咨 询 合 作"></div>
+          </div>
+          <!-- 建议反馈 -->
+          <div class="settings-group">
+            <h3 class="settings-group-title">💬 建议反馈</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>英文标题</label><input type="text" id="secSugstEyebrow" placeholder="Your Voice"></div>
+              <div class="form-group"><label>大标题</label><input type="text" id="secSugstTitle" placeholder="对我们的建议"></div>
+            </div>
+            <div class="form-group"><label>中文副标题</label><input type="text" id="secSugstTitleCn" placeholder="您 的 声 音 很 重 要"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -678,7 +764,7 @@ async function api(path, options = {}) {
 function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page' + capitalize(page)));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-  const titles = { dashboard:'仪表盘', works:'作品管理', banners:'轮播图管理', bookings:'预约管理', suggestions:'建议反馈', settings:'网站设置' };
+  const titles = { dashboard:'仪表盘', works:'作品管理', banners:'轮播图管理', bookings:'预约管理', suggestions:'建议反馈', sections:'内容管理', settings:'网站设置' };
   document.getElementById('topbarTitle').textContent = titles[page] || '';
   // Close sidebar on mobile
   document.getElementById('sidebar').classList.remove('open');
@@ -694,7 +780,7 @@ function toggleSidebar() {
 
 // ═══ Load All ═══
 async function loadAll() {
-  await Promise.all([loadWorks(), loadBanners(), loadBookings(), loadSuggestions(), loadSettings()]);
+  await Promise.all([loadWorks(), loadBanners(), loadBookings(), loadSuggestions(), loadSettings(), loadSectionContent()]);
   renderDashboard();
 }
 
@@ -1046,6 +1132,59 @@ async function saveSettings() {
       })
     });
     toast('设置已保存', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ═══ Section Content ═══
+const sectionKeys = [
+  ['phil_eyebrow', 'secPhilEyebrow'],
+  ['phil_title', 'secPhilTitle'],
+  ['phil_title_cn', 'secPhilTitleCn'],
+  ['phil_desc', 'secPhilDesc'],
+  ['port_eyebrow', 'secPortEyebrow'],
+  ['port_title', 'secPortTitle'],
+  ['port_title_cn', 'secPortTitleCn'],
+  ['showcase_quote', 'secShowcaseQuote'],
+  ['showcase_cite', 'secShowcaseCite'],
+  ['svc_eyebrow', 'secSvcEyebrow'],
+  ['svc_title', 'secSvcTitle'],
+  ['svc_title_cn', 'secSvcTitleCn'],
+  ['proc_eyebrow', 'secProcEyebrow'],
+  ['proc_title', 'secProcTitle'],
+  ['proc_title_cn', 'secProcTitleCn'],
+  ['testi_eyebrow', 'secTestiEyebrow'],
+  ['testi_title', 'secTestiTitle'],
+  ['testi_title_cn', 'secTestiTitleCn'],
+  ['book_eyebrow', 'secBookEyebrow'],
+  ['book_title', 'secBookTitle'],
+  ['book_title_cn', 'secBookTitleCn'],
+  ['sugst_eyebrow', 'secSugstEyebrow'],
+  ['sugst_title', 'secSugstTitle'],
+  ['sugst_title_cn', 'secSugstTitleCn'],
+];
+
+async function loadSectionContent() {
+  try {
+    const s = await api('/api/settings');
+    for (const [key, elId] of sectionKeys) {
+      const el = document.getElementById(elId);
+      if (el && s[key]) el.value = s[key];
+    }
+  } catch (e) { /* settings already loaded */ }
+}
+
+async function saveSectionContent() {
+  const body = {};
+  for (const [key, elId] of sectionKeys) {
+    const el = document.getElementById(elId);
+    if (el) body[key] = el.value;
+  }
+  try {
+    await api('/api/settings', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    toast('模块内容已保存，刷新前台页面后生效', 'success');
   } catch (e) { toast(e.message, 'error'); }
 }
 
