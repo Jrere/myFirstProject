@@ -396,12 +396,26 @@ body:hover .cursor-glow{opacity:1}
   .showcase{height:65vh}
   .hero-light{display:none}
   .process-step{flex:0 0 100%}
+  /* Login modal mobile */
+  .login-modal{padding:32px 20px;width:94%;max-width:none;border-radius:8px}
+  .login-tabs{margin:0 -20px 20px}
+  .login-tab{font-size:.62rem;letter-spacing:2px;padding:12px 8px}
+  .login-modal .form-group{margin-bottom:16px}
+  .login-modal .form-group label{font-size:.65rem;letter-spacing:1px}
+  .login-modal .form-group input{padding:12px 14px;font-size:.85rem}
+  .login-modal .login-btn{padding:14px;font-size:.68rem;letter-spacing:3px}
+  .login-modal .login-icon{width:40px;height:40px;margin-bottom:16px}
+  .login-modal .login-icon svg{width:18px;height:18px}
+  .login-modal .login-hint{font-size:.65rem;margin-top:12px}
 }
 @media(max-width:480px){
   .hero-cta{padding:16px 40px}
   .portfolio-filter{gap:16px}
   .filter-btn{font-size:.62rem;padding:8px 4px}
   .booking-form .form-submit{width:100%;justify-content:center}
+  .login-modal{padding:24px 16px}
+  .login-tabs{margin:0 -16px 16px}
+  .login-tab{font-size:.58rem;letter-spacing:1.5px;padding:10px 6px}
 }
 
 /* Suggestions */
@@ -430,8 +444,8 @@ body:hover .cursor-glow{opacity:1}
 .login-modal .login-close:hover{color:var(--charcoal)}
 .login-modal .login-icon{width:48px;height:48px;margin:0 auto 20px;border:1px solid var(--gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center}
 .login-modal .login-icon svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.5}
-.login-tabs{display:flex;margin:0 -40px 28px;border-bottom:1px solid var(--warm)}
-.login-tab{flex:1;padding:14px;font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--text-light);cursor:pointer;position:relative;transition:color .3s;background:none;border:none}
+.login-tabs{display:flex;margin:0 -40px 28px;border-bottom:1px solid var(--warm);width:calc(100% + 80px)}
+.login-tab{flex:1;padding:14px 12px;font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--text-light);cursor:pointer;position:relative;transition:color .3s;background:none;border:none}
 .login-tab.active{color:var(--gold)}
 .login-tab.active::after{content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:2px;background:var(--gold)}
 .login-modal .form-group{margin-bottom:20px;text-align:left}
@@ -902,6 +916,7 @@ body:hover .cursor-glow{opacity:1}
       <a href="#" title="小红书">红</a>
       <a href="#" title="抖音">抖</a>
       <a href="#" title="微博">微</a>
+      <a href="/admin/" title="管理后台" style="font-size:.55rem;letter-spacing:1px">管理</a>
     </div>
   </div>
 </footer>
