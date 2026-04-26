@@ -363,6 +363,32 @@ export default {
         return json({ success: true }, corsHeaders);
       }
 
+      // ═══════════════════════════════════════════
+      // ─── 网站设置 (Settings) ───
+      // ═══════════════════════════════════════════
+
+      // ─── 获取所有设置（前台+后台） ───
+      if (pathname === '/api/settings' && method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM settings').all();
+        const map = {};
+        results.forEach(r => { map[r.key] = r.value; });
+        return json(map, corsHeaders);
+      }
+
+      // ─── 更新设置（后台） ───
+      if (pathname === '/api/settings' && method === 'PUT') {
+        const body = await request.json();
+        for (const [key, value] of Object.entries(body)) {
+          await env.DB.prepare(
+            'INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=?, updated_at=CURRENT_TIMESTAMP'
+          ).bind(key, value, value).run();
+        }
+        const { results } = await env.DB.prepare('SELECT * FROM settings').all();
+        const map = {};
+        results.forEach(r => { map[r.key] = r.value; });
+        return json(map, corsHeaders);
+      }
+
       return json({ error: 'Not found' }, corsHeaders, 404);
     } catch (err) {
       return json({ error: err.message }, corsHeaders, 500);

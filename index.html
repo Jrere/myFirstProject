@@ -629,7 +629,7 @@ body:hover .cursor-glow{opacity:1}
       <h3>CORPORATE FILM</h3>
       <p class="cn">企业宣传片</p>
       <p>从创意策划到成片交付，一站式企业影像服务。品牌故事、产品发布、企业文化，用影像提升品牌价值与影响力。</p>
-      <div class="service-price">¥<span>12,800</span> 起</div>
+      <div class="service-price">¥<span id="priceCorporate">12,800</span> 起</div>
     </div>
     <div class="service-card reveal reveal-delay-2">
       <div class="service-num">02</div>
@@ -639,7 +639,7 @@ body:hover .cursor-glow{opacity:1}
       <h3>PORTRAIT VIDEO</h3>
       <p class="cn">人像摄像</p>
       <p>动态记录最真实的你。个人形象片、生活纪录、成长影像，用影像留住当下的温度与故事。</p>
-      <div class="service-price">¥<span>2,680</span> 起</div>
+      <div class="service-price">¥<span id="pricePortrait">2,680</span> 起</div>
     </div>
     <div class="service-card reveal reveal-delay-3">
       <div class="service-num">03</div>
@@ -649,7 +649,7 @@ body:hover .cursor-glow{opacity:1}
       <h3>SILVER GROUP</h3>
       <p class="cn">银发团</p>
       <p>为银发族量身定制的温暖影像服务。家庭合影、金婚纪念、退休留念，用镜头传递岁月沉淀的美好与温情。</p>
-      <div class="service-price">¥<span>1,980</span> 起</div>
+      <div class="service-price">¥<span id="priceSilver">1,980</span> 起</div>
     </div>
     <div class="service-card reveal reveal-delay-4">
       <div class="service-num">04</div>
@@ -659,7 +659,7 @@ body:hover .cursor-glow{opacity:1}
       <h3>HEADSHOT</h3>
       <p class="cn">肖像</p>
       <p>专业商务肖像、职业形象照、个人品牌照。精准布光，捕捉最具说服力的面容，助力职业形象升级。</p>
-      <div class="service-price">¥<span>880</span> 起</div>
+      <div class="service-price">¥<span id="priceHeadshot">880</span> 起</div>
     </div>
   </div>
 </section>
@@ -745,7 +745,7 @@ body:hover .cursor-glow{opacity:1}
         </div>
         <div class="booking-info-text">
           <h4>EMAIL</h4>
-          <p>hello@bailuyuan.com</p>
+          <p id="siteEmail">hello@bailuyuan.com</p>
         </div>
       </div>
       <div class="booking-info-item">
@@ -754,7 +754,7 @@ body:hover .cursor-glow{opacity:1}
         </div>
         <div class="booking-info-text">
           <h4>PHONE</h4>
-          <p>400-920-8866</p>
+          <p id="sitePhone">400-920-8866</p>
         </div>
       </div>
       <div class="booking-info-item">
@@ -763,7 +763,7 @@ body:hover .cursor-glow{opacity:1}
         </div>
         <div class="booking-info-text">
           <h4>STUDIO</h4>
-          <p>上海市黄浦区外滩金融中心<br>S2幢 36层</p>
+          <p id="siteAddress">上海市黄浦区外滩金融中心<br>S2幢 36层</p>
         </div>
       </div>
       <div class="booking-info-item">
@@ -772,7 +772,7 @@ body:hover .cursor-glow{opacity:1}
         </div>
         <div class="booking-info-text">
           <h4>HOURS</h4>
-          <p>每日 09:00 - 20:00<br>全年无休（需提前预约）</p>
+          <p id="siteHours">每日 09:00 - 20:00<br>全年无休（需提前预约）</p>
         </div>
       </div>
     </div>
@@ -902,6 +902,7 @@ const worksStatic = [
 ];
 let works = [];
 let worksLoaded = false;
+let siteSettings = {};
 
 // ===== Render Portfolio =====
 function renderPortfolio(filter='all') {
@@ -1118,6 +1119,31 @@ function fetchWithTimeout(url, ms = 4000) {
     .finally(() => clearTimeout(id));
 }
 
+// Fetch settings from API
+async function fetchSettings() {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/api/settings`, 4000);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    siteSettings = data;
+  } catch (e) {
+    console.log('Settings API unavailable, using defaults:', e.message);
+  }
+}
+
+// Apply settings to page
+function applySettings() {
+  const s = siteSettings;
+  if (s.price_corporate) document.getElementById('priceCorporate').textContent = s.price_corporate;
+  if (s.price_portrait) document.getElementById('pricePortrait').textContent = s.price_portrait;
+  if (s.price_silver) document.getElementById('priceSilver').textContent = s.price_silver;
+  if (s.price_headshot) document.getElementById('priceHeadshot').textContent = s.price_headshot;
+  if (s.phone) document.getElementById('sitePhone').textContent = s.phone;
+  if (s.email) document.getElementById('siteEmail').textContent = s.email;
+  if (s.address) document.getElementById('siteAddress').innerHTML = s.address;
+  if (s.hours) document.getElementById('siteHours').innerHTML = s.hours;
+}
+
 // Fetch banners from API
 async function fetchBanners() {
   try {
@@ -1170,7 +1196,8 @@ document.addEventListener('mousemove', e => {
 window.addEventListener('load', async () => {
   setTimeout(() => document.getElementById('loader').classList.add('hide'), 1200);
   createParticles();
-  await Promise.all([fetchBanners(), fetchWorks()]);
+  await Promise.all([fetchBanners(), fetchWorks(), fetchSettings()]);
+  applySettings();
   renderCarousel();
   renderPortfolio();
 });

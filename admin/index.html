@@ -190,6 +190,11 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
 .status-badge.unread{background:rgba(241,196,15,.15);color:#f1c40f}
 .status-badge.read{background:rgba(52,152,219,.15);color:#3498db}
 .status-badge.replied{background:rgba(46,204,113,.15);color:#2ecc71}
+
+/* Settings */
+.settings-section{margin-bottom:32px}
+.settings-title{font-size:.9rem;font-weight:500;margin-bottom:20px;color:var(--gold);letter-spacing:1px}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
 </style>
 </head>
 <body>
@@ -221,6 +226,9 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
     </div>
     <div class="tab" data-tab="suggestions" onclick="switchTab('suggestions')">
       💡 建议反馈 <span class="badge" id="suggestionsBadge">0</span>
+    </div>
+    <div class="tab" data-tab="settings" onclick="switchTab('settings')">
+      ⚙️ 网站设置
     </div>
   </div>
 
@@ -288,6 +296,58 @@ body{font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;background:var
     </div>
     <div id="suggestionsList">
       <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Tab: Settings -->
+  <div class="tab-content" id="tabSettings">
+    <div class="settings-section">
+      <h3 class="settings-title">💰 服务价格</h3>
+      <div class="settings-grid">
+        <div class="form-group">
+          <label>企业宣传片（起）</label>
+          <input type="text" id="setPriceCorporate" placeholder="12,800">
+        </div>
+        <div class="form-group">
+          <label>人像摄像（起）</label>
+          <input type="text" id="setPricePortrait" placeholder="2,680">
+        </div>
+        <div class="form-group">
+          <label>银发团（起）</label>
+          <input type="text" id="setPriceSilver" placeholder="1,980">
+        </div>
+        <div class="form-group">
+          <label>肖像（起）</label>
+          <input type="text" id="setPriceHeadshot" placeholder="880">
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3 class="settings-title">📞 联系方式</h3>
+      <div class="settings-grid">
+        <div class="form-group">
+          <label>电话</label>
+          <input type="text" id="setPhone" placeholder="400-920-8866">
+        </div>
+        <div class="form-group">
+          <label>邮箱</label>
+          <input type="text" id="setEmail" placeholder="hello@bailuyuan.com">
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3 class="settings-title">📍 地址与营业时间</h3>
+      <div class="form-group">
+        <label>工作室地址</label>
+        <input type="text" id="setAddress" placeholder="上海市黄浦区外滩金融中心<br>S2幢 36层">
+      </div>
+      <div class="form-group">
+        <label>营业时间</label>
+        <input type="text" id="setHours" placeholder="每日 09:00 - 20:00<br>全年无休（需提前预约）">
+      </div>
+    </div>
+    <div style="margin-top:32px">
+      <button class="btn btn-primary" id="btnSaveSettings" onclick="saveSettings()">💾 保存设置</button>
     </div>
   </div>
 </div>
@@ -443,7 +503,8 @@ function switchTab(tab) {
     works: `<button class="btn btn-secondary" onclick="loadWorks()">🔄 刷新</button><button class="btn btn-primary" onclick="openModal()">＋ 添加作品</button>`,
     banners: `<button class="btn btn-secondary" onclick="loadBanners()">🔄 刷新</button><button class="btn btn-primary" onclick="openBannerModal()">＋ 添加轮播图</button>`,
     bookings: `<button class="btn btn-secondary" onclick="loadBookings()">🔄 刷新</button>`,
-    suggestions: `<button class="btn btn-secondary" onclick="loadSuggestions()">🔄 刷新</button>`
+    suggestions: `<button class="btn btn-secondary" onclick="loadSuggestions()">🔄 刷新</button>`,
+    settings: ``
   };
   actions.innerHTML = tabActions[tab] || '';
 }
@@ -817,6 +878,55 @@ loadWorks();
 loadBanners();
 loadBookings();
 loadSuggestions();
+loadSettings();
+
+// ═══════════════════════════════════════════════
+// ═══ Settings ═══
+// ═══════════════════════════════════════════════
+
+async function loadSettings() {
+  try {
+    const s = await api('/api/settings');
+    document.getElementById('setPriceCorporate').value = s.price_corporate || '';
+    document.getElementById('setPricePortrait').value = s.price_portrait || '';
+    document.getElementById('setPriceSilver').value = s.price_silver || '';
+    document.getElementById('setPriceHeadshot').value = s.price_headshot || '';
+    document.getElementById('setPhone').value = s.phone || '';
+    document.getElementById('setEmail').value = s.email || '';
+    document.getElementById('setAddress').value = s.address || '';
+    document.getElementById('setHours').value = s.hours || '';
+  } catch (e) {
+    toast('加载设置失败: ' + e.message, 'error');
+  }
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('btnSaveSettings');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+  try {
+    await api('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_corporate: document.getElementById('setPriceCorporate').value,
+        price_portrait: document.getElementById('setPricePortrait').value,
+        price_silver: document.getElementById('setPriceSilver').value,
+        price_headshot: document.getElementById('setPriceHeadshot').value,
+        phone: document.getElementById('setPhone').value,
+        email: document.getElementById('setEmail').value,
+        address: document.getElementById('setAddress').value,
+        hours: document.getElementById('setHours').value,
+      })
+    });
+    toast('设置已保存，刷新前台页面后生效', 'success');
+  } catch (e) {
+    toast('保存失败: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 保存设置';
+  }
+}
 
 // ═══════════════════════════════════════════════
 // ═══ Bookings CRUD ═══
