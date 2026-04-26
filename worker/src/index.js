@@ -33,19 +33,56 @@ export default {
         const adminUser = env.ADMIN_USER || 'admin';
         const adminPass = env.ADMIN_PASS || 'admin123';
 
+        // 先检查管理员
         if (username === adminUser && password === adminPass) {
-          const token = await generateToken(env);
-          return json({ success: true, token }, corsHeaders);
+          const token = await generateToken(env, 'admin');
+          return json({ success: true, token, role: 'admin' }, corsHeaders);
         }
+
+        // 再检查普通用户
+        const user = await env.DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
+        if (user && await verifyPassword(password, user.password_hash)) {
+          const token = await generateToken(env, 'user', user.id, user.username);
+          return json({ success: true, token, role: 'user', username: user.username }, corsHeaders);
+        }
+
         return json({ error: '用户名或密码错误' }, corsHeaders, 401);
+      }
+
+      // ─── 用户注册 ───
+      if (pathname === '/api/auth/register' && method === 'POST') {
+        const body = await request.json();
+        const username = (body.username || '').trim();
+        const password = (body.password || '').trim();
+
+        if (!username || username.length < 2 || username.length > 30) {
+          return json({ error: '用户名需要 2-30 个字符' }, corsHeaders, 400);
+        }
+        if (!password || password.length < 6) {
+          return json({ error: '密码至少需要 6 个字符' }, corsHeaders, 400);
+        }
+
+        const existing = await env.DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
+        if (existing) {
+          return json({ error: '该用户名已被注册' }, corsHeaders, 409);
+        }
+
+        const id = crypto.randomUUID();
+        const hash = await hashPassword(password);
+        await env.DB.prepare(
+          'INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)'
+        ).bind(id, username, hash).run();
+
+        const token = await generateToken(env, 'user', id, username);
+        return json({ success: true, token, role: 'user', username }, corsHeaders, 201);
       }
 
       // ─── 验证 token ───
       if (pathname === '/api/auth/verify' && method === 'GET') {
         const auth = request.headers.get('Authorization') || '';
-        const valid = await verifyAuth(auth, env);
-        if (!valid) return json({ error: 'Unauthorized' }, corsHeaders, 401);
-        return json({ success: true, role: 'admin' }, corsHeaders);
+        const payload = await verifyAuthPayload(auth, env);
+        if (!payload) return json({ error: 'Unauthorized' }, corsHeaders, 401);
+        return json({ success: true, role: payload.role, username: payload.username || 'admin' }, corsHeaders);
       }
 
       // ═══════════════════════════════════════════
@@ -366,31 +403,59 @@ export default {
 // ─── 认证工具函数 ───
 // ═══════════════════════════════════════════
 
-async function generateToken(env) {
+async function generateToken(env, role = 'admin', userId = null, username = null) {
   const secret = env.JWT_SECRET || 'bailuyuan-admin-secret-2026';
-  const payload = { role: 'admin', iat: Date.now(), exp: Date.now() + 7 * 24 * 3600 * 1000 };
+  const payload = { role, userId, username, iat: Date.now(), exp: Date.now() + 7 * 24 * 3600 * 1000 };
   const data = JSON.stringify(payload);
   const encoded = btoa(unescape(encodeURIComponent(data)));
   const sig = await hmacSign(encoded, secret);
   return `${encoded}.${sig}`;
 }
 
-async function verifyAuth(authHeader, env) {
-  if (!authHeader.startsWith('Bearer ')) return false;
+async function verifyAuthPayload(authHeader, env) {
+  if (!authHeader.startsWith('Bearer ')) return null;
   const token = authHeader.slice(7);
   const parts = token.split('.');
-  if (parts.length !== 2) return false;
+  if (parts.length !== 2) return null;
   const [encoded, sig] = parts;
   const secret = env.JWT_SECRET || 'bailuyuan-admin-secret-2026';
   const expectedSig = await hmacSign(encoded, secret);
-  if (sig !== expectedSig) return false;
+  if (sig !== expectedSig) return null;
   try {
     const payload = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-    if (payload.exp && payload.exp < Date.now()) return false;
-    return payload.role === 'admin';
-  } catch {
-    return false;
-  }
+    if (payload.exp && payload.exp < Date.now()) return null;
+    return payload;
+  } catch { return null; }
+}
+
+async function verifyAuth(authHeader, env) {
+  const payload = await verifyAuthPayload(authHeader, env);
+  return payload && (payload.role === 'admin' || payload.role === 'user');
+}
+
+async function hashPassword(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const saltHex = [...salt].map(b => b.toString(16).padStart(2, '0')).join('');
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, key, 256
+  );
+  const hashHex = [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${saltHex}:${hashHex}`;
+}
+
+async function verifyPassword(password, stored) {
+  const [saltHex, hashHex] = stored.split(':');
+  if (!saltHex || !hashHex) return false;
+  const salt = new Uint8Array(saltHex.match(/.{2}/g).map(b => parseInt(b, 16)));
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, key, 256
+  );
+  const computed = [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
+  return computed === hashHex;
 }
 
 async function hmacSign(data, secret) {
