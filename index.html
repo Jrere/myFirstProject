@@ -397,26 +397,26 @@ body:hover .cursor-glow{opacity:1}
   .hero-light{display:none}
   .process-step{flex:0 0 100%}
   /* Login modal mobile */
-  .login-modal{padding:28px 18px 24px}
-  .login-tabs{margin:0 -18px 18px}
-  .login-tab{font-size:.6rem;letter-spacing:1.5px;padding:10px 4px}
-  .login-modal .form-group{margin-bottom:14px}
-  .login-modal .form-group label{font-size:.62rem;letter-spacing:1px}
-  .login-modal .form-group input{padding:11px 12px;font-size:.82rem}
-  .login-modal .login-btn{padding:13px;font-size:.65rem;letter-spacing:2px}
-  .login-modal .login-icon{width:38px;height:38px;margin-bottom:12px}
-  .login-modal .login-icon svg{width:16px;height:16px}
-  .login-modal .login-hint{font-size:.62rem;margin-top:10px}
+  .login-header{padding:28px 24px 0}
+  .login-body{padding:18px 24px 28px}
+  .login-tabs{padding:0 24px}
+  .login-brand{font-size:1.1rem;letter-spacing:4px}
+  .login-modal .form-group input{padding:12px 14px;font-size:.84rem}
+  .login-modal .login-btn{padding:14px;font-size:.68rem}
+  .login-modal .login-hint{font-size:.62rem}
 }
 @media(max-width:480px){
   .hero-cta{padding:16px 40px}
   .portfolio-filter{gap:16px}
   .filter-btn{font-size:.62rem;padding:8px 4px}
   .booking-form .form-submit{width:100%;justify-content:center}
-  .login-modal{padding:24px 14px 20px}
-  .login-tabs{margin:0 -14px 14px}
-  .login-tab{font-size:.55rem;letter-spacing:1px;padding:9px 2px}
-  .login-modal .form-group input{padding:10px;font-size:.78rem}
+  .login-header{padding:24px 18px 0}
+  .login-body{padding:16px 18px 22px}
+  .login-tabs{padding:0 18px}
+  .login-brand{font-size:1rem;letter-spacing:3px}
+  .login-modal .form-group{margin-bottom:14px}
+  .login-modal .form-group input{padding:11px 12px;font-size:.8rem}
+  .login-modal .login-btn{padding:13px;font-size:.65rem;letter-spacing:2px}
 }
 
 /* Suggestions */
@@ -438,26 +438,33 @@ body:hover .cursor-glow{opacity:1}
 .suggestion-form .form-submit:hover{background:var(--gold);color:var(--white)}
 
 /* ═══ Login Modal ═══ */
-.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);padding:16px}
+.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:16px}
 .login-overlay.active{display:flex}
-.login-modal{background:var(--white);border-radius:8px;max-width:420px;width:100%;padding:40px 36px 36px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.2);position:relative;overflow:hidden}
-.login-modal .login-close{position:absolute;top:12px;right:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text-light);cursor:pointer;transition:color .3s;z-index:2}
-.login-modal .login-close:hover{color:var(--charcoal)}
-.login-modal .login-icon{width:44px;height:44px;margin:0 auto 16px;border:1px solid var(--gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center}
-.login-modal .login-icon svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.5}
-.login-tabs{display:flex;margin:0 -36px 24px;border-bottom:1px solid var(--warm)}
-.login-tab{flex:1;padding:12px 8px;font-family:var(--font-sans);font-size:.7rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text-light);cursor:pointer;position:relative;transition:color .3s;background:none;border:none;white-space:nowrap}
-.login-tab.active{color:var(--gold)}
-.login-tab.active::after{content:'';position:absolute;bottom:-1px;left:25%;right:25%;height:2px;background:var(--gold)}
-.login-modal .form-group{margin-bottom:16px;text-align:left}
-.login-modal .form-group label{display:block;font-family:var(--font-sans);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:6px}
-.login-modal .form-group input{width:100%;padding:12px 14px;border:1px solid var(--warm);background:var(--ivory);font-family:var(--font-sans);font-size:.88rem;color:var(--charcoal);outline:none;transition:all .3s var(--ease);border-radius:2px}
-.login-modal .form-group input:focus{border-color:var(--gold);background:var(--white)}
-.login-modal .login-btn{width:100%;padding:14px;border:1px solid var(--gold);background:var(--gold);color:var(--white);font-family:var(--font-sans);font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .4s var(--ease);margin-top:6px}
-.login-modal .login-btn:hover{background:var(--gold-dark);border-color:var(--gold-dark)}
-.login-modal .login-btn:disabled{opacity:.6;cursor:not-allowed}
-.login-modal .login-error{color:var(--rose);font-size:.78rem;margin-top:10px;display:none}
-.login-modal .login-hint{font-size:.68rem;color:var(--text-light);margin-top:14px;letter-spacing:.3px;line-height:1.6}
+.login-modal{background:var(--charcoal);max-width:440px;width:100%;border-radius:6px;position:relative;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.login-modal .login-close{position:absolute;top:16px;right:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:rgba(255,255,255,.3);cursor:pointer;transition:all .3s;z-index:10;border-radius:50%}
+.login-modal .login-close:hover{color:var(--white);background:rgba(255,255,255,.1)}
+.login-header{padding:40px 40px 0;text-align:center}
+.login-modal .login-icon{width:52px;height:52px;margin:0 auto 20px;border:1px solid rgba(184,151,106,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(184,151,106,.06)}
+.login-modal .login-icon svg{width:22px;height:22px;stroke:var(--gold-light);fill:none;stroke-width:1.5}
+.login-brand{font-family:var(--font-display);font-size:1.3rem;font-weight:400;letter-spacing:6px;color:var(--white);margin-bottom:4px}
+.login-brand-cn{font-family:var(--font-cn);font-size:.65rem;letter-spacing:4px;color:var(--gold);margin-bottom:4px}
+.login-sub{font-family:var(--font-sans);font-size:.68rem;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:4px}
+.login-tabs{display:flex;padding:0 40px;margin-top:28px;gap:0}
+.login-tab{flex:1;padding:14px 0;font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);cursor:pointer;position:relative;transition:all .3s;background:none;border:none}
+.login-tab:hover{color:rgba(255,255,255,.6)}
+.login-tab.active{color:var(--gold-light)}
+.login-tab.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--gold);border-radius:1px}
+.login-body{padding:24px 40px 36px}
+.login-modal .form-group{margin-bottom:18px}
+.login-modal .form-group label{display:block;font-family:var(--font-sans);font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px}
+.login-modal .form-group input{width:100%;padding:13px 16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);font-family:var(--font-sans);font-size:.88rem;color:var(--white);outline:none;transition:all .3s var(--ease);border-radius:4px}
+.login-modal .form-group input::placeholder{color:rgba(255,255,255,.2)}
+.login-modal .form-group input:focus{border-color:var(--gold);background:rgba(184,151,106,.06);box-shadow:0 0 0 3px rgba(184,151,106,.1)}
+.login-modal .login-btn{width:100%;padding:15px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--white);font-family:var(--font-sans);font-size:.72rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .4s var(--ease);margin-top:6px;border-radius:4px}
+.login-modal .login-btn:hover{background:linear-gradient(135deg,var(--gold-light),var(--gold));transform:translateY(-1px);box-shadow:0 8px 24px rgba(184,151,106,.3)}
+.login-modal .login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.login-modal .login-error{color:var(--rose);font-size:.78rem;margin-top:12px;display:none;text-align:center;padding:10px;background:rgba(255,71,87,.08);border-radius:4px}
+.login-modal .login-hint{font-size:.68rem;color:rgba(255,255,255,.25);margin-top:20px;letter-spacing:.3px;line-height:1.7;text-align:center}
 .login-form{display:none}
 .login-form.active{display:block}
 </style>
@@ -926,44 +933,51 @@ body:hover .cursor-glow{opacity:1}
 <div class="login-overlay" id="loginOverlay">
   <div class="login-modal">
     <div class="login-close" onclick="closeLoginModal()">×</div>
-    <div class="login-icon">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="login-header">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="login-brand">BAILUYUAN</div>
+      <div class="login-brand-cn">白鹿缘摄影</div>
+      <p class="login-sub">预约服务需要登录账户</p>
     </div>
     <div class="login-tabs">
       <button class="login-tab active" onclick="switchAuthTab('login')">登录</button>
       <button class="login-tab" onclick="switchAuthTab('register')">注册</button>
     </div>
-    <!-- Login Form -->
-    <form class="login-form active" id="loginForm" onsubmit="handleLogin(event)">
-      <div class="form-group">
-        <label>用户名</label>
-        <input type="text" id="loginUser" placeholder="请输入用户名" required>
-      </div>
-      <div class="form-group">
-        <label>密码</label>
-        <input type="password" id="loginPass" placeholder="请输入密码" required>
-      </div>
-      <button type="submit" class="login-btn" id="loginBtn">登 录</button>
-      <p class="login-error" id="loginError"></p>
-    </form>
-    <!-- Register Form -->
-    <form class="login-form" id="registerForm" onsubmit="handleRegister(event)">
-      <div class="form-group">
-        <label>用户名</label>
-        <input type="text" id="regUser" placeholder="2-30 个字符" required>
-      </div>
-      <div class="form-group">
-        <label>密码</label>
-        <input type="password" id="regPass" placeholder="至少 6 个字符" required>
-      </div>
-      <div class="form-group">
-        <label>确认密码</label>
-        <input type="password" id="regPass2" placeholder="再次输入密码" required>
-      </div>
-      <button type="submit" class="login-btn" id="regBtn">注 册</button>
-      <p class="login-error" id="regError"></p>
-    </form>
-    <p class="login-hint">预约服务需要登录账户<br>留言建议无需登录</p>
+    <div class="login-body">
+      <!-- Login Form -->
+      <form class="login-form active" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>用户名</label>
+          <input type="text" id="loginUser" placeholder="请输入用户名" required>
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="loginPass" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="login-btn" id="loginBtn">登 录</button>
+        <p class="login-error" id="loginError"></p>
+      </form>
+      <!-- Register Form -->
+      <form class="login-form" id="registerForm" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>用户名</label>
+          <input type="text" id="regUser" placeholder="2-30 个字符" required>
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="regPass" placeholder="至少 6 个字符" required>
+        </div>
+        <div class="form-group">
+          <label>确认密码</label>
+          <input type="password" id="regPass2" placeholder="再次输入密码" required>
+        </div>
+        <button type="submit" class="login-btn" id="regBtn">注 册</button>
+        <p class="login-error" id="regError"></p>
+      </form>
+    </div>
+    <p class="login-hint">留言建议无需登录 · 预约服务需先注册</p>
   </div>
 </div>
 
