@@ -4,7 +4,6 @@ export default {
     const { pathname } = url;
     const method = request.method;
 
-    // CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -20,6 +19,38 @@ export default {
       if (pathname === '/api/health' && method === 'GET') {
         return json({ status: 'ok', time: new Date().toISOString() }, corsHeaders);
       }
+
+      // ═══════════════════════════════════════════
+      // ─── 认证 (Auth) ───
+      // ═══════════════════════════════════════════
+
+      // ─── 管理员登录 ───
+      if (pathname === '/api/auth/login' && method === 'POST') {
+        const body = await request.json();
+        const username = (body.username || '').trim();
+        const password = (body.password || '').trim();
+
+        const adminUser = env.ADMIN_USER || 'admin';
+        const adminPass = env.ADMIN_PASS || 'admin123';
+
+        if (username === adminUser && password === adminPass) {
+          const token = await generateToken(env);
+          return json({ success: true, token }, corsHeaders);
+        }
+        return json({ error: '用户名或密码错误' }, corsHeaders, 401);
+      }
+
+      // ─── 验证 token ───
+      if (pathname === '/api/auth/verify' && method === 'GET') {
+        const auth = request.headers.get('Authorization') || '';
+        const valid = await verifyAuth(auth, env);
+        if (!valid) return json({ error: 'Unauthorized' }, corsHeaders, 401);
+        return json({ success: true, role: 'admin' }, corsHeaders);
+      }
+
+      // ═══════════════════════════════════════════
+      // ─── 公开 API (无需认证) ───
+      // ═══════════════════════════════════════════
 
       // ─── 获取所有作品 ───
       if (pathname === '/api/works' && method === 'GET') {
@@ -38,7 +69,90 @@ export default {
         return json(row, corsHeaders);
       }
 
-      // ─── 创建作品 ───
+      // ─── 图片代理 ───
+      const imageMatch = pathname.match(/^\/api\/image\/(.+)$/);
+      if (imageMatch && method === 'GET') {
+        const key = decodeURIComponent(imageMatch[1]);
+        const obj = await env.R2.get(key);
+        if (!obj) return json({ error: 'Image not found' }, corsHeaders, 404);
+        const headers = new Headers(corsHeaders);
+        obj.writeHttpMetadata(headers);
+        headers.set('etag', obj.httpEtag);
+        headers.set('cache-control', 'public, max-age=86400');
+        return new Response(obj.body, { headers });
+      }
+
+      // ─── 轮播图 (公开) ───
+      if (pathname === '/api/banners' && method === 'GET') {
+        const activeOnly = url.searchParams.get('active');
+        let query = 'SELECT * FROM banners';
+        if (activeOnly === '1') query += ' WHERE active = 1';
+        query += ' ORDER BY sort_order ASC, created_at ASC';
+        const { results } = await env.DB.prepare(query).all();
+        return json(results, corsHeaders);
+      }
+
+      if (pathname.match(/^\/api\/banners\/([^/]+)$/) && method === 'GET') {
+        const id = pathname.match(/^\/api\/banners\/([^/]+)$/)[1];
+        const row = await env.DB.prepare('SELECT * FROM banners WHERE id = ?').bind(id).first();
+        if (!row) return json({ error: 'Not found' }, corsHeaders, 404);
+        return json(row, corsHeaders);
+      }
+
+      // ─── 获取设置 (公开) ───
+      if (pathname === '/api/settings' && method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM settings').all();
+        const map = {};
+        results.forEach(r => { map[r.key] = r.value; });
+        return json(map, corsHeaders);
+      }
+
+      // ─── 提交建议（前台，无需登录）───
+      if (pathname === '/api/suggestions' && method === 'POST') {
+        const body = await request.json();
+        const contact = (body.contact || '').trim().slice(0, 200);
+        const content = (body.content || '').trim().slice(0, 5000);
+        if (!content) return json({ error: '建议内容不能为空' }, corsHeaders, 400);
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          'INSERT INTO suggestions (id, contact, content) VALUES (?, ?, ?)'
+        ).bind(id, contact, content).run();
+        return json({ success: true, id }, corsHeaders, 201);
+      }
+
+      // ─── 提交预约（前台，需要登录）───
+      if (pathname === '/api/bookings' && method === 'POST') {
+        const auth = request.headers.get('Authorization') || '';
+        const valid = await verifyAuth(auth, env);
+        if (!valid) return json({ error: '请先登录后再提交预约', needLogin: true }, corsHeaders, 401);
+
+        const body = await request.json();
+        const name = (body.name || '').trim().slice(0, 100);
+        const phone = (body.phone || '').trim().slice(0, 30);
+        const date = (body.date || '').trim().slice(0, 50);
+        const type = (body.type || '').trim().slice(0, 100);
+        const message = (body.message || '').trim().slice(0, 2000);
+        if (!name || !phone) return json({ error: '姓名和联系电话为必填' }, corsHeaders, 400);
+
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          'INSERT INTO bookings (id, name, phone, date, type, message) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(id, name, phone, date, type, message).run();
+        return json({ success: true, id }, corsHeaders, 201);
+      }
+
+      // ═══════════════════════════════════════════
+      // ─── 管理 API (需要认证) ───
+      // ═══════════════════════════════════════════
+
+      const auth = request.headers.get('Authorization') || '';
+      const isAdmin = await verifyAuth(auth, env);
+
+      if (!isAdmin) {
+        return json({ error: 'Unauthorized', needLogin: true }, corsHeaders, 401);
+      }
+
+      // ─── 作品 CRUD (管理) ───
       if (pathname === '/api/works' && method === 'POST') {
         const formData = await request.formData();
         const name = formData.get('name') || '';
@@ -47,17 +161,11 @@ export default {
         const detail = formData.get('detail') || '';
         const sortOrder = parseInt(formData.get('sort_order') || '0', 10);
         const file = formData.get('image');
-
-        if (!file || typeof file === 'string') {
-          return json({ error: 'Image file is required' }, corsHeaders, 400);
-        }
+        if (!file || typeof file === 'string') return json({ error: 'Image file is required' }, corsHeaders, 400);
 
         const ext = file.name.split('.').pop() || 'jpg';
         const key = `works/${crypto.randomUUID()}.${ext}`;
-
-        await env.R2.put(key, file.stream(), {
-          httpMetadata: { contentType: file.type },
-        });
+        await env.R2.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
 
         const id = crypto.randomUUID();
         await env.DB.prepare(
@@ -68,10 +176,9 @@ export default {
         return json(row, corsHeaders, 201);
       }
 
-      // ─── 更新作品 ───
-      const updateMatch = pathname.match(/^\/api\/works\/([^/]+)$/);
-      if (updateMatch && method === 'PUT') {
-        const id = updateMatch[1];
+      const updateWorkMatch = pathname.match(/^\/api\/works\/([^/]+)$/);
+      if (updateWorkMatch && method === 'PUT') {
+        const id = updateWorkMatch[1];
         const existing = await env.DB.prepare('SELECT * FROM works WHERE id = ?').bind(id).first();
         if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
 
@@ -89,9 +196,7 @@ export default {
           if (imageKey) await env.R2.delete(imageKey);
           const ext = file.name.split('.').pop() || 'jpg';
           imageKey = `works/${crypto.randomUUID()}.${ext}`;
-          await env.R2.put(imageKey, file.stream(), {
-            httpMetadata: { contentType: file.type },
-          });
+          await env.R2.put(imageKey, file.stream(), { httpMetadata: { contentType: file.type } });
         }
 
         await env.DB.prepare(
@@ -102,57 +207,16 @@ export default {
         return json(row, corsHeaders);
       }
 
-      // ─── 删除作品 ───
-      const deleteMatch = pathname.match(/^\/api\/works\/([^/]+)$/);
-      if (deleteMatch && method === 'DELETE') {
-        const id = deleteMatch[1];
+      if (updateWorkMatch && method === 'DELETE') {
+        const id = updateWorkMatch[1];
         const existing = await env.DB.prepare('SELECT * FROM works WHERE id = ?').bind(id).first();
         if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
-
         if (existing.image_key) await env.R2.delete(existing.image_key);
         await env.DB.prepare('DELETE FROM works WHERE id = ?').bind(id).run();
-
         return json({ success: true }, corsHeaders);
       }
 
-      // ─── 图片代理 ───
-      const imageMatch = pathname.match(/^\/api\/image\/(.+)$/);
-      if (imageMatch && method === 'GET') {
-        const key = decodeURIComponent(imageMatch[1]);
-        const obj = await env.R2.get(key);
-        if (!obj) return json({ error: 'Image not found' }, corsHeaders, 404);
-
-        const headers = new Headers(corsHeaders);
-        obj.writeHttpMetadata(headers);
-        headers.set('etag', obj.httpEtag);
-        headers.set('cache-control', 'public, max-age=86400');
-        return new Response(obj.body, { headers });
-      }
-
-      // ═══════════════════════════════════════════
-      // ─── 轮播图 (Banners) ───
-      // ═══════════════════════════════════════════
-
-      // ─── 获取所有轮播图 ───
-      if (pathname === '/api/banners' && method === 'GET') {
-        const activeOnly = url.searchParams.get('active');
-        let query = 'SELECT * FROM banners';
-        if (activeOnly === '1') query += ' WHERE active = 1';
-        query += ' ORDER BY sort_order ASC, created_at ASC';
-        const { results } = await env.DB.prepare(query).all();
-        return json(results, corsHeaders);
-      }
-
-      // ─── 获取单个轮播图 ───
-      const bannerSingleMatch = pathname.match(/^\/api\/banners\/([^/]+)$/);
-      if (bannerSingleMatch && method === 'GET') {
-        const id = bannerSingleMatch[1];
-        const row = await env.DB.prepare('SELECT * FROM banners WHERE id = ?').bind(id).first();
-        if (!row) return json({ error: 'Not found' }, corsHeaders, 404);
-        return json(row, corsHeaders);
-      }
-
-      // ─── 创建轮播图 ───
+      // ─── 轮播图 CRUD (管理) ───
       if (pathname === '/api/banners' && method === 'POST') {
         const formData = await request.formData();
         const title = formData.get('title') || '';
@@ -161,17 +225,11 @@ export default {
         const sortOrder = parseInt(formData.get('sort_order') || '0', 10);
         const active = formData.get('active') != null ? parseInt(formData.get('active'), 10) : 1;
         const file = formData.get('image');
-
-        if (!file || typeof file === 'string') {
-          return json({ error: 'Image file is required' }, corsHeaders, 400);
-        }
+        if (!file || typeof file === 'string') return json({ error: 'Image file is required' }, corsHeaders, 400);
 
         const ext = file.name.split('.').pop() || 'jpg';
         const key = `banners/${crypto.randomUUID()}.${ext}`;
-
-        await env.R2.put(key, file.stream(), {
-          httpMetadata: { contentType: file.type },
-        });
+        await env.R2.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
 
         const id = crypto.randomUUID();
         await env.DB.prepare(
@@ -182,7 +240,6 @@ export default {
         return json(row, corsHeaders, 201);
       }
 
-      // ─── 更新轮播图 ───
       const bannerUpdateMatch = pathname.match(/^\/api\/banners\/([^/]+)$/);
       if (bannerUpdateMatch && method === 'PUT') {
         const id = bannerUpdateMatch[1];
@@ -204,9 +261,7 @@ export default {
           if (imageKey) await env.R2.delete(imageKey);
           const ext = file.name.split('.').pop() || 'jpg';
           imageKey = `banners/${crypto.randomUUID()}.${ext}`;
-          await env.R2.put(imageKey, file.stream(), {
-            httpMetadata: { contentType: file.type },
-          });
+          await env.R2.put(imageKey, file.stream(), { httpMetadata: { contentType: file.type } });
         }
 
         await env.DB.prepare(
@@ -217,165 +272,76 @@ export default {
         return json(row, corsHeaders);
       }
 
-      // ─── 删除轮播图 ───
-      const bannerDeleteMatch = pathname.match(/^\/api\/banners\/([^/]+)$/);
-      if (bannerDeleteMatch && method === 'DELETE') {
-        const id = bannerDeleteMatch[1];
+      if (bannerUpdateMatch && method === 'DELETE') {
+        const id = bannerUpdateMatch[1];
         const existing = await env.DB.prepare('SELECT * FROM banners WHERE id = ?').bind(id).first();
         if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
-
         if (existing.image_key) await env.R2.delete(existing.image_key);
         await env.DB.prepare('DELETE FROM banners WHERE id = ?').bind(id).run();
-
         return json({ success: true }, corsHeaders);
       }
 
-      // ═══════════════════════════════════════════
-      // ─── 预约 (Bookings) ───
-      // ═══════════════════════════════════════════
-
-      // ─── 提交预约（前台） ───
-      if (pathname === '/api/bookings' && method === 'POST') {
-        const body = await request.json();
-        const name = (body.name || '').trim().slice(0, 100);
-        const phone = (body.phone || '').trim().slice(0, 30);
-        const date = (body.date || '').trim().slice(0, 50);
-        const type = (body.type || '').trim().slice(0, 100);
-        const message = (body.message || '').trim().slice(0, 2000);
-
-        if (!name || !phone) {
-          return json({ error: '姓名和联系电话为必填' }, corsHeaders, 400);
-        }
-
-        const id = crypto.randomUUID();
-        await env.DB.prepare(
-          'INSERT INTO bookings (id, name, phone, date, type, message) VALUES (?, ?, ?, ?, ?, ?)'
-        ).bind(id, name, phone, date, type, message).run();
-
-        return json({ success: true, id }, corsHeaders, 201);
-      }
-
-      // ─── 获取所有预约（后台） ───
+      // ─── 预约管理 (后台) ───
       if (pathname === '/api/bookings' && method === 'GET') {
         const status = url.searchParams.get('status');
         let query = 'SELECT * FROM bookings';
         const params = [];
-        if (status) {
-          query += ' WHERE status = ?';
-          params.push(status);
-        }
+        if (status) { query += ' WHERE status = ?'; params.push(status); }
         query += ' ORDER BY created_at DESC';
-        const stmt = params.length
-          ? env.DB.prepare(query).bind(...params)
-          : env.DB.prepare(query);
+        const stmt = params.length ? env.DB.prepare(query).bind(...params) : env.DB.prepare(query);
         const { results } = await stmt.all();
         return json(results, corsHeaders);
       }
 
-      // ─── 更新预约状态（后台） ───
       const bookingUpdateMatch = pathname.match(/^\/api\/bookings\/([^/]+)$/);
       if (bookingUpdateMatch && method === 'PUT') {
         const id = bookingUpdateMatch[1];
         const existing = await env.DB.prepare('SELECT * FROM bookings WHERE id = ?').bind(id).first();
         if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
-
         const body = await request.json();
         const status = body.status || existing.status;
-
-        await env.DB.prepare(
-          'UPDATE bookings SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
-        ).bind(status, id).run();
-
+        await env.DB.prepare('UPDATE bookings SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(status, id).run();
         const row = await env.DB.prepare('SELECT * FROM bookings WHERE id = ?').bind(id).first();
         return json(row, corsHeaders);
       }
 
-      // ─── 删除预约（后台） ───
-      const bookingDeleteMatch = pathname.match(/^\/api\/bookings\/([^/]+)$/);
-      if (bookingDeleteMatch && method === 'DELETE') {
-        const id = bookingDeleteMatch[1];
+      if (bookingUpdateMatch && method === 'DELETE') {
+        const id = bookingUpdateMatch[1];
         await env.DB.prepare('DELETE FROM bookings WHERE id = ?').bind(id).run();
         return json({ success: true }, corsHeaders);
       }
 
-      // ═══════════════════════════════════════════
-      // ─── 建议 (Suggestions) ───
-      // ═══════════════════════════════════════════
-
-      // ─── 提交建议（前台） ───
-      if (pathname === '/api/suggestions' && method === 'POST') {
-        const body = await request.json();
-        const contact = (body.contact || '').trim().slice(0, 200);
-        const content = (body.content || '').trim().slice(0, 5000);
-
-        if (!content) {
-          return json({ error: '建议内容不能为空' }, corsHeaders, 400);
-        }
-
-        const id = crypto.randomUUID();
-        await env.DB.prepare(
-          'INSERT INTO suggestions (id, contact, content) VALUES (?, ?, ?)'
-        ).bind(id, contact, content).run();
-
-        return json({ success: true, id }, corsHeaders, 201);
-      }
-
-      // ─── 获取所有建议（后台） ───
+      // ─── 建议管理 (后台) ───
       if (pathname === '/api/suggestions' && method === 'GET') {
         const status = url.searchParams.get('status');
         let query = 'SELECT * FROM suggestions';
         const params = [];
-        if (status) {
-          query += ' WHERE status = ?';
-          params.push(status);
-        }
+        if (status) { query += ' WHERE status = ?'; params.push(status); }
         query += ' ORDER BY created_at DESC';
-        const stmt = params.length
-          ? env.DB.prepare(query).bind(...params)
-          : env.DB.prepare(query);
+        const stmt = params.length ? env.DB.prepare(query).bind(...params) : env.DB.prepare(query);
         const { results } = await stmt.all();
         return json(results, corsHeaders);
       }
 
-      // ─── 更新建议状态（后台） ───
       const suggestionUpdateMatch = pathname.match(/^\/api\/suggestions\/([^/]+)$/);
       if (suggestionUpdateMatch && method === 'PUT') {
         const id = suggestionUpdateMatch[1];
         const existing = await env.DB.prepare('SELECT * FROM suggestions WHERE id = ?').bind(id).first();
         if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
-
         const body = await request.json();
         const status = body.status || existing.status;
-
-        await env.DB.prepare(
-          'UPDATE suggestions SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
-        ).bind(status, id).run();
-
+        await env.DB.prepare('UPDATE suggestions SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(status, id).run();
         const row = await env.DB.prepare('SELECT * FROM suggestions WHERE id = ?').bind(id).first();
         return json(row, corsHeaders);
       }
 
-      // ─── 删除建议（后台） ───
-      const suggestionDeleteMatch = pathname.match(/^\/api\/suggestions\/([^/]+)$/);
-      if (suggestionDeleteMatch && method === 'DELETE') {
-        const id = suggestionDeleteMatch[1];
+      if (suggestionUpdateMatch && method === 'DELETE') {
+        const id = suggestionUpdateMatch[1];
         await env.DB.prepare('DELETE FROM suggestions WHERE id = ?').bind(id).run();
         return json({ success: true }, corsHeaders);
       }
 
-      // ═══════════════════════════════════════════
-      // ─── 网站设置 (Settings) ───
-      // ═══════════════════════════════════════════
-
-      // ─── 获取所有设置（前台+后台） ───
-      if (pathname === '/api/settings' && method === 'GET') {
-        const { results } = await env.DB.prepare('SELECT * FROM settings').all();
-        const map = {};
-        results.forEach(r => { map[r.key] = r.value; });
-        return json(map, corsHeaders);
-      }
-
-      // ─── 更新设置（后台） ───
+      // ─── 更新设置 (管理) ───
       if (pathname === '/api/settings' && method === 'PUT') {
         const body = await request.json();
         for (const [key, value] of Object.entries(body)) {
@@ -395,6 +361,46 @@ export default {
     }
   }
 };
+
+// ═══════════════════════════════════════════
+// ─── 认证工具函数 ───
+// ═══════════════════════════════════════════
+
+async function generateToken(env) {
+  const secret = env.JWT_SECRET || 'bailuyuan-admin-secret-2026';
+  const payload = { role: 'admin', iat: Date.now(), exp: Date.now() + 7 * 24 * 3600 * 1000 };
+  const data = JSON.stringify(payload);
+  const encoded = btoa(unescape(encodeURIComponent(data)));
+  const sig = await hmacSign(encoded, secret);
+  return `${encoded}.${sig}`;
+}
+
+async function verifyAuth(authHeader, env) {
+  if (!authHeader.startsWith('Bearer ')) return false;
+  const token = authHeader.slice(7);
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  const [encoded, sig] = parts;
+  const secret = env.JWT_SECRET || 'bailuyuan-admin-secret-2026';
+  const expectedSig = await hmacSign(encoded, secret);
+  if (sig !== expectedSig) return false;
+  try {
+    const payload = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    if (payload.exp && payload.exp < Date.now()) return false;
+    return payload.role === 'admin';
+  } catch {
+    return false;
+  }
+}
+
+async function hmacSign(data, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(data));
+  return btoa(String.fromCharCode(...new Uint8Array(sig)));
+}
 
 function json(data, corsHeaders, status = 200) {
   return new Response(JSON.stringify(data), {

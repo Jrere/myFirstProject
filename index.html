@@ -414,6 +414,35 @@ body:hover .cursor-glow{opacity:1}
 .suggestion-form .form-group textarea{min-height:140px;resize:vertical}
 .suggestion-form .form-submit{display:inline-flex;align-items:center;gap:12px;padding:18px 52px;border:1px solid var(--gold);color:var(--gold);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;background:none;cursor:pointer;transition:all .5s var(--ease)}
 .suggestion-form .form-submit:hover{background:var(--gold);color:var(--white)}
+
+/* ═══ Login Modal ═══ */
+.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.login-overlay.active{display:flex}
+.login-modal{background:var(--white);border-radius:4px;max-width:420px;width:90%;padding:56px 48px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.2);position:relative}
+.login-modal .login-close{position:absolute;top:20px;right:20px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text-light);cursor:pointer;transition:color .3s}
+.login-modal .login-close:hover{color:var(--charcoal)}
+.login-modal .login-icon{width:56px;height:56px;margin:0 auto 24px;border:1px solid var(--gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.login-modal .login-icon svg{width:24px;height:24px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.login-modal h2{font-family:var(--font-display);font-size:1.4rem;font-weight:400;letter-spacing:4px;margin-bottom:4px}
+.login-modal .login-sub{font-family:var(--font-cn);font-size:.75rem;color:var(--text-light);letter-spacing:3px;margin-bottom:36px}
+.login-modal .form-group{margin-bottom:24px;text-align:left}
+.login-modal .form-group label{display:block;font-family:var(--font-sans);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-light);margin-bottom:8px}
+.login-modal .form-group input{width:100%;padding:14px 16px;border:1px solid var(--warm);background:var(--ivory);font-family:var(--font-sans);font-size:.9rem;color:var(--charcoal);outline:none;transition:all .3s var(--ease);border-radius:2px}
+.login-modal .form-group input:focus{border-color:var(--gold);background:var(--white)}
+.login-modal .login-btn{width:100%;padding:16px;border:1px solid var(--gold);background:var(--gold);color:var(--white);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .4s var(--ease);margin-top:8px}
+.login-modal .login-btn:hover{background:var(--gold-dark);border-color:var(--gold-dark)}
+.login-modal .login-btn:disabled{opacity:.6;cursor:not-allowed}
+.login-modal .login-error{color:var(--rose);font-size:.8rem;margin-top:12px;display:none}
+.login-modal .login-hint{font-size:.72rem;color:var(--text-light);margin-top:20px;letter-spacing:.5px}
+
+/* Auth status bar */
+.auth-bar{position:fixed;top:0;left:0;right:0;z-index:1001;background:var(--charcoal);padding:8px 60px;display:none;align-items:center;justify-content:flex-end;gap:12px;font-family:var(--font-sans);font-size:.7rem;letter-spacing:1px;color:var(--gold-light)}
+.auth-bar.show{display:flex}
+.auth-bar .auth-user{display:flex;align-items:center;gap:6px}
+.auth-bar .auth-logout{color:rgba(255,255,255,.5);cursor:pointer;transition:color .3s}
+.auth-bar .auth-logout:hover{color:var(--rose)}
+body.has-auth .nav{top:36px}
+body.has-auth .mobile-menu{top:36px}
 </style>
 </head>
 <body>
@@ -868,6 +897,40 @@ body:hover .cursor-glow{opacity:1}
   </div>
 </footer>
 
+<!-- Auth Bar -->
+<div class="auth-bar" id="authBar">
+  <div class="auth-user">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>已登录</span>
+  </div>
+  <span class="auth-logout" onclick="logoutUser()">退出</span>
+</div>
+
+<!-- Login Modal -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-modal">
+    <div class="login-close" onclick="closeLoginModal()">×</div>
+    <div class="login-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h2>LOGIN</h2>
+    <p class="login-sub">登录后即可提交预约</p>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="loginUser" placeholder="请输入用户名" required>
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="loginPass" placeholder="请输入密码" required>
+      </div>
+      <button type="submit" class="login-btn" id="loginBtn">登录</button>
+      <p class="login-error" id="loginError"></p>
+    </form>
+    <p class="login-hint">预约服务需要登录账户<br>如需账户请联系工作室</p>
+  </div>
+</div>
+
 <!-- Back to Top -->
 <button class="back-top" id="backTop">↑</button>
 
@@ -1196,6 +1259,7 @@ document.addEventListener('mousemove', e => {
 window.addEventListener('load', async () => {
   setTimeout(() => document.getElementById('loader').classList.add('hide'), 1200);
   createParticles();
+  updateAuthUI();
   await Promise.all([fetchBanners(), fetchWorks(), fetchSettings()]);
   applySettings();
   renderCarousel();
@@ -1264,11 +1328,81 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// ===== Form Submit =====
+// ===== Auth Management =====
+function getAuthToken() { return localStorage.getItem('bailuyuan_token') || ''; }
+function setAuthToken(t) { localStorage.setItem('bailuyuan_token', t); }
+function clearAuthToken() { localStorage.removeItem('bailuyuan_token'); }
+
+function updateAuthUI() {
+  const token = getAuthToken();
+  document.getElementById('authBar').classList.toggle('show', !!token);
+  document.body.classList.toggle('has-auth', !!token);
+  // Update nav CTA
+  const cta = document.querySelector('.nav-cta');
+  if (token) {
+    cta.textContent = '退出登录';
+    cta.onclick = (e) => { e.preventDefault(); logoutUser(); };
+  } else {
+    cta.textContent = '咨询合作';
+    cta.onclick = null;
+    cta.setAttribute('href', '#booking');
+  }
+}
+
+function openLoginModal() {
+  document.getElementById('loginOverlay').classList.add('active');
+  document.getElementById('loginUser').focus();
+}
+function closeLoginModal() {
+  document.getElementById('loginOverlay').classList.remove('active');
+  document.getElementById('loginError').style.display = 'none';
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  btn.disabled = true;
+  btn.textContent = '登录中...';
+  errEl.style.display = 'none';
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '登录失败');
+    setAuthToken(data.token);
+    updateAuthUI();
+    closeLoginModal();
+    // If there's a pending booking, submit it
+    if (pendingBooking) {
+      await submitBookingWithAuth(pendingBooking);
+      pendingBooking = null;
+    }
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '登录';
+  }
+}
+
+function logoutUser() {
+  clearAuthToken();
+  updateAuthUI();
+}
+
+let pendingBooking = null;
+
+// ===== Form Submit (Booking - needs auth) =====
 async function handleSubmit(e) {
   e.preventDefault();
   const form = e.target;
-  const btn = form.querySelector('.form-submit');
   const inputs = form.querySelectorAll('input, select, textarea');
   const name = inputs[0].value.trim();
   const phone = inputs[1].value.trim();
@@ -1277,14 +1411,38 @@ async function handleSubmit(e) {
   const message = inputs[4].value.trim();
 
   if (!name || !phone || !type) { alert('请填写姓名、电话和拍摄类型'); return; }
+
+  // Check auth
+  if (!getAuthToken()) {
+    pendingBooking = { name, phone, date, type, message };
+    openLoginModal();
+    return;
+  }
+
+  await submitBookingWithAuth({ name, phone, date, type, message });
+}
+
+async function submitBookingWithAuth(data) {
+  const form = document.querySelector('.booking-form');
+  const btn = form.querySelector('.form-submit');
   btn.textContent = '提交中...';
   btn.disabled = true;
   try {
     const res = await fetch(`${API_BASE}/api/bookings`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, date, type, message })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify(data)
     });
+    if (res.status === 401) {
+      clearAuthToken();
+      updateAuthUI();
+      pendingBooking = data;
+      openLoginModal();
+      throw new Error('登录已过期，请重新登录');
+    }
     if (!res.ok) throw new Error('提交失败');
     btn.textContent = '预约成功 ✓';
     btn.style.background = 'var(--gold)';
@@ -1299,7 +1457,7 @@ async function handleSubmit(e) {
       form.reset();
     }, 3000);
   } catch (err) {
-    btn.textContent = '提交失败，请重试';
+    btn.textContent = err.message || '提交失败，请重试';
     btn.style.borderColor = 'var(--rose)';
     setTimeout(() => {
       btn.textContent = '提交预约';
@@ -1309,7 +1467,7 @@ async function handleSubmit(e) {
   }
 }
 
-// ===== Suggestion Submit =====
+// ===== Suggestion Submit (no auth needed) =====
 async function handleSuggestion(e) {
   e.preventDefault();
   const form = e.target;

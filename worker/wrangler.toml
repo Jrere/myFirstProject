@@ -13,7 +13,8 @@ database_id = "70477cb8-eb9b-4a7a-ad2e-7ee4683b0551"
 binding = "R2"
 bucket_name = "bailuyuan-images"
 
-# ─── 自定义域名（可选）───
-# [routes]
-# pattern = "api.bailuyuan.com"
-# zone_name = "bailuyuan.com"
+# ─── 环境变量 ───
+[vars]
+ADMIN_USER = "admin"
+ADMIN_PASS = "admin123"
+JWT_SECRET = "bailuyuan-admin-secret-2026"
