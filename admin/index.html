@@ -416,7 +416,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <div class="sidebar-user-name">管理员</div>
           <div class="sidebar-user-role">Administrator</div>
         </div>
-        <span class="sidebar-logout" onclick="handleLogout()" title="退出登录">⏻</span>
+        <div style="display:flex;gap:4px">
+          <span class="sidebar-logout" onclick="switchPage('settings');scrollToChangePass()" title="修改密码" style="font-size:.75rem">🔑</span>
+          <span class="sidebar-logout" onclick="handleLogout()" title="退出登录">⏻</span>
+        </div>
       </div>
     </div>
   </aside>
@@ -664,6 +667,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <h3 class="settings-group-title">📍 地址与营业时间</h3>
             <div class="form-group"><label>工作室地址</label><input type="text" id="setAddress" placeholder="上海市黄浦区外滩金融中心"></div>
             <div class="form-group"><label>营业时间</label><input type="text" id="setHours" placeholder="每日 09:00 - 20:00"></div>
+          </div>
+          <div class="settings-group" id="accountSecurity">
+            <h3 class="settings-group-title">🔐 账户安全</h3>
+            <div class="settings-grid">
+              <div class="form-group"><label>当前密码</label><input type="password" id="adminOldPass" placeholder="请输入当前密码"></div>
+              <div class="form-group"><label>新密码</label><input type="password" id="adminNewPass" placeholder="至少 6 个字符"></div>
+              <div class="form-group"><label>确认新密码</label><input type="password" id="adminNewPass2" placeholder="再次输入新密码"></div>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" id="changePassBtn" onclick="adminChangePassword()">🔑 修改密码</button>
+              <p id="changePassMsg" style="margin-top:12px;font-size:.78rem;display:none"></p>
+            </div>
           </div>
         </div>
       </div>
@@ -1317,6 +1332,74 @@ function showConfirm(text, cb) {
   document.getElementById('confirmBtn').onclick = () => { closeConfirm(); if (confirmCallback) confirmCallback(); };
 }
 function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
+
+// ═══ Admin Change Password ═══
+function scrollToChangePass() {
+  setTimeout(() => {
+    const el = document.getElementById('accountSecurity');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+async function adminChangePassword() {
+  const oldPass = document.getElementById('adminOldPass').value.trim();
+  const newPass = document.getElementById('adminNewPass').value.trim();
+  const newPass2 = document.getElementById('adminNewPass2').value.trim();
+  const msgEl = document.getElementById('changePassMsg');
+  const btn = document.getElementById('changePassBtn');
+
+  if (!oldPass || !newPass || !newPass2) {
+    msgEl.textContent = '请填写所有密码字段';
+    msgEl.style.color = 'var(--red)';
+    msgEl.style.display = 'block';
+    return;
+  }
+  if (newPass !== newPass2) {
+    msgEl.textContent = '两次输入的新密码不一致';
+    msgEl.style.color = 'var(--red)';
+    msgEl.style.display = 'block';
+    return;
+  }
+  if (newPass.length < 6) {
+    msgEl.textContent = '新密码至少需要 6 个字符';
+    msgEl.style.color = 'var(--red)';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '修改中...';
+  msgEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '修改失败');
+
+    msgEl.textContent = '✓ 密码修改成功，请重新登录';
+    msgEl.style.color = 'var(--green)';
+    msgEl.style.display = 'block';
+    document.getElementById('adminOldPass').value = '';
+    document.getElementById('adminNewPass').value = '';
+    document.getElementById('adminNewPass2').value = '';
+
+    setTimeout(() => handleLogout(), 2000);
+  } catch (err) {
+    msgEl.textContent = err.message;
+    msgEl.style.color = 'var(--red)';
+    msgEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔑 修改密码';
+  }
+}
 
 // ═══ Init ═══
 (async () => {

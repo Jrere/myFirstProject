@@ -24,7 +24,7 @@ export default {
       // ─── 认证 (Auth) ───
       // ═══════════════════════════════════════════
 
-      // ─── 管理员登录 ───
+      // ─── 登录 ───
       if (pathname === '/api/auth/login' && method === 'POST') {
         const body = await request.json();
         const username = (body.username || '').trim();
@@ -33,17 +33,18 @@ export default {
         const adminUser = env.ADMIN_USER || 'admin';
         const adminPass = env.ADMIN_PASS || 'admin123';
 
-        // 先检查管理员
+        // 先检查 users 表（包括管理员和普通用户）
+        const user = await env.DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
+        if (user && await verifyPassword(password, user.password_hash)) {
+          const role = (username === adminUser) ? 'admin' : 'user';
+          const token = await generateToken(env, role, user.id, user.username);
+          return json({ success: true, token, role, username: user.username }, corsHeaders);
+        }
+
+        // fallback 到 env 管理员凭据
         if (username === adminUser && password === adminPass) {
           const token = await generateToken(env, 'admin');
           return json({ success: true, token, role: 'admin' }, corsHeaders);
-        }
-
-        // 再检查普通用户
-        const user = await env.DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
-        if (user && await verifyPassword(password, user.password_hash)) {
-          const token = await generateToken(env, 'user', user.id, user.username);
-          return json({ success: true, token, role: 'user', username: user.username }, corsHeaders);
         }
 
         return json({ error: '用户名或密码错误' }, corsHeaders, 401);
@@ -83,6 +84,40 @@ export default {
         const payload = await verifyAuthPayload(auth, env);
         if (!payload) return json({ error: 'Unauthorized' }, corsHeaders, 401);
         return json({ success: true, role: payload.role, username: payload.username || 'admin' }, corsHeaders);
+      }
+
+      // ─── 修改密码 ───
+      if (pathname === '/api/auth/change-password' && method === 'POST') {
+        const authHeader = request.headers.get('Authorization') || '';
+        const payload = await verifyAuthPayload(authHeader, env);
+        if (!payload) return json({ error: 'Unauthorized' }, corsHeaders, 401);
+
+        const body = await request.json();
+        const oldPassword = (body.oldPassword || '').trim();
+        const newPassword = (body.newPassword || '').trim();
+
+        if (!oldPassword || !newPassword) {
+          return json({ error: '请填写旧密码和新密码' }, corsHeaders, 400);
+        }
+        if (newPassword.length < 6) {
+          return json({ error: '新密码至少需要 6 个字符' }, corsHeaders, 400);
+        }
+
+        const userId = payload.userId;
+        if (!userId) {
+          return json({ error: '管理员请先注册同名用户后再修改密码' }, corsHeaders, 400);
+        }
+
+        const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
+        if (!user) return json({ error: '用户不存在' }, corsHeaders, 404);
+
+        const valid = await verifyPassword(oldPassword, user.password_hash);
+        if (!valid) return json({ error: '旧密码错误' }, corsHeaders, 401);
+
+        const newHash = await hashPassword(newPassword);
+        await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?').bind(newHash, userId).run();
+
+        return json({ success: true, message: '密码修改成功' }, corsHeaders);
       }
 
       // ═══════════════════════════════════════════
