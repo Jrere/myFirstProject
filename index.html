@@ -321,10 +321,15 @@ body:hover .cursor-glow{opacity:1}
 .portfolio-card:hover .portfolio-overlay .view:hover svg{transform:translateX(4px)}
 
 /* Showcase Parallax */
-.showcase{height:85vh;min-height:550px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.showcase{height:85vh;min-height:550px;position:relative;display:flex;align-items:center;justify-content:center}
 .showcase-bg{position:absolute;inset:0;background:linear-gradient(160deg,#1a1714 0%,#2a2520 50%,#1a1714 100%)}
-.showcase-bg::before{content:'';position:absolute;top:0;left:0;right:0;height:120px;background:linear-gradient(to bottom,var(--ivory),transparent);z-index:1}
-.showcase-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--white),transparent);z-index:1}
+/* 上方渐变 — 从象牙白到暗色，多阶过渡 */
+.showcase-bg::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,#faf8f3 0%,#e8e0d4 8%,#c4b8a6 18%,#8a7d6e 30%,#5a5048 42%,#3a332d 56%,#2a2520 72%,#221f1a 88%,#1a1714 100%);z-index:1}
+/* 下方渐变 — 从暗色到白色，多阶过渡 */
+.showcase-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to top,#ffffff 0%,#f5f0e8 8%,#ddd5c8 18%,#a89e90 30%,#6e655a 42%,#4a433c 56%,#332e28 72%,#262220 88%,#1a1714 100%);z-index:1}
+/* 装饰分隔线 */
+.showcase-divider{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:3;width:1px;height:60px;background:linear-gradient(to bottom,transparent,var(--gold-light),transparent);opacity:.4}
+.showcase-divider-bottom{position:absolute;bottom:0;left:50%;transform:translateX(-50%);z-index:3;width:1px;height:60px;background:linear-gradient(to top,transparent,var(--gold-light),transparent);opacity:.4}
 .showcase-light{position:absolute;top:0;left:30%;width:40%;height:100%;background:radial-gradient(ellipse at 50% 40%,rgba(184,151,106,.06) 0%,transparent 70%)}
 .showcase-content{position:relative;z-index:2;text-align:center;padding:0 20px;max-width:700px}
 .showcase-content .quote-mark{font-family:var(--font-display);font-size:6rem;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-20px}
@@ -788,6 +793,8 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <!-- Showcase -->
 <section class="showcase">
   <div class="showcase-bg"></div>
+  <div class="showcase-divider"></div>
+  <div class="showcase-divider-bottom"></div>
   <div class="showcase-light"></div>
   <div class="showcase-sparks" id="showcaseSparks"></div>
   <div class="showcase-content reveal">
