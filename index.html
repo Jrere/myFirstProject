@@ -494,22 +494,38 @@ body:hover .cursor-glow{opacity:1}
 }
 
 /* Suggestions */
-.suggestions{background:var(--cream)}
-.suggestions-wrapper{max-width:640px;margin:0 auto}
-.suggestion-form .form-group{margin-bottom:28px}
+.suggestions{background:var(--ivory);position:relative;overflow:hidden}
+.suggestions::before{content:'';position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(184,151,106,.06) 0%,transparent 70%);pointer-events:none}
+.suggestions::after{content:'';position:absolute;bottom:-40px;left:-40px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(201,160,160,.05) 0%,transparent 70%);pointer-events:none}
+.suggestions-intro{text-align:center;max-width:560px;margin:0 auto 56px;font-family:var(--font-serif);font-size:1.05rem;line-height:2.2;color:var(--text);font-weight:300;letter-spacing:.3px;position:relative;z-index:1}
+.suggestions-intro .em{color:var(--gold);font-style:italic;font-weight:400}
+.suggestions-wrapper{max-width:640px;margin:0 auto;position:relative;z-index:1}
+.suggestion-card{background:var(--white);border:1px solid rgba(184,151,106,.1);border-radius:8px;padding:48px 44px;box-shadow:0 8px 40px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.02);position:relative}
+.suggestion-card::before{content:'';position:absolute;top:0;left:40px;right:40px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-light),transparent)}
+.suggestion-card .quote-icon{display:block;text-align:center;font-family:var(--font-display);font-size:3.5rem;color:var(--gold);opacity:.15;line-height:1;margin-bottom:-8px}
+.suggestion-form .form-group{margin-bottom:24px;position:relative}
 .suggestion-form .form-group input,
-.suggestion-form .form-group textarea{width:100%;padding:16px 20px;border:1px solid var(--warm);background:var(--white);font-family:var(--font-serif);font-size:.95rem;color:var(--charcoal);transition:all .4s var(--ease);outline:none}
+.suggestion-form .form-group textarea{width:100%;padding:14px 0;border:none;border-bottom:1px solid var(--warm);background:transparent;font-family:var(--font-serif);font-size:.95rem;color:var(--charcoal);transition:all .4s var(--ease);outline:none;letter-spacing:.3px}
 .suggestion-form .form-group input:focus,
-.suggestion-form .form-group textarea:focus{border-color:var(--gold)}
-.suggestion-form .form-group label{position:absolute;top:50%;left:20px;font-family:var(--font-serif);font-size:.9rem;color:var(--text-light);pointer-events:none;transition:all .3s var(--ease);transform:translateY(-50%)}
-.suggestion-form .form-group textarea ~ label{top:20px;transform:none}
+.suggestion-form .form-group textarea:focus{border-bottom-color:var(--gold)}
+.suggestion-form .form-group label{position:absolute;top:14px;left:0;font-family:var(--font-serif);font-size:.9rem;color:var(--text-light);pointer-events:none;transition:all .35s var(--ease);letter-spacing:.2px}
+.suggestion-form .form-group textarea ~ label{top:14px}
 .suggestion-form .form-group input:focus ~ label,
 .suggestion-form .form-group input:not(:placeholder-shown) ~ label,
 .suggestion-form .form-group textarea:focus ~ label,
-.suggestion-form .form-group textarea:not(:placeholder-shown) ~ label{top:-10px;left:16px;font-size:.72rem;color:var(--gold);background:var(--white);padding:0 6px;transform:none}
-.suggestion-form .form-group textarea{min-height:140px;resize:vertical}
-.suggestion-form .form-submit{display:inline-flex;align-items:center;gap:12px;padding:18px 52px;border:1px solid var(--gold);color:var(--gold);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;background:none;cursor:pointer;transition:all .5s var(--ease)}
-.suggestion-form .form-submit:hover{background:var(--gold);color:var(--white)}
+.suggestion-form .form-group textarea:not(:placeholder-shown) ~ label{top:-12px;font-size:.68rem;color:var(--gold);letter-spacing:1px}
+.suggestion-form .form-group textarea{min-height:140px;resize:vertical;line-height:1.9}
+.suggestion-form .form-group .char-count{text-align:right;font-family:var(--font-sans);font-size:.6rem;color:var(--text-light);letter-spacing:1px;margin-top:6px;transition:color .3s}
+.suggestion-form .form-group .char-count.warn{color:var(--rose)}
+.suggestion-form .form-submit{display:inline-flex;align-items:center;gap:12px;padding:16px 52px;border:1px solid var(--gold);color:var(--gold);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;background:none;cursor:pointer;transition:all .5s var(--ease);position:relative;overflow:hidden}
+.suggestion-form .form-submit::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);z-index:-1}
+.suggestion-form .form-submit:hover{color:var(--white)}
+.suggestion-form .form-submit:hover::before{transform:scaleX(1)}
+.suggestion-form .form-submit svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;transition:transform .3s var(--ease)}
+.suggestion-form .form-submit:hover svg{transform:translateX(3px)}
+.suggestion-footer{text-align:center;margin-top:32px;font-family:var(--font-sans);font-size:.68rem;letter-spacing:1px;color:var(--text-light);line-height:1.8}
+.suggestion-footer .lock{display:inline-flex;align-items:center;gap:4px;opacity:.6}
+.suggestion-footer .lock svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.5}
 
 /* ═══ Login Modal ═══ */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:16px}
@@ -998,18 +1014,32 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   <h2 class="section-title reveal" id="sugstTitle">对我们的建议</h2>
   <p class="section-title-cn reveal" id="sugstTitleCn">您 的 声 音 很 重 要</p>
   <div class="section-divider reveal"></div>
+  <p class="suggestions-intro reveal">您的每一条建议，都是我们变得更好的理由。<br>无论是拍摄体验、服务细节，还是您期待的新服务——<span class="em">我们都认真倾听</span。</p>
   <div class="suggestions-wrapper reveal">
-    <form class="suggestion-form" onsubmit="handleSuggestion(event)">
-      <div class="form-group">
-        <input type="text" class="suggestion-contact" placeholder=" ">
-        <label>联系方式（选填，方便我们回复您）</label>
-      </div>
-      <div class="form-group">
-        <textarea class="suggestion-content" placeholder=" " required></textarea>
-        <label>您的建议、意见或想法…</label>
-      </div>
-      <button type="submit" class="form-submit">提交建议</button>
-    </form>
+    <div class="suggestion-card">
+      <span class="quote-icon">"</span>
+      <form class="suggestion-form" onsubmit="handleSuggestion(event)">
+        <div class="form-group">
+          <input type="text" class="suggestion-contact" placeholder=" ">
+          <label>联系方式（选填，方便我们回复您）</label>
+        </div>
+        <div class="form-group">
+          <textarea class="suggestion-content" placeholder=" " required maxlength="2000"></textarea>
+          <label>您的建议、意见或想法…</label>
+          <div class="char-count"><span class="current">0</span> / 2000</div>
+        </div>
+        <button type="submit" class="form-submit">
+          提交建议
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </form>
+    </div>
+    <div class="suggestion-footer">
+      <span class="lock">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        您的信息仅用于回复，绝不外泄
+      </span>
+    </div>
   </div>
 </section>
 
@@ -1596,6 +1626,19 @@ document.querySelectorAll('.mobile-menu a').forEach(a => {
 // ===== Back to Top =====
 document.getElementById('backTop').addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ===== Suggestion Character Count =====
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.querySelector('.suggestion-content');
+  const countEl = document.querySelector('.char-count .current');
+  if (textarea && countEl) {
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      countEl.textContent = len;
+      countEl.closest('.char-count').classList.toggle('warn', len > 1800);
+    });
+  }
 });
 
 // ===== Filter =====
