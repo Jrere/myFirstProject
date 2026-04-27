@@ -1654,17 +1654,11 @@ function renderTestimonials() {
   const dotsContainer = document.getElementById('testimonialDots');
   const bgContainer = document.getElementById('testimonialsBgContainer');
 
-  // 筛选出有背景图的客户心声
-  const withBg = source.filter(t => t.bg_key);
-  // 有背景图的索引集合
-  const bgIndices = new Set(withBg.map(t => source.indexOf(t)));
-
-  // Render slides — 所有心声都显示，但只有有背景的参与轮播
+  // Render slides
   slider.innerHTML = source.map((t, i) => {
     const starsStr = '★ '.repeat(t.stars || 5).trim();
-    const isActive = withBg.length > 0 ? bgIndices.has(i) && i === [...bgIndices][0] : i === 0;
     return `
-    <div class="testimonial-item ${isActive ? 'active' : ''}" data-index="${i}">
+    <div class="testimonial-item ${i === 0 ? 'active' : ''}" data-index="${i}">
       <div class="testimonial-stars">${starsStr}</div>
       <p class="testimonial-quote">${esc(t.quote)}</p>
       <p class="testimonial-author">${esc(t.author)}</p>
@@ -1672,20 +1666,18 @@ function renderTestimonials() {
     </div>`;
   }).join('');
 
-  // Render dots — 只有超过1条有背景图时才显示轮播点
-  if (withBg.length > 1) {
-    dotsContainer.innerHTML = withBg.map((_, i) =>
-      `<div class="testimonial-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
-    ).join('');
-  } else {
-    dotsContainer.innerHTML = '';
-  }
+  // Render dots
+  dotsContainer.innerHTML = source.map((_, i) =>
+    `<div class="testimonial-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
+  ).join('');
 
-  // Render background layers — 只有有背景图的才渲染
-  if (withBg.length > 0) {
-    bgContainer.innerHTML = withBg.map((t, i) =>
-      `<div class="testimonials-bg ${i === 0 ? 'active' : ''}" data-index="${i}"><img src="${API_BASE}/api/image/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy"></div>`
-    ).join('');
+  // Render background layers
+  const hasAnyBg = source.some(t => t.bg_key);
+  if (hasAnyBg) {
+    bgContainer.innerHTML = source.map((t, i) => {
+      if (!t.bg_key) return '';
+      return `<div class="testimonials-bg ${i === 0 ? 'active' : ''}" data-index="${i}"><img src="${API_BASE}/api/image/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy"></div>`;
+    }).join('');
   } else {
     bgContainer.innerHTML = '';
   }
@@ -1702,15 +1694,10 @@ function renderTestimonials() {
 
 function showTestimonialSlide(n) {
   const source = testimonialsData.length > 0 ? testimonialsData : testimonialsFallback;
-  const withBg = source.filter(t => t.bg_key);
-  const carouselList = withBg.length > 0 ? withBg : source;
-  const total = carouselList.length;
+  const total = source.length;
   if (total === 0) return;
   if (n < 0) n = total - 1;
   if (n >= total) n = 0;
-
-  const carouselItem = carouselList[n];
-  const sourceIndex = source.indexOf(carouselItem);
 
   const items = document.querySelectorAll('.testimonial-item');
   const dots = document.querySelectorAll('.testimonial-dot');
@@ -1720,7 +1707,7 @@ function showTestimonialSlide(n) {
   testimonialBgs.forEach(b => b.classList.remove('active'));
 
   currentSlide = n;
-  if (items[sourceIndex]) items[sourceIndex].classList.add('active');
+  if (items[n]) items[n].classList.add('active');
   if (dots[n]) dots[n].classList.add('active');
   if (testimonialBgs[n]) testimonialBgs[n].classList.add('active');
 }
@@ -1728,9 +1715,7 @@ function showTestimonialSlide(n) {
 function startTestimonialAutoplay() {
   clearInterval(testimonialTimer);
   const source = testimonialsData.length > 0 ? testimonialsData : testimonialsFallback;
-  const withBg = source.filter(t => t.bg_key);
-  // 只有超过1条有背景图时才轮播，仅1条或无背景则不轮播
-  if (withBg.length <= 1) return;
+  if (source.length <= 1) return; // No autoplay for single item
   testimonialTimer = setInterval(() => showTestimonialSlide(currentSlide + 1), 6000);
 }
 
