@@ -308,6 +308,17 @@ body:hover .cursor-glow{opacity:1}
 .showcase-content .quote-mark{font-family:var(--font-display);font-size:6rem;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-20px}
 .showcase-content blockquote{font-family:var(--font-serif);font-size:clamp(1.1rem,2.5vw,1.5rem);font-weight:300;font-style:italic;letter-spacing:1px;color:rgba(255,255,255,.7);line-height:2.2;margin-bottom:32px}
 .showcase-content cite{font-family:var(--font-cn);font-size:.8rem;letter-spacing:4px;color:var(--gold-light);font-style:normal}
+.showcase-sparks{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.showcase-spark{position:absolute;border-radius:50%;opacity:0;animation:showcaseSpark var(--sk-dur,3s) var(--sk-delay,0s) ease-out infinite}
+.showcase-spark.gold{background:var(--gold);box-shadow:0 0 6px var(--gold),0 0 12px rgba(184,151,106,.3)}
+.showcase-spark.white{background:#fff;box-shadow:0 0 4px rgba(255,255,255,.6),0 0 8px rgba(184,151,106,.2)}
+.showcase-spark.ember{background:#e8a050;box-shadow:0 0 5px #e8a050,0 0 10px rgba(232,160,80,.3)}
+@keyframes showcaseSpark{
+  0%{opacity:0;transform:translate(0,0) scale(0)}
+  10%{opacity:1;transform:scale(1)}
+  40%{opacity:.7}
+  100%{opacity:0;transform:translate(var(--sk-drift,20px),var(--sk-rise,-120px)) scale(0)}
+}
 
 /* Services */
 .services{background:var(--white)}
@@ -750,6 +761,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <section class="showcase">
   <div class="showcase-bg"></div>
   <div class="showcase-light"></div>
+  <div class="showcase-sparks" id="showcaseSparks"></div>
   <div class="showcase-content reveal">
     <div class="quote-mark">"</div>
     <blockquote id="showcaseQuote">每一次拍摄都是一次对话——与品牌对话，与岁月对话，与镜头前最真实的自己对话。我们用影像，让这些对话被看见。</blockquote>
@@ -1445,9 +1457,31 @@ function createLoaderSparks() {
   }
 }
 
+// ===== Showcase Sparks =====
+function createShowcaseSparks() {
+  const container = document.getElementById('showcaseSparks');
+  if (!container) return;
+  const types = ['gold', 'white', 'ember'];
+  for (let i = 0; i < 35; i++) {
+    const spark = document.createElement('div');
+    const type = types[Math.floor(Math.random() * types.length)];
+    spark.className = `showcase-spark ${type}`;
+    const size = 1.5 + Math.random() * 3;
+    const x = Math.random() * 100;
+    const y = 40 + Math.random() * 50;
+    const drift = (Math.random() - 0.5) * 80;
+    const rise = -(60 + Math.random() * 100);
+    const dur = 2 + Math.random() * 3;
+    const delay = Math.random() * 4;
+    spark.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px;--sk-drift:${drift}px;--sk-rise:${rise}px;--sk-dur:${dur}s;--sk-delay:${delay}s`;
+    container.appendChild(spark);
+  }
+}
+
 // ===== Loader =====
 window.addEventListener('load', async () => {
   createLoaderSparks();
+  createShowcaseSparks();
   setTimeout(() => document.getElementById('loader').classList.add('hide'), 2200);
   createParticles();
   updateAuthUI();
