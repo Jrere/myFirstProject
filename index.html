@@ -164,9 +164,9 @@ body:hover .cursor-glow{opacity:1}
 .carousel-section{position:relative;width:100%}
 .carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal)}
 .carousel-track{position:relative;width:100%;height:100%}
-.carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:none}
+.carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:none;overflow:hidden}
 .carousel-slide.active{opacity:1;z-index:1}
-.carousel-slide-img{position:absolute;inset:-30px;width:calc(100% + 60px);height:calc(100% + 60px);object-fit:cover;will-change:transform}
+.carousel-slide-img{position:absolute;min-width:100%;min-height:100%;width:100%;height:100%;object-fit:cover;object-position:center center;will-change:transform}
 /* Ken Burns — 每张不同方向 */
 .carousel-slide.active .carousel-slide-img{animation:kbZoom1 8s ease-out forwards}
 .carousel-slide:nth-child(2).active .carousel-slide-img{animation:kbZoom2 8s ease-out forwards}
@@ -180,12 +180,12 @@ body:hover .cursor-glow{opacity:1}
 .carousel-crossfade{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;background:var(--charcoal);transition:opacity .6s cubic-bezier(.4,0,.2,1)}
 .carousel-crossfade.active{opacity:1}
 
-/* Ken Burns keyframes */
-@keyframes kbZoom1{0%{transform:scale(1)}100%{transform:scale(1.08) translate(-1%,-0.5%)}}
-@keyframes kbZoom2{0%{transform:scale(1.05)}100%{transform:scale(1) translate(1%,0.5%)}}
-@keyframes kbZoom3{0%{transform:scale(1) translateY(-1%)}100%{transform:scale(1.06) translate(0.5%,1%)}}
-@keyframes kbZoom4{0%{transform:scale(1.04) translate(1%,0)}100%{transform:scale(1.1) translate(-0.5%,-1%)}}
-@keyframes kbZoom5{0%{transform:scale(1.02)}100%{transform:scale(1.07) translateY(0.5%)}}
+/* Ken Burns keyframes — 从 cover 状态缓慢放大+平移 */
+@keyframes kbZoom1{0%{transform:scale(1)}100%{transform:scale(1.12) translate(-1%,-0.5%)}}
+@keyframes kbZoom2{0%{transform:scale(1.06)}100%{transform:scale(1) translate(1%,0.5%)}}
+@keyframes kbZoom3{0%{transform:scale(1) translateY(-1%)}100%{transform:scale(1.1) translate(0.5%,1%)}}
+@keyframes kbZoom4{0%{transform:scale(1.08) translate(1%,0)}100%{transform:scale(1.14) translate(-0.5%,-1%)}}
+@keyframes kbZoom5{0%{transform:scale(1.04)}100%{transform:scale(1.1) translateY(0.5%)}}
 
 /* 光晕扫过效果 */
 .carousel-light-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(184,151,106,.04) 45%,rgba(184,151,106,.08) 50%,rgba(184,151,106,.04) 55%,transparent 60%);opacity:0;transform:translateX(-100%);transition:none}
