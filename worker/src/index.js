@@ -427,6 +427,20 @@ export default {
         return json(map, corsHeaders);
       }
 
+      // ─── 通用图片上传 (管理) ───
+      if (pathname === '/api/upload-image' && method === 'POST') {
+        const formData = await request.formData();
+        const file = formData.get('image');
+        if (!file || typeof file === 'string') return json({ error: 'Image file is required' }, corsHeaders, 400);
+
+        const ext = file.name.split('.').pop() || 'jpg';
+        const folder = formData.get('folder') || 'settings';
+        const key = `${folder}/${crypto.randomUUID()}.${ext}`;
+        await env.R2.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
+
+        return json({ success: true, key }, corsHeaders, 201);
+      }
+
       return json({ error: 'Not found' }, corsHeaders, 404);
     } catch (err) {
       return json({ error: err.message }, corsHeaders, 500);

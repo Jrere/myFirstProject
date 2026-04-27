@@ -368,12 +368,15 @@ body:hover .cursor-glow{opacity:1}
 .process-step p{font-size:.82rem;line-height:1.8;color:var(--text);font-weight:300}
 
 /* Testimonials */
-.testimonials{background:var(--charcoal);text-align:center;overflow:hidden}
-.testimonials .section-eyebrow{color:var(--gold-light)}
-.testimonials .section-title{color:var(--white)}
-.testimonials .section-title-cn{color:rgba(255,255,255,.3)}
-.testimonials .section-divider{background:linear-gradient(90deg,transparent,var(--gold-light),transparent)}
-.testimonial-slider{max-width:750px;margin:64px auto 0;position:relative;min-height:260px}
+.testimonials{background:var(--charcoal);text-align:center;overflow:hidden;position:relative}
+.testimonials-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.testimonials-bg img{width:100%;height:100%;object-fit:cover;opacity:.25;filter:blur(1px)}
+.testimonials-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,26,26,.75) 0%,rgba(26,26,26,.55) 40%,rgba(26,26,26,.65) 70%,rgba(26,26,26,.85) 100%)}
+.testimonials .section-eyebrow{color:var(--gold-light);position:relative;z-index:1}
+.testimonials .section-title{color:var(--white);position:relative;z-index:1}
+.testimonials .section-title-cn{color:rgba(255,255,255,.3);position:relative;z-index:1}
+.testimonials .section-divider{background:linear-gradient(90deg,transparent,var(--gold-light),transparent);position:relative;z-index:1}
+.testimonial-slider{max-width:750px;margin:64px auto 0;position:relative;min-height:260px;z-index:1}
 .testimonial-item{position:absolute;inset:0;opacity:0;transition:opacity 1s var(--ease);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px}
 .testimonial-item.active{opacity:1}
 .testimonial-stars{color:var(--gold);font-size:.6rem;letter-spacing:6px;margin-bottom:20px}
@@ -381,7 +384,7 @@ body:hover .cursor-glow{opacity:1}
 .testimonial-quote::before{content:'"';position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-family:var(--font-display);font-size:4.5rem;color:var(--gold);opacity:.3;line-height:1;font-style:normal}
 .testimonial-author{font-family:var(--font-sans);font-size:.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold-light);margin-top:28px}
 .testimonial-detail{font-family:var(--font-cn);font-size:.72rem;color:rgba(255,255,255,.3);margin-top:6px;letter-spacing:3px}
-.testimonial-dots{display:flex;gap:12px;justify-content:center;margin-top:36px}
+.testimonial-dots{display:flex;gap:12px;justify-content:center;margin-top:36px;position:relative;z-index:1}
 .testimonial-dot{width:32px;height:2px;background:rgba(255,255,255,.15);cursor:pointer;transition:all .4s var(--ease);border-radius:1px}
 .testimonial-dot.active{background:var(--gold);width:48px}
 
@@ -881,6 +884,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 
 <!-- Testimonials -->
 <section class="section testimonials" id="testimonials">
+  <div class="testimonials-bg" id="testimonialsBg"></div>
   <p class="section-eyebrow reveal" id="testiEyebrow">Testimonials</p>
   <h2 class="section-title reveal" id="testiTitle">Client Stories</h2>
   <p class="section-title-cn reveal" id="testiTitleCn">客 户 心 声</p>
@@ -1426,6 +1430,17 @@ function applySettings() {
   if (s.phil_desc) document.getElementById('philDesc').textContent = s.phil_desc;
   if (s.showcase_quote) document.getElementById('showcaseQuote').textContent = s.showcase_quote;
   if (s.showcase_cite) document.getElementById('showcaseCite').textContent = s.showcase_cite;
+  // Testimonials background image
+  const testiBg = document.getElementById('testimonialsBg');
+  if (testiBg) {
+    if (s.testimonials_bg_key) {
+      testiBg.innerHTML = `<img src="${API_BASE}/api/image/${encodeURIComponent(s.testimonials_bg_key)}" alt="" loading="lazy">`;
+      testiBg.style.display = '';
+    } else {
+      testiBg.innerHTML = '';
+      testiBg.style.display = 'none';
+    }
+  }
 }
 
 // Fetch banners from API

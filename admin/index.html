@@ -616,6 +616,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
               <div class="form-group"><label>大标题</label><input type="text" id="secTestiTitle" placeholder="Client Stories"></div>
             </div>
             <div class="form-group"><label>中文副标题</label><input type="text" id="secTestiTitleCn" placeholder="客 户 心 声"></div>
+            <div class="form-group">
+              <label>背景图片</label>
+              <div class="upload-zone" id="testiBgUploadZone" onclick="document.getElementById('testiBgFileInput').click()">
+                <div id="testiBgUploadPlaceholder">
+                  <div class="upload-icon">🖼️</div>
+                  <div class="upload-text">点击上传背景图片（可选）</div>
+                  <div class="upload-hint">💡 推荐横版图片（16:9 或更宽），如 1920×1080<br>横版图片能更好地覆盖整个区域，避免上下被裁切<br>不上传则保持原有纯色背景效果</div>
+                </div>
+                <div id="testiBgUploadPreview" style="display:none">
+                  <img id="testiBgPreviewImg" src="" alt="">
+                  <div class="change-overlay">更换图片</div>
+                </div>
+                <input type="file" id="testiBgFileInput" accept="image/*" onchange="handleTestiBgFile(event)" style="display:none">
+              </div>
+              <div id="testiBgOrientation" style="display:none;margin-top:10px;padding:10px 14px;border-radius:var(--radius-xs);font-size:.75rem;letter-spacing:.5px"></div>
+              <button class="btn btn-ghost btn-sm" id="testiBgRemoveBtn" style="display:none;margin-top:10px" onclick="removeTestiBg()">🗑️ 移除背景图</button>
+            </div>
           </div>
           <!-- 咨询合作 -->
           <div class="settings-group">
@@ -753,6 +770,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           </div>
           <input type="file" id="bannerFileInput" accept="image/*" onchange="handleBannerFile(event)">
         </div>
+        <div id="bannerOrientation" style="display:none;margin-top:10px;padding:10px 14px;border-radius:var(--radius-xs);font-size:.75rem;letter-spacing:.5px"></div>
       </div>
       <div class="form-group"><label>标题</label><input type="text" id="bannerTitle" placeholder="品牌视觉大片"></div>
       <div class="form-group"><label>副标题</label><input type="text" id="bannerSubtitle" placeholder="专业 · 高端 · 定制"></div>
@@ -994,9 +1012,36 @@ function closeWorkModal() { document.getElementById('workModalOverlay').classLis
 function handleWorkFile(e) {
   const file = e.target.files[0]; if (!file) return;
   workFile = file;
-  document.getElementById('workPreviewImg').src = URL.createObjectURL(file);
+  const previewUrl = URL.createObjectURL(file);
+  document.getElementById('workPreviewImg').src = previewUrl;
   document.getElementById('workUploadPlaceholder').style.display = 'none';
   document.getElementById('workUploadPreview').style.display = '';
+
+  // Detect orientation and show hint
+  const existingHint = document.getElementById('workOrientation');
+  if (existingHint) existingHint.remove();
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const ratio = (w / h).toFixed(2);
+    let tip = '', bgColor = '', textColor = '';
+    if (w > h) {
+      tip = `✅ 横版图片 (${w}×${h}) — 展示效果好`;
+      bgColor = 'rgba(46,213,115,.1)'; textColor = 'var(--green)';
+    } else if (h > w) {
+      tip = `ℹ️ 竖版图片 (${w}×${h}) — 在网格中可能被裁剪`;
+      bgColor = 'rgba(255,165,2,.1)'; textColor = 'var(--amber)';
+    } else {
+      tip = `ℹ️ 方形图片 (${w}×${h})`;
+      bgColor = 'rgba(83,82,237,.1)'; textColor = 'var(--blue)';
+    }
+    const div = document.createElement('div');
+    div.id = 'workOrientation';
+    div.style.cssText = `margin-top:10px;padding:10px 14px;border-radius:var(--radius-xs);font-size:.75rem;letter-spacing:.5px;background:${bgColor};color:${textColor}`;
+    div.textContent = tip;
+    document.getElementById('workUploadZone').closest('.form-group').appendChild(div);
+  };
+  img.src = previewUrl;
 }
 
 async function saveWork() {
@@ -1084,9 +1129,32 @@ function closeBannerModal() { document.getElementById('bannerModalOverlay').clas
 function handleBannerFile(e) {
   const file = e.target.files[0]; if (!file) return;
   bannerFile = file;
-  document.getElementById('bannerPreviewImg').src = URL.createObjectURL(file);
+  const previewUrl = URL.createObjectURL(file);
+  document.getElementById('bannerPreviewImg').src = previewUrl;
   document.getElementById('bannerUploadPlaceholder').style.display = 'none';
   document.getElementById('bannerUploadPreview').style.display = '';
+
+  // Detect orientation
+  const orientationEl = document.getElementById('bannerOrientation');
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const ratio = (w / h).toFixed(2);
+    let tip = '', bgColor = '', textColor = '';
+    if (w > h * 1.2) {
+      tip = `✅ 横版图片 (${w}×${h}，宽高比 ${ratio}:1) — 非常适合轮播图！能完整显示`;
+      bgColor = 'rgba(46,213,115,.1)'; textColor = 'var(--green)';
+    } else if (h > w * 1.2) {
+      tip = `⚠️ 竖版图片 (${w}×${h}，宽高比 ${ratio}:1) — 竖版图片会被居中裁剪，上下部分可能丢失。强烈建议使用横版图片`;
+      bgColor = 'rgba(255,71,87,.1)'; textColor = 'var(--red)';
+    } else {
+      tip = `ℹ️ 方形图片 (${w}×${h}，宽高比 ${ratio}:1) — 可以使用，但横版图片效果更佳`;
+      bgColor = 'rgba(83,82,237,.1)'; textColor = 'var(--blue)';
+    }
+    orientationEl.textContent = tip;
+    orientationEl.style.cssText = `display:block;background:${bgColor};color:${textColor};border-radius:var(--radius-xs);padding:10px 14px;font-size:.75rem;letter-spacing:.5px;margin-top:10px`;
+  };
+  img.src = previewUrl;
 }
 
 async function saveBanner() {
@@ -1287,6 +1355,58 @@ const sectionKeys = [
   ['sugst_title_cn', 'secSugstTitleCn'],
 ];
 
+// ═══ Testimonials Background Image ═══
+let testiBgFile = null;
+let testiBgExistingKey = '';
+
+function handleTestiBgFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  testiBgFile = file;
+
+  // Show preview
+  const previewUrl = URL.createObjectURL(file);
+  document.getElementById('testiBgPreviewImg').src = previewUrl;
+  document.getElementById('testiBgUploadPlaceholder').style.display = 'none';
+  document.getElementById('testiBgUploadPreview').style.display = '';
+  document.getElementById('testiBgRemoveBtn').style.display = '';
+
+  // Detect orientation
+  const orientationEl = document.getElementById('testiBgOrientation');
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const ratio = (w / h).toFixed(2);
+    let tip = '', color = '';
+    if (w > h * 1.2) {
+      // Landscape - ideal
+      tip = `✅ 横版图片 (${w}×${h}，宽高比 ${ratio}:1) — 非常适合做背景！能完整覆盖区域`;
+      color = 'var(--green-bg); color: var(--green)';
+    } else if (h > w * 1.2) {
+      // Portrait - not ideal
+      tip = `⚠️ 竖版图片 (${w}×${h}，宽高比 ${ratio}:1) — 竖版图片会居中显示，左右两侧可能有较大空白区域。建议使用横版图片效果更好`;
+      color = 'var(--amber-bg); color: var(--amber)';
+    } else {
+      // Square-ish
+      tip = `ℹ️ 方形图片 (${w}×${h}，宽高比 ${ratio}:1) — 可以使用，横版图片效果会更好`;
+      color = 'var(--blue-bg); color: var(--blue)';
+    }
+    orientationEl.textContent = tip;
+    orientationEl.style.cssText = `display:block;background:${color.split(';')[0]};color:${color.split(';')[1]};border-radius:var(--radius-xs);padding:10px 14px;font-size:.75rem;letter-spacing:.5px;margin-top:10px`;
+  };
+  img.src = previewUrl;
+}
+
+function removeTestiBg() {
+  testiBgFile = null;
+  testiBgExistingKey = '';
+  document.getElementById('testiBgFileInput').value = '';
+  document.getElementById('testiBgUploadPlaceholder').style.display = '';
+  document.getElementById('testiBgUploadPreview').style.display = 'none';
+  document.getElementById('testiBgRemoveBtn').style.display = 'none';
+  document.getElementById('testiBgOrientation').style.display = 'none';
+}
+
 async function loadSectionContent() {
   try {
     const s = await api('/api/settings');
@@ -1294,6 +1414,19 @@ async function loadSectionContent() {
       const el = document.getElementById(elId);
       if (el && s[key]) el.value = s[key];
     }
+    // Load testimonials background image
+    testiBgExistingKey = s.testimonials_bg_key || '';
+    if (testiBgExistingKey) {
+      document.getElementById('testiBgPreviewImg').src = `${API_BASE}/api/image/${encodeURIComponent(testiBgExistingKey)}`;
+      document.getElementById('testiBgUploadPlaceholder').style.display = 'none';
+      document.getElementById('testiBgUploadPreview').style.display = '';
+      document.getElementById('testiBgRemoveBtn').style.display = '';
+    } else {
+      document.getElementById('testiBgUploadPlaceholder').style.display = '';
+      document.getElementById('testiBgUploadPreview').style.display = 'none';
+      document.getElementById('testiBgRemoveBtn').style.display = 'none';
+    }
+    document.getElementById('testiBgOrientation').style.display = 'none';
   } catch (e) { /* settings already loaded */ }
 }
 
@@ -1303,11 +1436,31 @@ async function saveSectionContent() {
     const el = document.getElementById(elId);
     if (el) body[key] = el.value;
   }
+
+  // Handle testimonials background image upload
+  if (testiBgFile) {
+    const fd = new FormData();
+    fd.append('image', testiBgFile);
+    try {
+      const res = await fetch(`${API_BASE}/api/upload-image`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: fd
+      });
+      if (!res.ok) throw new Error('图片上传失败');
+      const data = await res.json();
+      body.testimonials_bg_key = data.key;
+    } catch (e) { toast('背景图片上传失败: ' + e.message, 'error'); return; }
+  } else if (!testiBgExistingKey) {
+    body.testimonials_bg_key = '';
+  }
+
   try {
     await api('/api/settings', {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+    testiBgFile = null;
     toast('模块内容已保存，刷新前台页面后生效', 'success');
   } catch (e) { toast(e.message, 'error'); }
 }
