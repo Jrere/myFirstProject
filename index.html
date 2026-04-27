@@ -67,11 +67,18 @@ body:hover .cursor-glow{opacity:1}
 .nav-logo-text{display:flex;flex-direction:column}
 .nav-logo-en{font-family:var(--font-display);font-size:1.1rem;font-weight:500;letter-spacing:4px;color:var(--charcoal)}
 .nav-logo-cn{font-family:var(--font-cn);font-size:.65rem;font-weight:300;letter-spacing:6px;color:var(--gold);margin-top:1px}
-.nav-links{display:flex;gap:40px;list-style:none}
-.nav-links a{font-family:var(--font-sans);font-size:.72rem;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:var(--soft-black);position:relative;padding:6px 0;transition:color .3s}
-.nav-links a::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:1px;background:var(--gold);transition:all .4s var(--ease);transform:translateX(-50%)}
-.nav-links a:hover{color:var(--gold)}
-.nav-links a:hover::after{width:100%}
+.nav-links{display:flex;gap:44px;list-style:none}
+.nav-links a{font-family:var(--font-sans);font-size:.72rem;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--soft-black);position:relative;padding:10px 0;transition:color .4s cubic-bezier(.25,.46,.45,.94),letter-spacing .4s cubic-bezier(.25,.46,.45,.94)}
+.nav-links a::before{content:'';position:absolute;bottom:0;left:50%;width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transition:all .5s cubic-bezier(.16,1,.3,1);transform:translateX(-50%)}
+.nav-links a::after{content:'';position:absolute;bottom:-2px;left:50%;width:0;height:3px;background:var(--gold);border-radius:2px;transition:all .5s cubic-bezier(.16,1,.3,1);transform:translateX(-50%);opacity:0}
+.nav-links a:hover{color:var(--gold);letter-spacing:3.5px}
+.nav-links a:hover::before{width:100%}
+.nav-links a:hover::after{width:16px;opacity:.3}
+.nav-links a:active{transition-duration:.1s}
+.nav-links a:active::before{width:80%}
+.nav-links a.active{color:var(--gold)}
+.nav-links a.active::before{width:100%}
+.nav-links a.active::after{width:6px;opacity:.5}
 .nav-right{display:flex;align-items:center;gap:16px}
 .nav-cta{font-family:var(--font-sans);font-size:.68rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;padding:12px 32px;border:1px solid var(--gold);color:var(--gold);transition:all .4s var(--ease);position:relative;overflow:hidden}
 .nav-cta::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);z-index:-1}
@@ -1425,9 +1432,25 @@ window.addEventListener('load', async () => {
 
 // ===== Nav Scroll =====
 const nav = document.getElementById('nav');
+const navLinks = document.querySelectorAll('.nav-links a');
+const sections = ['philosophy', 'portfolio', 'services', 'testimonials', 'booking'];
+
+function updateActiveNav() {
+  const scrollY = window.scrollY + 200;
+  let current = '';
+  for (const id of sections) {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) current = id;
+  }
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 60);
   document.getElementById('backTop').classList.toggle('show', window.scrollY > 600);
+  updateActiveNav();
 });
 
 function closeMobileMenu() {
