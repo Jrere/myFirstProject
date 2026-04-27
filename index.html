@@ -46,8 +46,17 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .loader-logo::after{content:'';position:absolute;inset:-12px;border:1px solid rgba(184,151,106,.15);border-radius:50%;animation:loaderRing 2s var(--ease) infinite}
 .loader-brand{font-family:var(--font-display);font-size:2rem;font-weight:400;letter-spacing:16px;color:var(--gold-light);margin-bottom:6px;opacity:0;animation:loaderTextIn .8s var(--ease) .4s forwards}
 .loader-brand-cn{font-family:var(--font-cn);font-size:.7rem;font-weight:200;letter-spacing:8px;color:rgba(184,151,106,.5);margin-bottom:36px;opacity:0;animation:loaderTextIn .8s var(--ease) .6s forwards}
-.loader-bar{width:160px;height:1px;background:rgba(255,255,255,.06);margin:0 auto;position:relative;overflow:hidden;opacity:0;animation:loaderTextIn .6s var(--ease) .8s forwards}
-.loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light),var(--gold-dark));animation:loaderFill 2s var(--ease) .8s forwards}
+.loader-bar{width:160px;height:1px;background:rgba(255,255,255,.06);margin:0 auto;position:relative;overflow:visible;opacity:0;animation:loaderTextIn .6s var(--ease) .8s forwards}
+.loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light),var(--gold-dark));animation:loaderFill 2s var(--ease) .8s forwards;box-shadow:0 0 8px rgba(184,151,106,.6),0 0 20px rgba(184,151,106,.3)}
+.loader-sparks{position:absolute;left:0;top:-2px;width:160px;height:60px;pointer-events:none;opacity:0;animation:loaderTextIn .6s var(--ease) .8s forwards}
+.spark{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--gold-light);box-shadow:0 0 4px var(--gold),0 0 8px rgba(184,151,106,.5);animation:sparkFly var(--spark-dur,.8s) var(--spark-delay,0s) ease-out infinite}
+.spark:nth-child(odd){width:1.5px;height:1.5px;background:#fff;box-shadow:0 0 3px var(--gold-light),0 0 6px var(--gold)}
+.spark:nth-child(3n){width:3px;height:3px;background:var(--gold);box-shadow:0 0 6px var(--gold),0 0 12px rgba(184,151,106,.4)}
+@keyframes sparkFly{
+  0%{opacity:1;transform:translate(var(--spark-x,0),0) scale(1)}
+  50%{opacity:.8}
+  100%{opacity:0;transform:translate(calc(var(--spark-x,0) + var(--spark-drift,10px)),calc(-30px - var(--spark-height,20px))) scale(0)}
+}
 .loader-progress{font-family:var(--font-sans);font-size:.6rem;letter-spacing:4px;color:rgba(255,255,255,.2);margin-top:16px;opacity:0;animation:loaderTextIn .6s var(--ease) .8s forwards}
 @keyframes loaderFill{to{width:100%}}
 @keyframes loaderLogoIn{to{opacity:1;transform:scale(1)}}
@@ -537,7 +546,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
     </div>
     <div class="loader-brand">BAILUYUAN</div>
     <div class="loader-brand-cn">白 鹿 缘 摄 影</div>
-    <div class="loader-bar"></div>
+    <div class="loader-bar"><div class="loader-sparks" id="loaderSparks"></div></div>
     <div class="loader-progress">LOADING</div>
   </div>
 </div>
@@ -1419,8 +1428,26 @@ document.addEventListener('mousemove', e => {
   cursorGlow.style.top = e.clientY + 'px';
 });
 
+// ===== Loader Sparks =====
+function createLoaderSparks() {
+  const container = document.getElementById('loaderSparks');
+  if (!container) return;
+  for (let i = 0; i < 20; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'spark';
+    const x = Math.random() * 140 + 10;
+    const drift = (Math.random() - 0.5) * 30;
+    const height = 15 + Math.random() * 35;
+    const dur = 0.4 + Math.random() * 0.6;
+    const delay = Math.random() * 1.5;
+    spark.style.cssText = `left:${x}px;bottom:0;--spark-drift:${drift}px;--spark-height:${height}px;--spark-dur:${dur}s;--spark-delay:${delay}s`;
+    container.appendChild(spark);
+  }
+}
+
 // ===== Loader =====
 window.addEventListener('load', async () => {
+  createLoaderSparks();
   setTimeout(() => document.getElementById('loader').classList.add('hide'), 2200);
   createParticles();
   updateAuthUI();
