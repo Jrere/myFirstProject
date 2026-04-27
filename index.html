@@ -303,6 +303,8 @@ body:hover .cursor-glow{opacity:1}
 /* Showcase Parallax */
 .showcase{height:85vh;min-height:550px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .showcase-bg{position:absolute;inset:0;background:linear-gradient(160deg,#1a1714 0%,#2a2520 50%,#1a1714 100%)}
+.showcase-bg::before{content:'';position:absolute;top:0;left:0;right:0;height:120px;background:linear-gradient(to bottom,var(--ivory),transparent);z-index:1}
+.showcase-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--white),transparent);z-index:1}
 .showcase-light{position:absolute;top:0;left:30%;width:40%;height:100%;background:radial-gradient(ellipse at 50% 40%,rgba(184,151,106,.06) 0%,transparent 70%)}
 .showcase-content{position:relative;z-index:2;text-align:center;padding:0 20px;max-width:700px}
 .showcase-content .quote-mark{font-family:var(--font-display);font-size:6rem;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-20px}
@@ -1462,19 +1464,24 @@ function createShowcaseSparks() {
   const container = document.getElementById('showcaseSparks');
   if (!container) return;
   const types = ['gold', 'white', 'ember'];
-  for (let i = 0; i < 35; i++) {
-    const spark = document.createElement('div');
-    const type = types[Math.floor(Math.random() * types.length)];
-    spark.className = `showcase-spark ${type}`;
-    const size = 1.5 + Math.random() * 3;
-    const x = Math.random() * 100;
-    const y = 40 + Math.random() * 50;
-    const drift = (Math.random() - 0.5) * 80;
-    const rise = -(60 + Math.random() * 100);
-    const dur = 2 + Math.random() * 3;
-    const delay = Math.random() * 4;
-    spark.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px;--sk-drift:${drift}px;--sk-rise:${rise}px;--sk-dur:${dur}s;--sk-delay:${delay}s`;
-    container.appendChild(spark);
+  // 7列 x 5行均匀分布
+  const cols = 7, rows = 5;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const spark = document.createElement('div');
+      const type = types[Math.floor(Math.random() * types.length)];
+      spark.className = `showcase-spark ${type}`;
+      const size = 1.5 + Math.random() * 2.5;
+      // 在每个格子内随机偏移
+      const x = (c / cols) * 100 + (Math.random() * (100 / cols));
+      const y = (r / rows) * 100 + (Math.random() * (100 / rows));
+      const drift = (Math.random() - 0.5) * 60;
+      const rise = -(40 + Math.random() * 80);
+      const dur = 2.5 + Math.random() * 2.5;
+      const delay = Math.random() * 5;
+      spark.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px;--sk-drift:${drift}px;--sk-rise:${rise}px;--sk-dur:${dur}s;--sk-delay:${delay}s`;
+      container.appendChild(spark);
+    }
   }
 }
 
