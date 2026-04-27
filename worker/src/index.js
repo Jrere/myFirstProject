@@ -171,6 +171,16 @@ export default {
         return json(row, corsHeaders);
       }
 
+      // ─── 客户心声 (公开) ───
+      if (pathname === '/api/testimonials' && method === 'GET') {
+        const activeOnly = url.searchParams.get('active');
+        let query = 'SELECT * FROM testimonials';
+        if (activeOnly === '1') query += ' WHERE active = 1';
+        query += ' ORDER BY sort_order ASC, created_at ASC';
+        const { results } = await env.DB.prepare(query).all();
+        return json(results, corsHeaders);
+      }
+
       // ─── 获取设置 (公开) ───
       if (pathname === '/api/settings' && method === 'GET') {
         const { results } = await env.DB.prepare('SELECT * FROM settings').all();
@@ -439,6 +449,85 @@ export default {
         await env.R2.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
 
         return json({ success: true, key }, corsHeaders, 201);
+      }
+
+      // ─── 客户心声 CRUD (管理) ───
+      if (pathname === '/api/testimonials' && method === 'GET') {
+        const { results } = await env.DB.prepare(
+          'SELECT * FROM testimonials ORDER BY sort_order ASC, created_at ASC'
+        ).all();
+        return json(results, corsHeaders);
+      }
+
+      if (pathname === '/api/testimonials' && method === 'POST') {
+        const formData = await request.formData();
+        const quote = formData.get('quote') || '';
+        const author = formData.get('author') || '';
+        const detail = formData.get('detail') || '';
+        const stars = parseInt(formData.get('stars') || '5', 10);
+        const sortOrder = parseInt(formData.get('sort_order') || '0', 10);
+        const active = formData.get('active') != null ? parseInt(formData.get('active'), 10) : 1;
+
+        let bgKey = '';
+        const file = formData.get('bg_image');
+        if (file && typeof file !== 'string') {
+          const ext = file.name.split('.').pop() || 'jpg';
+          bgKey = `testimonials/${crypto.randomUUID()}.${ext}`;
+          await env.R2.put(bgKey, file.stream(), { httpMetadata: { contentType: file.type } });
+        }
+
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          'INSERT INTO testimonials (id, quote, author, detail, stars, bg_key, sort_order, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind(id, quote, author, detail, stars, bgKey, sortOrder, active).run();
+
+        const row = await env.DB.prepare('SELECT * FROM testimonials WHERE id = ?').bind(id).first();
+        return json(row, corsHeaders, 201);
+      }
+
+      const testimonialUpdateMatch = pathname.match(/^\/api\/testimonials\/([^/]+)$/);
+      if (testimonialUpdateMatch && method === 'PUT') {
+        const id = testimonialUpdateMatch[1];
+        const existing = await env.DB.prepare('SELECT * FROM testimonials WHERE id = ?').bind(id).first();
+        if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
+
+        const formData = await request.formData();
+        const quote = formData.get('quote') ?? existing.quote;
+        const author = formData.get('author') ?? existing.author;
+        const detail = formData.get('detail') ?? existing.detail;
+        const stars = formData.get('stars') != null ? parseInt(formData.get('stars'), 10) : existing.stars;
+        const sortOrder = formData.get('sort_order') != null ? parseInt(formData.get('sort_order'), 10) : existing.sort_order;
+        const active = formData.get('active') != null ? parseInt(formData.get('active'), 10) : existing.active;
+
+        let bgKey = existing.bg_key;
+        const file = formData.get('bg_image');
+        if (file && typeof file !== 'string') {
+          if (bgKey) await env.R2.delete(bgKey);
+          const ext = file.name.split('.').pop() || 'jpg';
+          bgKey = `testimonials/${crypto.randomUUID()}.${ext}`;
+          await env.R2.put(bgKey, file.stream(), { httpMetadata: { contentType: file.type } });
+        }
+        // Check if bg_image removal was requested
+        if (formData.get('remove_bg') === '1' && bgKey) {
+          await env.R2.delete(bgKey);
+          bgKey = '';
+        }
+
+        await env.DB.prepare(
+          'UPDATE testimonials SET quote=?, author=?, detail=?, stars=?, bg_key=?, sort_order=?, active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+        ).bind(quote, author, detail, stars, bgKey, sortOrder, active, id).run();
+
+        const row = await env.DB.prepare('SELECT * FROM testimonials WHERE id = ?').bind(id).first();
+        return json(row, corsHeaders);
+      }
+
+      if (testimonialUpdateMatch && method === 'DELETE') {
+        const id = testimonialUpdateMatch[1];
+        const existing = await env.DB.prepare('SELECT * FROM testimonials WHERE id = ?').bind(id).first();
+        if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
+        if (existing.bg_key) await env.R2.delete(existing.bg_key);
+        await env.DB.prepare('DELETE FROM testimonials WHERE id = ?').bind(id).run();
+        return json({ success: true }, corsHeaders);
       }
 
       return json({ error: 'Not found' }, corsHeaders, 404);

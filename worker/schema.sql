@@ -63,3 +63,19 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
+CREATE TABLE IF NOT EXISTS testimonials (
+  id TEXT PRIMARY KEY,
+  quote TEXT NOT NULL DEFAULT '',
+  author TEXT NOT NULL DEFAULT '',
+  detail TEXT NOT NULL DEFAULT '',
+  stars INTEGER NOT NULL DEFAULT 5,
+  bg_key TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_testimonials_sort ON testimonials(sort_order);
+CREATE INDEX IF NOT EXISTS idx_testimonials_active ON testimonials(active);

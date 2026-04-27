@@ -369,9 +369,10 @@ body:hover .cursor-glow{opacity:1}
 
 /* Testimonials */
 .testimonials{background:var(--charcoal);text-align:center;overflow:hidden;position:relative}
-.testimonials-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
-.testimonials-bg img{width:100%;height:100%;object-fit:cover;opacity:.25;filter:blur(1px)}
-.testimonials-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,26,26,.75) 0%,rgba(26,26,26,.55) 40%,rgba(26,26,26,.65) 70%,rgba(26,26,26,.85) 100%)}
+.testimonials-bg{position:absolute;inset:0;z-index:0;overflow:hidden;opacity:0;transition:opacity 1.2s var(--ease)}
+.testimonials-bg.active{opacity:1}
+.testimonials-bg img{width:100%;height:100%;object-fit:cover;filter:blur(2px)}
+.testimonials-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,26,26,.7) 0%,rgba(26,26,26,.45) 35%,rgba(26,26,26,.55) 65%,rgba(26,26,26,.8) 100%)}
 .testimonials .section-eyebrow{color:var(--gold-light);position:relative;z-index:1}
 .testimonials .section-title{color:var(--white);position:relative;z-index:1}
 .testimonials .section-title-cn{color:rgba(255,255,255,.3);position:relative;z-index:1}
@@ -900,35 +901,16 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 
 <!-- Testimonials -->
 <section class="section testimonials" id="testimonials">
-  <div class="testimonials-bg" id="testimonialsBg"></div>
+  <div id="testimonialsBgContainer"></div>
   <p class="section-eyebrow reveal" id="testiEyebrow">Testimonials</p>
   <h2 class="section-title reveal" id="testiTitle">Client Stories</h2>
   <p class="section-title-cn reveal" id="testiTitleCn">客 户 心 声</p>
   <div class="section-divider reveal"></div>
-  <div class="testimonial-slider reveal">
-    <div class="testimonial-item active">
-      <div class="testimonial-stars">★ ★ ★ ★ ★</div>
-      <p class="testimonial-quote">白鹿缘为我们公司拍的企业宣传片效果远超预期。从脚本策划到拍摄执行非常专业，成片在行业展会上播放时反响很好，品牌形象提升了一个档次。</p>
-      <p class="testimonial-author">Zhang Wei · 科技公司 CEO</p>
-      <p class="testimonial-detail">2025年11月 · 企业宣传片</p>
-    </div>
-    <div class="testimonial-item">
-      <div class="testimonial-stars">★ ★ ★ ★ ★</div>
-      <p class="testimonial-quote">给爸妈拍了一组银发团纪念照，摄影师特别耐心，逗得两位老人笑得很自然。看到成片那一刻特别感动，谢谢白鹿缘留住了这么温暖的画面。</p>
-      <p class="testimonial-author">Liu Fang</p>
-      <p class="testimonial-detail">2025年9月 · 银发团</p>
-    </div>
-    <div class="testimonial-item">
-      <div class="testimonial-stars">★ ★ ★ ★ ★</div>
-      <p class="testimonial-quote">公司需要给团队统一拍职业肖像，白鹿缘上门服务，效率高、出片好。每张照片都很专业又有亲和力，同事们都非常满意。</p>
-      <p class="testimonial-author">Chen Jie · 人力资源总监</p>
-      <p class="testimonial-detail">2025年持续合作 · 肖像</p>
-    </div>
+  <div class="testimonial-slider reveal" id="testimonialSlider">
+    <!-- Rendered by JS -->
   </div>
-  <div class="testimonial-dots reveal">
-    <div class="testimonial-dot active" data-index="0"></div>
-    <div class="testimonial-dot" data-index="1"></div>
-    <div class="testimonial-dot" data-index="2"></div>
+  <div class="testimonial-dots reveal" id="testimonialDots">
+    <!-- Rendered by JS -->
   </div>
 </section>
 
@@ -1164,6 +1146,9 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <button class="back-top" id="backTop">↑</button>
 
 <script>
+// ===== Utilities =====
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 // ===== Photo SVG Templates =====
 function photoSVG(category) {
   const icons = {
@@ -1460,17 +1445,6 @@ function applySettings() {
   if (s.phil_desc) document.getElementById('philDesc').textContent = s.phil_desc;
   if (s.showcase_quote) document.getElementById('showcaseQuote').textContent = s.showcase_quote;
   if (s.showcase_cite) document.getElementById('showcaseCite').textContent = s.showcase_cite;
-  // Testimonials background image
-  const testiBg = document.getElementById('testimonialsBg');
-  if (testiBg) {
-    if (s.testimonials_bg_key) {
-      testiBg.innerHTML = `<img src="${API_BASE}/api/image/${encodeURIComponent(s.testimonials_bg_key)}" alt="" loading="lazy">`;
-      testiBg.style.display = '';
-    } else {
-      testiBg.innerHTML = '';
-      testiBg.style.display = 'none';
-    }
-  }
 }
 
 // Fetch banners from API
@@ -1573,10 +1547,11 @@ window.addEventListener('load', async () => {
   setTimeout(() => document.getElementById('loader').classList.add('hide'), 2200);
   createParticles();
   updateAuthUI();
-  await Promise.all([fetchBanners(), fetchWorks(), fetchSettings()]);
+  await Promise.all([fetchBanners(), fetchWorks(), fetchSettings(), fetchTestimonials()]);
   applySettings();
   renderCarousel();
   renderPortfolio();
+  renderTestimonials();
 });
 
 // ===== Nav Scroll =====
@@ -1651,18 +1626,98 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 // ===== Testimonial Slider =====
-const testimonials = document.querySelectorAll('.testimonial-item');
-const dots = document.querySelectorAll('.testimonial-dot');
+let testimonialsData = [];
+let testimonialBgs = [];
 let currentSlide = 0;
-function showSlide(n) {
-  testimonials.forEach(t => t.classList.remove('active'));
-  dots.forEach(d => d.classList.remove('active'));
-  currentSlide = n;
-  testimonials[n].classList.add('active');
-  dots[n].classList.add('active');
+let testimonialTimer = null;
+
+const testimonialsFallback = [
+  { quote:'白鹿缘为我们公司拍的企业宣传片效果远超预期。从脚本策划到拍摄执行非常专业，成片在行业展会上播放时反响很好，品牌形象提升了一个档次。', author:'Zhang Wei · 科技公司 CEO', detail:'2025年11月 · 企业宣传片', stars:5, bg_key:'' },
+  { quote:'给爸妈拍了一组银发团纪念照，摄影师特别耐心，逗得两位老人笑得很自然。看到成片那一刻特别感动，谢谢白鹿缘留住了这么温暖的画面。', author:'Liu Fang', detail:'2025年9月 · 银发团', stars:5, bg_key:'' },
+  { quote:'公司需要给团队统一拍职业肖像，白鹿缘上门服务，效率高、出片好。每张照片都很专业又有亲和力，同事们都非常满意。', author:'Chen Jie · 人力资源总监', detail:'2025年持续合作 · 肖像', stars:5, bg_key:'' },
+];
+
+async function fetchTestimonials() {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/api/testimonials?active=1`, 4000);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    if (data && data.length > 0) testimonialsData = data;
+  } catch (e) {
+    console.log('Testimonials API unavailable, using fallback:', e.message);
+  }
 }
-dots.forEach(d => d.addEventListener('click', () => showSlide(+d.dataset.index)));
-setInterval(() => showSlide((currentSlide + 1) % testimonials.length), 6000);
+
+function renderTestimonials() {
+  const source = testimonialsData.length > 0 ? testimonialsData : testimonialsFallback;
+  const slider = document.getElementById('testimonialSlider');
+  const dotsContainer = document.getElementById('testimonialDots');
+  const bgContainer = document.getElementById('testimonialsBgContainer');
+
+  // Render slides
+  slider.innerHTML = source.map((t, i) => {
+    const starsStr = '★ '.repeat(t.stars || 5).trim();
+    return `
+    <div class="testimonial-item ${i === 0 ? 'active' : ''}" data-index="${i}">
+      <div class="testimonial-stars">${starsStr}</div>
+      <p class="testimonial-quote">${esc(t.quote)}</p>
+      <p class="testimonial-author">${esc(t.author)}</p>
+      <p class="testimonial-detail">${esc(t.detail)}</p>
+    </div>`;
+  }).join('');
+
+  // Render dots
+  dotsContainer.innerHTML = source.map((_, i) =>
+    `<div class="testimonial-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
+  ).join('');
+
+  // Render background layers
+  const hasAnyBg = source.some(t => t.bg_key);
+  if (hasAnyBg) {
+    bgContainer.innerHTML = source.map((t, i) => {
+      if (!t.bg_key) return '';
+      return `<div class="testimonials-bg ${i === 0 ? 'active' : ''}" data-index="${i}"><img src="${API_BASE}/api/image/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy"></div>`;
+    }).join('');
+  } else {
+    bgContainer.innerHTML = '';
+  }
+  testimonialBgs = bgContainer.querySelectorAll('.testimonials-bg');
+
+  // Bind dot clicks
+  dotsContainer.querySelectorAll('.testimonial-dot').forEach(d => {
+    d.addEventListener('click', () => showTestimonialSlide(+d.dataset.index));
+  });
+
+  currentSlide = 0;
+  startTestimonialAutoplay();
+}
+
+function showTestimonialSlide(n) {
+  const source = testimonialsData.length > 0 ? testimonialsData : testimonialsFallback;
+  const total = source.length;
+  if (total === 0) return;
+  if (n < 0) n = total - 1;
+  if (n >= total) n = 0;
+
+  const items = document.querySelectorAll('.testimonial-item');
+  const dots = document.querySelectorAll('.testimonial-dot');
+
+  items.forEach(t => t.classList.remove('active'));
+  dots.forEach(d => d.classList.remove('active'));
+  testimonialBgs.forEach(b => b.classList.remove('active'));
+
+  currentSlide = n;
+  if (items[n]) items[n].classList.add('active');
+  if (dots[n]) dots[n].classList.add('active');
+  if (testimonialBgs[n]) testimonialBgs[n].classList.add('active');
+}
+
+function startTestimonialAutoplay() {
+  clearInterval(testimonialTimer);
+  const source = testimonialsData.length > 0 ? testimonialsData : testimonialsFallback;
+  if (source.length <= 1) return; // No autoplay for single item
+  testimonialTimer = setInterval(() => showTestimonialSlide(currentSlide + 1), 6000);
+}
 
 // ===== Scroll Reveal =====
 const observer = new IntersectionObserver((entries) => {

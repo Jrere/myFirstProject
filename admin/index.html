@@ -401,6 +401,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span class="icon">💬</span> 建议反馈 <span class="badge" id="suggestionsBadge">0</span>
       </div>
       <div class="sidebar-section">展示</div>
+      <div class="nav-item" data-page="testimonials" onclick="switchPage('testimonials')">
+        <span class="icon">⭐</span> 客户心声 <span class="badge" id="testimonialsBadge">0</span>
+      </div>
       <div class="nav-item" data-page="sections" onclick="switchPage('sections')">
         <span class="icon">📝</span> 内容管理
       </div>
@@ -438,9 +441,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <span class="bicon">📅</span>
       <span class="blabel">预约</span>
     </div>
-    <div class="bottom-nav-item" data-page="suggestions" onclick="switchPage('suggestions')">
-      <span class="bicon">💬</span>
-      <span class="blabel">建议</span>
+    <div class="bottom-nav-item" data-page="testimonials" onclick="switchPage('testimonials')">
+      <span class="bicon">⭐</span>
+      <span class="blabel">心声</span>
     </div>
     <div class="bottom-nav-item" data-page="sections" onclick="switchPage('sections')">
       <span class="bicon">📝</span>
@@ -557,6 +560,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
 
+    <!-- Testimonials -->
+    <div class="content page" id="pageTestimonials">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">⭐ 客户心声管理</span>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" onclick="loadTestimonials()">🔄 刷新</button>
+            <button class="btn btn-primary btn-sm" onclick="openTestimonialModal()">＋ 添加</button>
+          </div>
+        </div>
+        <div style="padding:12px 24px">
+          <p style="font-size:.75rem;color:var(--text-dim);line-height:1.7">💡 每条客户心声可单独设置背景图片。多条都有背景时，背景随轮播自动切换；仅一条有背景则不轮播。</p>
+        </div>
+        <div class="cards" id="testimonialsGrid"></div>
+      </div>
+    </div>
+
     <!-- Sections Content -->
     <div class="content page" id="pageSections">
       <div class="panel">
@@ -616,23 +636,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
               <div class="form-group"><label>大标题</label><input type="text" id="secTestiTitle" placeholder="Client Stories"></div>
             </div>
             <div class="form-group"><label>中文副标题</label><input type="text" id="secTestiTitleCn" placeholder="客 户 心 声"></div>
-            <div class="form-group">
-              <label>背景图片</label>
-              <div class="upload-zone" id="testiBgUploadZone" onclick="document.getElementById('testiBgFileInput').click()">
-                <div id="testiBgUploadPlaceholder">
-                  <div class="upload-icon">🖼️</div>
-                  <div class="upload-text">点击上传背景图片（可选）</div>
-                  <div class="upload-hint">💡 推荐横版图片（16:9 或更宽），如 1920×1080<br>横版图片能更好地覆盖整个区域，避免上下被裁切<br>不上传则保持原有纯色背景效果</div>
-                </div>
-                <div id="testiBgUploadPreview" style="display:none">
-                  <img id="testiBgPreviewImg" src="" alt="">
-                  <div class="change-overlay">更换图片</div>
-                </div>
-                <input type="file" id="testiBgFileInput" accept="image/*" onchange="handleTestiBgFile(event)" style="display:none">
-              </div>
-              <div id="testiBgOrientation" style="display:none;margin-top:10px;padding:10px 14px;border-radius:var(--radius-xs);font-size:.75rem;letter-spacing:.5px"></div>
-              <button class="btn btn-ghost btn-sm" id="testiBgRemoveBtn" style="display:none;margin-top:10px" onclick="removeTestiBg()">🗑️ 移除背景图</button>
-            </div>
+            <p style="font-size:.72rem;color:var(--text-muted);margin-top:-8px">💡 背景图片请在「客户心声」管理页面中为每条单独设置</p>
           </div>
           <!-- 咨询合作 -->
           <div class="settings-group">
@@ -788,6 +792,60 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   </div>
 </div>
 
+<!-- Testimonial Modal -->
+<div class="modal-overlay" id="testimonialModalOverlay" onclick="if(event.target===this)closeTestimonialModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="testimonialModalTitle">添加客户心声</h2>
+      <button class="modal-close" onclick="closeTestimonialModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="testimonialEditId">
+      <div class="form-group">
+        <label>背景图片（可选）</label>
+        <div class="upload-zone" id="testiUploadZone" onclick="document.getElementById('testiFileInput').click()">
+          <div id="testiUploadPlaceholder">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">点击上传背景图片</div>
+            <div class="upload-hint">💡 推荐横版图片（16:9），如 1920×1080<br>不上传则无背景，仅显示深色底</div>
+          </div>
+          <div id="testiUploadPreview" style="display:none">
+            <img id="testiPreviewImg" src="" alt="">
+            <div class="change-overlay">更换图片</div>
+          </div>
+          <input type="file" id="testiFileInput" accept="image/*" onchange="handleTestiFile(event)" style="display:none">
+        </div>
+        <div id="testiOrientation" style="display:none;margin-top:10px;padding:10px 14px;border-radius:var(--radius-xs);font-size:.75rem;letter-spacing:.5px"></div>
+        <button class="btn btn-ghost btn-sm" id="testiRemoveBgBtn" style="display:none;margin-top:10px" onclick="removeTestiBg()">🗑️ 移除背景图</button>
+      </div>
+      <div class="form-group">
+        <label>客户评价</label>
+        <textarea id="testimonialQuote" rows="4" placeholder="客户的评价内容…"></textarea>
+      </div>
+      <div class="form-group"><label>客户署名</label><input type="text" id="testimonialAuthor" placeholder="Zhang Wei · 科技公司 CEO"></div>
+      <div class="form-group"><label>详情备注</label><input type="text" id="testimonialDetail" placeholder="2025年11月 · 企业宣传片"></div>
+      <div class="settings-grid">
+        <div class="form-group"><label>评分</label>
+          <select id="testimonialStars">
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★ (4)</option>
+            <option value="3">★★★ (3)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>排序</label><input type="number" id="testimonialSort" value="0" min="0"></div>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" id="testimonialActive" checked><span class="toggle-slider"></span></label>
+        <span class="toggle-label">启用</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTestimonialModal()">取消</button>
+      <button class="btn btn-primary" id="testimonialSaveBtn" onclick="saveTestimonial()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
@@ -891,7 +949,7 @@ function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page' + capitalize(page)));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
   document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-  const titles = { dashboard:'仪表盘', works:'作品管理', banners:'轮播图管理', bookings:'预约管理', suggestions:'建议反馈', sections:'内容管理', settings:'网站设置' };
+  const titles = { dashboard:'仪表盘', works:'作品管理', banners:'轮播图管理', bookings:'预约管理', suggestions:'建议反馈', testimonials:'客户心声', sections:'内容管理', settings:'网站设置' };
   document.getElementById('topbarTitle').textContent = titles[page] || '';
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('active');
@@ -906,7 +964,7 @@ function toggleSidebar() {
 
 // ═══ Load All ═══
 async function loadAll() {
-  await Promise.all([loadWorks(), loadBanners(), loadBookings(), loadSuggestions(), loadSettings(), loadSectionContent()]);
+  await Promise.all([loadWorks(), loadBanners(), loadBookings(), loadSuggestions(), loadTestimonials(), loadSettings(), loadSectionContent()]);
   renderDashboard();
 }
 
@@ -1186,6 +1244,146 @@ function deleteBanner(id, name) {
   });
 }
 
+// ═══ Testimonials ═══
+let testimonialFile = null;
+let testimonialRemoveBg = false;
+
+async function loadTestimonials() {
+  try {
+    const data = await api('/api/testimonials');
+    document.getElementById('testimonialsBadge').textContent = data.length;
+    window._testimonials = data;
+    renderTestimonialsAdmin();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function renderTestimonialsAdmin() {
+  const grid = document.getElementById('testimonialsGrid');
+  const data = window._testimonials || [];
+  if (data.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="icon">⭐</div><p>还没有客户心声</p><button class="btn btn-primary" onclick="openTestimonialModal()">＋ 添加</button></div>';
+    return;
+  }
+  grid.innerHTML = data.map(t => `
+    <div class="card">
+      ${t.bg_key ? `<img class="card-img" src="${API_BASE}/api/image/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy">` : '<div class="card-img-placeholder" style="background:linear-gradient(135deg,#1a1a1a,#2d2d2d);color:var(--gold);font-size:1.2rem;display:flex;align-items:center;justify-content:center;opacity:.4">⭐</div>'}
+      <div class="card-body">
+        <span class="status ${t.active ? 'done' : 'cancelled'}"><span class="status-dot"></span>${t.active ? '已启用' : '已禁用'}</span>
+        <h3 style="margin-top:8px;font-style:italic;font-size:.82rem;color:var(--text-dim);line-height:1.6">"${esc(t.quote).slice(0, 60)}${t.quote.length > 60 ? '…' : ''}"</h3>
+        <div class="sub">${esc(t.author)}</div>
+        <div class="meta">${esc(t.detail)} · ${'★'.repeat(t.stars)} · 排序 ${t.sort_order}${t.bg_key ? ' · 🖼️ 有背景' : ''}</div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editTestimonial('${t.id}')">✏️ 编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTestimonial('${t.id}','${esc(t.author)}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleTestiFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  testimonialFile = file;
+  testimonialRemoveBg = false;
+  const previewUrl = URL.createObjectURL(file);
+  document.getElementById('testiPreviewImg').src = previewUrl;
+  document.getElementById('testiUploadPlaceholder').style.display = 'none';
+  document.getElementById('testiUploadPreview').style.display = '';
+  document.getElementById('testiRemoveBgBtn').style.display = '';
+
+  const orientationEl = document.getElementById('testiOrientation');
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const ratio = (w / h).toFixed(2);
+    let tip = '', bgColor = '', textColor = '';
+    if (w > h * 1.2) {
+      tip = `✅ 横版图片 (${w}×${h}，宽高比 ${ratio}:1) — 非常适合做背景！`;
+      bgColor = 'rgba(46,213,115,.1)'; textColor = 'var(--green)';
+    } else if (h > w * 1.2) {
+      tip = `⚠️ 竖版图片 (${w}×${h}，宽高比 ${ratio}:1) — 建议使用横版图片效果更好`;
+      bgColor = 'rgba(255,165,2,.1)'; textColor = 'var(--amber)';
+    } else {
+      tip = `ℹ️ 方形图片 (${w}×${h}，宽高比 ${ratio}:1) — 可以使用，横版更佳`;
+      bgColor = 'rgba(83,82,237,.1)'; textColor = 'var(--blue)';
+    }
+    orientationEl.textContent = tip;
+    orientationEl.style.cssText = `display:block;background:${bgColor};color:${textColor};border-radius:var(--radius-xs);padding:10px 14px;font-size:.75rem;letter-spacing:.5px;margin-top:10px`;
+  };
+  img.src = previewUrl;
+}
+
+function removeTestiBg() {
+  testimonialFile = null;
+  testimonialRemoveBg = true;
+  document.getElementById('testiFileInput').value = '';
+  document.getElementById('testiUploadPlaceholder').style.display = '';
+  document.getElementById('testiUploadPreview').style.display = 'none';
+  document.getElementById('testiRemoveBgBtn').style.display = 'none';
+  document.getElementById('testiOrientation').style.display = 'none';
+}
+
+function openTestimonialModal(t = null) {
+  document.getElementById('testimonialEditId').value = t ? t.id : '';
+  document.getElementById('testimonialModalTitle').textContent = t ? '编辑客户心声' : '添加客户心声';
+  document.getElementById('testimonialQuote').value = t ? t.quote : '';
+  document.getElementById('testimonialAuthor').value = t ? t.author : '';
+  document.getElementById('testimonialDetail').value = t ? t.detail : '';
+  document.getElementById('testimonialStars').value = t ? t.stars : 5;
+  document.getElementById('testimonialSort').value = t ? t.sort_order : (window._testimonials || []).length;
+  document.getElementById('testimonialActive').checked = t ? !!t.active : true;
+  testimonialFile = null;
+  testimonialRemoveBg = false;
+  document.getElementById('testiFileInput').value = '';
+  document.getElementById('testiUploadPlaceholder').style.display = '';
+  document.getElementById('testiUploadPreview').style.display = 'none';
+  document.getElementById('testiRemoveBgBtn').style.display = 'none';
+  document.getElementById('testiOrientation').style.display = 'none';
+  if (t && t.bg_key) {
+    document.getElementById('testiPreviewImg').src = `${API_BASE}/api/image/${encodeURIComponent(t.bg_key)}`;
+    document.getElementById('testiUploadPlaceholder').style.display = 'none';
+    document.getElementById('testiUploadPreview').style.display = '';
+    document.getElementById('testiRemoveBgBtn').style.display = '';
+  }
+  document.getElementById('testimonialModalOverlay').classList.add('active');
+}
+
+function closeTestimonialModal() { document.getElementById('testimonialModalOverlay').classList.remove('active'); }
+
+function editTestimonial(id) {
+  const t = (window._testimonials || []).find(t => t.id === id);
+  if (t) openTestimonialModal(t);
+}
+
+async function saveTestimonial() {
+  const id = document.getElementById('testimonialEditId').value;
+  const fd = new FormData();
+  fd.append('quote', document.getElementById('testimonialQuote').value);
+  fd.append('author', document.getElementById('testimonialAuthor').value);
+  fd.append('detail', document.getElementById('testimonialDetail').value);
+  fd.append('stars', document.getElementById('testimonialStars').value);
+  fd.append('sort_order', document.getElementById('testimonialSort').value);
+  fd.append('active', document.getElementById('testimonialActive').checked ? '1' : '0');
+  if (testimonialFile) fd.append('bg_image', testimonialFile);
+  if (testimonialRemoveBg) fd.append('remove_bg', '1');
+
+  const btn = document.getElementById('testimonialSaveBtn'); btn.disabled = true; btn.textContent = '保存中...';
+  try {
+    if (id) await api(`/api/testimonials/${id}`, { method: 'PUT', body: fd });
+    else await api('/api/testimonials', { method: 'POST', body: fd });
+    toast(id ? '已更新' : '已添加', 'success');
+    closeTestimonialModal(); await loadTestimonials(); renderDashboard();
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '保存'; }
+}
+
+function deleteTestimonial(id, name) {
+  showConfirm(`确定删除「${name}」的客户心声？背景图片也将被删除。`, async () => {
+    try { await api(`/api/testimonials/${id}`, { method: 'DELETE' }); toast('已删除', 'success'); await loadTestimonials(); renderDashboard(); }
+    catch (e) { toast(e.message, 'error'); }
+  });
+}
+
 // ═══ Bookings ═══
 async function loadBookings() {
   try {
@@ -1355,58 +1553,6 @@ const sectionKeys = [
   ['sugst_title_cn', 'secSugstTitleCn'],
 ];
 
-// ═══ Testimonials Background Image ═══
-let testiBgFile = null;
-let testiBgExistingKey = '';
-
-function handleTestiBgFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  testiBgFile = file;
-
-  // Show preview
-  const previewUrl = URL.createObjectURL(file);
-  document.getElementById('testiBgPreviewImg').src = previewUrl;
-  document.getElementById('testiBgUploadPlaceholder').style.display = 'none';
-  document.getElementById('testiBgUploadPreview').style.display = '';
-  document.getElementById('testiBgRemoveBtn').style.display = '';
-
-  // Detect orientation
-  const orientationEl = document.getElementById('testiBgOrientation');
-  const img = new Image();
-  img.onload = () => {
-    const w = img.naturalWidth, h = img.naturalHeight;
-    const ratio = (w / h).toFixed(2);
-    let tip = '', color = '';
-    if (w > h * 1.2) {
-      // Landscape - ideal
-      tip = `✅ 横版图片 (${w}×${h}，宽高比 ${ratio}:1) — 非常适合做背景！能完整覆盖区域`;
-      color = 'var(--green-bg); color: var(--green)';
-    } else if (h > w * 1.2) {
-      // Portrait - not ideal
-      tip = `⚠️ 竖版图片 (${w}×${h}，宽高比 ${ratio}:1) — 竖版图片会居中显示，左右两侧可能有较大空白区域。建议使用横版图片效果更好`;
-      color = 'var(--amber-bg); color: var(--amber)';
-    } else {
-      // Square-ish
-      tip = `ℹ️ 方形图片 (${w}×${h}，宽高比 ${ratio}:1) — 可以使用，横版图片效果会更好`;
-      color = 'var(--blue-bg); color: var(--blue)';
-    }
-    orientationEl.textContent = tip;
-    orientationEl.style.cssText = `display:block;background:${color.split(';')[0]};color:${color.split(';')[1]};border-radius:var(--radius-xs);padding:10px 14px;font-size:.75rem;letter-spacing:.5px;margin-top:10px`;
-  };
-  img.src = previewUrl;
-}
-
-function removeTestiBg() {
-  testiBgFile = null;
-  testiBgExistingKey = '';
-  document.getElementById('testiBgFileInput').value = '';
-  document.getElementById('testiBgUploadPlaceholder').style.display = '';
-  document.getElementById('testiBgUploadPreview').style.display = 'none';
-  document.getElementById('testiBgRemoveBtn').style.display = 'none';
-  document.getElementById('testiBgOrientation').style.display = 'none';
-}
-
 async function loadSectionContent() {
   try {
     const s = await api('/api/settings');
@@ -1414,19 +1560,6 @@ async function loadSectionContent() {
       const el = document.getElementById(elId);
       if (el && s[key]) el.value = s[key];
     }
-    // Load testimonials background image
-    testiBgExistingKey = s.testimonials_bg_key || '';
-    if (testiBgExistingKey) {
-      document.getElementById('testiBgPreviewImg').src = `${API_BASE}/api/image/${encodeURIComponent(testiBgExistingKey)}`;
-      document.getElementById('testiBgUploadPlaceholder').style.display = 'none';
-      document.getElementById('testiBgUploadPreview').style.display = '';
-      document.getElementById('testiBgRemoveBtn').style.display = '';
-    } else {
-      document.getElementById('testiBgUploadPlaceholder').style.display = '';
-      document.getElementById('testiBgUploadPreview').style.display = 'none';
-      document.getElementById('testiBgRemoveBtn').style.display = 'none';
-    }
-    document.getElementById('testiBgOrientation').style.display = 'none';
   } catch (e) { /* settings already loaded */ }
 }
 
@@ -1436,31 +1569,11 @@ async function saveSectionContent() {
     const el = document.getElementById(elId);
     if (el) body[key] = el.value;
   }
-
-  // Handle testimonials background image upload
-  if (testiBgFile) {
-    const fd = new FormData();
-    fd.append('image', testiBgFile);
-    try {
-      const res = await fetch(`${API_BASE}/api/upload-image`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: fd
-      });
-      if (!res.ok) throw new Error('图片上传失败');
-      const data = await res.json();
-      body.testimonials_bg_key = data.key;
-    } catch (e) { toast('背景图片上传失败: ' + e.message, 'error'); return; }
-  } else if (!testiBgExistingKey) {
-    body.testimonials_bg_key = '';
-  }
-
   try {
     await api('/api/settings', {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    testiBgFile = null;
     toast('模块内容已保存，刷新前台页面后生效', 'success');
   } catch (e) { toast(e.message, 'error'); }
 }
