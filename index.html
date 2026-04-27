@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ç½é¹¿ç¼æå½± Â· BAILUYUAN STUDIO</title>
+<title>白鹿缘摄影 · BAILUYUAN STUDIO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -63,7 +63,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 @keyframes loaderTextIn{to{opacity:1}}
 @keyframes loaderRing{0%,100%{transform:scale(1);opacity:.15}50%{transform:scale(1.15);opacity:.3}}
 
-/* Light beam sweeping from top-left to bottom-right */
+/* Light beam sweeping across loader */
 .loader-beam{position:absolute;top:-60%;left:-30%;width:40%;height:220%;background:linear-gradient(105deg,transparent 30%,rgba(212,188,150,.04) 42%,rgba(212,188,150,.12) 50%,rgba(212,188,150,.04) 58%,transparent 70%);transform:rotate(-20deg);pointer-events:none;animation:beamSweep 3s cubic-bezier(.4,0,.2,1) .6s forwards;opacity:0;z-index:1}
 .loader-beam-glow{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 45%,rgba(184,151,106,.06) 0%,transparent 55%);pointer-events:none;animation:beamGlow 2.5s ease .8s forwards;opacity:0;z-index:1}
 @keyframes beamSweep{0%{opacity:0;left:-30%}15%{opacity:1}70%{opacity:1}100%{opacity:0;left:90%}}
@@ -166,14 +166,14 @@ body:hover .cursor-glow{opacity:1}
 .section-divider{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 48px}
 .section-desc{max-width:620px;margin:0 auto;text-align:center;font-size:1rem;line-height:2;color:var(--text);font-weight:300;letter-spacing:.5px}
 
-/* âââ Banner Carousel âââ */
+/* ═══ Banner Carousel ═══ */
 .carousel-section{position:relative;width:100%}
 .carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal)}
 .carousel-track{position:relative;width:100%;height:100%}
 .carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:none;overflow:hidden}
 .carousel-slide.active{opacity:1;z-index:1}
 .carousel-slide-img{position:absolute;min-width:100%;min-height:100%;width:100%;height:100%;object-fit:cover;object-position:center center;will-change:transform}
-/* Ken Burns â æ¯å¼ ä¸åæ¹å */
+/* Ken Burns — 每张不同方向 */
 .carousel-slide.active .carousel-slide-img{animation:kbZoom1 8s ease-out forwards}
 .carousel-slide:nth-child(2).active .carousel-slide-img{animation:kbZoom2 8s ease-out forwards}
 .carousel-slide:nth-child(3).active .carousel-slide-img{animation:kbZoom3 8s ease-out forwards}
@@ -182,23 +182,23 @@ body:hover .cursor-glow{opacity:1}
 .carousel-slide-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .carousel-slide-placeholder .photo-placeholder{width:100%;height:100%}
 
-/* æ·¡å¥æ·¡åºè¦çå± â ç¨äºè¿æ¸¡æ¶çé®ç½© */
+/* 淡入淡出覆盖层 — 用于过渡时的遮罩 */
 .carousel-crossfade{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;background:var(--charcoal);transition:opacity .6s cubic-bezier(.4,0,.2,1)}
 .carousel-crossfade.active{opacity:1}
 
-/* Ken Burns keyframes â ä» cover ç¶æç¼æ¢æ¾å¤§+å¹³ç§» */
+/* Ken Burns keyframes — 从 cover 状态缓慢放大+平移 */
 @keyframes kbZoom1{0%{transform:scale(1)}100%{transform:scale(1.12) translate(-1%,-0.5%)}}
 @keyframes kbZoom2{0%{transform:scale(1.06)}100%{transform:scale(1) translate(1%,0.5%)}}
 @keyframes kbZoom3{0%{transform:scale(1) translateY(-1%)}100%{transform:scale(1.1) translate(0.5%,1%)}}
 @keyframes kbZoom4{0%{transform:scale(1.08) translate(1%,0)}100%{transform:scale(1.14) translate(-0.5%,-1%)}}
 @keyframes kbZoom5{0%{transform:scale(1.04)}100%{transform:scale(1.1) translateY(0.5%)}}
 
-/* åææ«è¿ææ */
+/* 光晕扫过效果 */
 .carousel-light-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(184,151,106,.04) 45%,rgba(184,151,106,.08) 50%,rgba(184,151,106,.04) 55%,transparent 60%);opacity:0;transform:translateX(-100%);transition:none}
 .carousel-light-sweep.sweeping{opacity:1;animation:lightSweep 1.2s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes lightSweep{to{transform:translateX(100%)}}
 
-/* é¢ç²çº¹ç */
+/* 颗粒纹理 */
 .carousel-grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
 
 /* Overlays */
@@ -534,7 +534,7 @@ body:hover .cursor-glow{opacity:1}
 .suggestion-footer .lock{display:inline-flex;align-items:center;gap:4px;opacity:.6}
 .suggestion-footer .lock svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.5}
 
-/* âââ Login Modal âââ */
+/* ═══ Login Modal ═══ */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:16px}
 .login-overlay.active{display:flex}
 .login-modal{background:var(--charcoal);max-width:440px;width:100%;border-radius:6px;position:relative;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.5)}
@@ -565,7 +565,7 @@ body:hover .cursor-glow{opacity:1}
 .login-form{display:none}
 .login-form.active{display:block}
 
-/* âââ Enhanced Interactions âââ */
+/* ═══ Enhanced Interactions ═══ */
 button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:active{transform:scale(.97)!important;transition-duration:.1s}
 .form-group input,.form-group textarea,.form-group select{transition:all .4s var(--ease-smooth)}
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-bottom-color:var(--gold);box-shadow:0 4px 12px rgba(184,151,106,.08)}
@@ -591,7 +591,6 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 
 <!-- Loader -->
 <div class="loader" id="loader">
-  <!-- Light beam effect -->
   <div class="loader-beam"></div>
   <div class="loader-beam-glow"></div>
   <div class="loader-inner">
@@ -605,7 +604,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
       </svg>
     </div>
     <div class="loader-brand">BAILUYUAN</div>
-    <div class="loader-brand-cn">ç½ é¹¿ ç¼ æ å½±</div>
+    <div class="loader-brand-cn">白 鹿 缘 摄 影</div>
     <div class="loader-bar"><div class="loader-sparks" id="loaderSparks"></div></div>
     <div class="loader-progress">LOADING</div>
   </div>
@@ -625,33 +624,33 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
     </div>
     <div class="nav-logo-text">
       <span class="nav-logo-en">BAILUYUAN</span>
-      <span class="nav-logo-cn">ç½é¹¿ç¼æå½±</span>
+      <span class="nav-logo-cn">白鹿缘摄影</span>
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="#philosophy">çå¿µ</a></li>
-    <li><a href="#portfolio">ä½å</a></li>
-    <li><a href="#services">æå¡</a></li>
-    <li><a href="#testimonials">å£ç¢</a></li>
-    <li><a href="#booking">é¢çº¦</a></li>
+    <li><a href="#philosophy">理念</a></li>
+    <li><a href="#portfolio">作品</a></li>
+    <li><a href="#services">服务</a></li>
+    <li><a href="#testimonials">口碑</a></li>
+    <li><a href="#booking">预约</a></li>
   </ul>
   <div class="nav-right">
-    <a href="#booking" class="nav-cta">å¨è¯¢åä½</a>
+    <a href="#booking" class="nav-cta">咨询合作</a>
     <div class="nav-user-wrapper">
       <button class="nav-user-btn" id="navUserBtn" onclick="handleNavUserClick()">
         <span class="user-dot"></span>
-        <span id="navUserText">ç»å½</span>
+        <span id="navUserText">登录</span>
       </button>
       <div class="user-dropdown" id="userDropdown">
-        <div class="user-dropdown-header"><span class="dot"></span><span id="dropdownUsername">ç¨æ·</span></div>
+        <div class="user-dropdown-header"><span class="dot"></span><span id="dropdownUsername">用户</span></div>
         <button class="user-dropdown-item" onclick="openChangePassModal();closeUserMenu()">
           <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          ä¿®æ¹å¯ç 
+          修改密码
         </button>
         <div class="user-dropdown-divider"></div>
         <button class="user-dropdown-item danger" onclick="logoutUser();closeUserMenu()">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          éåºç»å½
+          退出登录
         </button>
       </div>
     </div>
@@ -663,12 +662,12 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 
 <!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#philosophy" data-cn="åççå¿µ">çå¿µ</a>
-  <a href="#portfolio" data-cn="æå½±ä½å">ä½å</a>
-  <a href="#services" data-cn="æå¡é¡¹ç®">æå¡</a>
-  <a href="#testimonials" data-cn="å®¢æ·å£ç¢">å£ç¢</a>
-  <a href="#booking" data-cn="å¨è¯¢åä½">é¢çº¦</a>
-  <a href="#" data-cn="è´¦æ·" onclick="event.preventDefault();closeMobileMenu();if(getAuthToken()){if(confirm('ç¡®å®éåºï¼'))logoutUser();}else{openLoginModal();}" id="mobileAuthLink">ç»å½</a>
+  <a href="#philosophy" data-cn="品牌理念">理念</a>
+  <a href="#portfolio" data-cn="摄影作品">作品</a>
+  <a href="#services" data-cn="服务项目">服务</a>
+  <a href="#testimonials" data-cn="客户口碑">口碑</a>
+  <a href="#booking" data-cn="咨询合作">预约</a>
+  <a href="#" data-cn="账户" onclick="event.preventDefault();closeMobileMenu();if(getAuthToken()){if(confirm('确定退出？'))logoutUser();}else{openLoginModal();}" id="mobileAuthLink">登录</a>
 </div>
 
 <!-- Hero -->
@@ -679,13 +678,13 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   <div class="hero-light"></div>
   <div class="hero-particles" id="particles"></div>
   <div class="hero-content">
-    <div class="hero-badge">Est. 2016 Â· é«ç«¯æå½±</div>
+    <div class="hero-badge">Est. 2016 · 高端摄影</div>
     <h1 class="hero-title">BAILUYUAN</h1>
-    <p class="hero-title-cn"><span class="char">ç½</span><span class="char">é¹¿</span><span class="char">ç¼</span><span class="char">æ</span><span class="char">å½±</span><span class="char">å·¥</span><span class="char">ä½</span><span class="char">å®¤</span></p>
+    <p class="hero-title-cn"><span class="char">白</span><span class="char">鹿</span><span class="char">缘</span><span class="char">摄</span><span class="char">影</span><span class="char">工</span><span class="char">作</span><span class="char">室</span></p>
     <div class="hero-divider"></div>
-    <p class="hero-subtitle">ä»¥åå½±ä¸ºç¬ï¼ä»¥éå¤´ä¸ºå¢¨<br>ä¼ä¸å®£ä¼  Â· äººåæå Â· é¶åå¢ Â· ä¸ä¸èå</p>
+    <p class="hero-subtitle">以光影为笔，以镜头为墨<br>企业宣传 · 人像摄像 · 银发团 · 专业肖像</p>
     <a href="#portfolio" class="hero-cta">
-      æ¥çä½å
+      查看作品
       <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     </a>
   </div>
@@ -695,7 +694,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   </div>
 </section>
 
-<!-- âââ Banner Carousel âââ -->
+<!-- ═══ Banner Carousel ═══ -->
 <section class="carousel-section" id="carousel">
   <div class="carousel-viewport">
     <div class="carousel-track" id="carouselTrack">
@@ -716,15 +715,15 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
       <h2 class="carousel-title" id="carouselTitle"></h2>
       <p class="carousel-subtitle" id="carouselSubtitle"></p>
       <a href="#portfolio" class="carousel-cta" id="carouselCta">
-        æ¢ç´¢æ´å¤
+        探索更多
         <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
     <!-- Controls -->
-    <button class="carousel-btn carousel-prev" id="carouselPrev" aria-label="ä¸ä¸å¼ ">
+    <button class="carousel-btn carousel-prev" id="carouselPrev" aria-label="上一张">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <button class="carousel-btn carousel-next" id="carouselNext" aria-label="ä¸ä¸å¼ ">
+    <button class="carousel-btn carousel-next" id="carouselNext" aria-label="下一张">
       <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
     </button>
     <!-- Progress dots -->
@@ -764,9 +763,9 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <section class="section philosophy" id="philosophy">
   <p class="section-eyebrow reveal" id="philEyebrow">Our Philosophy</p>
   <h2 class="section-title reveal" id="philTitle">Why Choose Us</h2>
-  <p class="section-title-cn reveal" id="philTitleCn">ä¸º ä» ä¹ é æ© ç½ é¹¿ ç¼</p>
+  <p class="section-title-cn reveal" id="philTitleCn">为 什 么 选 择 白 鹿 缘</p>
   <div class="section-divider reveal"></div>
-  <p class="section-desc reveal" id="philDesc">æä»¬ä¸åªæ¯æä¸å¿«é¨ââæä»¬ç¨åå¹´ç£¨ä¸åçå å¿ï¼ä¸ºæ¨æææ¯ä¸ä¸ªå¼å¾é­è®°çç¬é´ï¼æ è®ºåä¸ãå®¶åº­è¿æ¯ä¸ªäººã</p>
+  <p class="section-desc reveal" id="philDesc">我们不只是按下快门——我们用十年磨一剑的匠心，为您捕捉每一个值得铭记的瞬间，无论商业、家庭还是个人。</p>
   <div class="philosophy-grid">
     <div class="philosophy-item reveal reveal-delay-1">
       <div class="philosophy-num">01</div>
@@ -774,24 +773,24 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         <svg viewBox="0 0 48 48"><path d="M24 4 L28 16 L40 18 L30 26 L34 38 L24 32 L14 38 L18 26 L8 18 L20 16Z"/></svg>
       </div>
       <h3>PROFESSIONAL</h3>
-      <p class="cn">ä¸ä¸åè´¨</p>
-      <p>ä»ä¼ä¸å®£ä¼ çå°ä¸ªäººèåï¼æä»¬ä»¥çµå½±çº§çæ åå¯¹å¾æ¯ä¸æ¬¡ææï¼ç¡®ä¿æ¯ä¸å¸§ç»é¢é½ç»å¾èµ·æ¶é´çæ£éªã</p>
+      <p class="cn">专业品质</p>
+      <p>从企业宣传片到个人肖像，我们以电影级的标准对待每一次拍摄，确保每一帧画面都经得起时间的检验。</p>
     </div>
     <div class="philosophy-item reveal reveal-delay-2">
       <div class="philosophy-icon">
         <svg viewBox="0 0 48 48"><circle cx="18" cy="18" r="8"/><circle cx="32" cy="18" r="8"/><path d="M10 44 C10 36 13 30 18 30 C21 30 24 32 24 32 C24 32 27 30 30 30 C35 30 38 36 38 44"/></svg>
       </div>
       <h3>WARMTH</h3>
-      <p class="cn">æ¸©æè®°å½</p>
-      <p>å°¤å¶æé¿é¶åå¢ææï¼ç¨èå¿ä¸æ¸©åº¦ææé¿è¾ä»¬æèªç¶çç¬å®¹ï¼è®©æ¯ä¸å¼ åå½±é½æä¸ºå®¶åº­ççè´µè®°å¿ã</p>
+      <p class="cn">温暖记录</p>
+      <p>尤其擅长银发团拍摄，用耐心与温度捕捉长辈们最自然的笑容，让每一张合影都成为家庭的珍贵记忆。</p>
     </div>
     <div class="philosophy-item reveal reveal-delay-3">
       <div class="philosophy-icon">
         <svg viewBox="0 0 48 48"><rect x="4" y="10" width="40" height="26" rx="3"/><polygon points="19,17 19,31 32,24"/><circle cx="40" cy="12" r="2"/></svg>
       </div>
       <h3>CINEMATIC</h3>
-      <p class="cn">å½±ååäº</p>
-      <p>ä»¥å¯¼æ¼æç»´ç­åæ¯ä¸æ¯ä¼ä¸å®£ä¼ çï¼ç¨å½±åè®²æäºãæ åçã4Kçµå½±çº§ç»è´¨ï¼ä¸ä¸å¢éå¨ç¨æ§è¡ã</p>
+      <p class="cn">影像叙事</p>
+      <p>以导演思维策划每一支企业宣传片，用影像讲故事、树品牌。4K电影级画质，专业团队全程执行。</p>
     </div>
   </div>
 </section>
@@ -800,14 +799,14 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <section class="section portfolio" id="portfolio">
   <p class="section-eyebrow reveal" id="portEyebrow">Portfolio</p>
   <h2 class="section-title reveal" id="portTitle">Our Works</h2>
-  <p class="section-title-cn reveal" id="portTitleCn">ç²¾ é ä½ å</p>
+  <p class="section-title-cn reveal" id="portTitleCn">精 选 作 品</p>
   <div class="section-divider reveal"></div>
   <div class="portfolio-filter reveal">
-    <button class="filter-btn active" data-filter="all">å¨é¨</button>
-    <button class="filter-btn" data-filter="corporate">ä¼ä¸å®£ä¼ </button>
-    <button class="filter-btn" data-filter="portrait">äººåæå</button>
-    <button class="filter-btn" data-filter="silver">é¶åå¢</button>
-    <button class="filter-btn" data-filter="headshot">èå</button>
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="corporate">企业宣传</button>
+    <button class="filter-btn" data-filter="portrait">人像摄像</button>
+    <button class="filter-btn" data-filter="silver">银发团</button>
+    <button class="filter-btn" data-filter="headshot">肖像</button>
   </div>
   <div class="portfolio-grid" id="portfolioGrid"></div>
 </section>
@@ -819,8 +818,8 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   <div class="showcase-sparks" id="showcaseSparks"></div>
   <div class="showcase-content reveal">
     <div class="quote-mark">"</div>
-    <blockquote id="showcaseQuote">æ¯ä¸æ¬¡ææé½æ¯ä¸æ¬¡å¯¹è¯ââä¸åçå¯¹è¯ï¼ä¸å²æå¯¹è¯ï¼ä¸éå¤´åæçå®çèªå·±å¯¹è¯ãæä»¬ç¨å½±åï¼è®©è¿äºå¯¹è¯è¢«çè§ã</blockquote>
-    <cite id="showcaseCite">â ç½é¹¿ç¼æå½± Â· åå§çå¿µ</cite>
+    <blockquote id="showcaseQuote">每一次拍摄都是一次对话——与品牌对话，与岁月对话，与镜头前最真实的自己对话。我们用影像，让这些对话被看见。</blockquote>
+    <cite id="showcaseCite">— 白鹿缘摄影 · 创始理念</cite>
   </div>
 </section>
 
@@ -828,7 +827,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <section class="section services" id="services">
   <p class="section-eyebrow reveal" id="svcEyebrow">Services</p>
   <h2 class="section-title reveal" id="svcTitle">What We Offer</h2>
-  <p class="section-title-cn reveal" id="svcTitleCn">æ ä»¬ ç æ å¡</p>
+  <p class="section-title-cn reveal" id="svcTitleCn">我 们 的 服 务</p>
   <div class="section-divider reveal"></div>
   <div class="services-grid">
     <div class="service-card reveal reveal-delay-1">
@@ -837,9 +836,9 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         <svg viewBox="0 0 48 48"><rect x="4" y="10" width="40" height="26" rx="3"/><polygon points="19,17 19,31 32,24"/><circle cx="40" cy="12" r="2"/></svg>
       </div>
       <h3>CORPORATE FILM</h3>
-      <p class="cn">ä¼ä¸å®£ä¼ ç</p>
-      <p>ä»åæç­åå°æçäº¤ä»ï¼ä¸ç«å¼ä¼ä¸å½±åæå¡ãåçæäºãäº§ååå¸ãä¼ä¸æåï¼ç¨å½±åæååçä»·å¼ä¸å½±ååã</p>
-      <div class="service-price">Â¥<span id="priceCorporate">12,800</span> èµ·</div>
+      <p class="cn">企业宣传片</p>
+      <p>从创意策划到成片交付，一站式企业影像服务。品牌故事、产品发布、企业文化，用影像提升品牌价值与影响力。</p>
+      <div class="service-price">¥<span id="priceCorporate">12,800</span> 起</div>
     </div>
     <div class="service-card reveal reveal-delay-2">
       <div class="service-num">02</div>
@@ -847,9 +846,9 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         <svg viewBox="0 0 48 48"><circle cx="24" cy="20" r="10"/><path d="M14 44 C14 36 18 30 24 30 C30 30 34 36 34 44"/><circle cx="24" cy="20" r="4"/><path d="M30 10 L34 6"/></svg>
       </div>
       <h3>PORTRAIT VIDEO</h3>
-      <p class="cn">äººåæå</p>
-      <p>å¨æè®°å½æçå®çä½ ãä¸ªäººå½¢è±¡çãçæ´»çºªå½ãæé¿å½±åï¼ç¨å½±åçä½å½ä¸çæ¸©åº¦ä¸æäºã</p>
-      <div class="service-price">Â¥<span id="pricePortrait">2,680</span> èµ·</div>
+      <p class="cn">人像摄像</p>
+      <p>动态记录最真实的你。个人形象片、生活纪录、成长影像，用影像留住当下的温度与故事。</p>
+      <div class="service-price">¥<span id="pricePortrait">2,680</span> 起</div>
     </div>
     <div class="service-card reveal reveal-delay-3">
       <div class="service-num">03</div>
@@ -857,9 +856,9 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         <svg viewBox="0 0 48 48"><circle cx="18" cy="16" r="7"/><circle cx="32" cy="16" r="7"/><path d="M10 44 C10 36 13 30 18 30 C21 30 24 32 24 32 C24 32 27 30 30 30 C35 30 38 36 38 44"/><path d="M18 10 Q18 6 22 8" stroke-width=".6"/><path d="M32 10 Q32 6 36 8" stroke-width=".6"/></svg>
       </div>
       <h3>SILVER GROUP</h3>
-      <p class="cn">é¶åå¢</p>
-      <p>ä¸ºé¶åæéèº«å®å¶çæ¸©æå½±åæå¡ãå®¶åº­åå½±ãéå©çºªå¿µãéä¼çå¿µï¼ç¨éå¤´ä¼ éå²ææ²æ·çç¾å¥½ä¸æ¸©æã</p>
-      <div class="service-price">Â¥<span id="priceSilver">1,980</span> èµ·</div>
+      <p class="cn">银发团</p>
+      <p>为银发族量身定制的温暖影像服务。家庭合影、金婚纪念、退休留念，用镜头传递岁月沉淀的美好与温情。</p>
+      <div class="service-price">¥<span id="priceSilver">1,980</span> 起</div>
     </div>
     <div class="service-card reveal reveal-delay-4">
       <div class="service-num">04</div>
@@ -867,9 +866,9 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         <svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="28" rx="3"/><circle cx="24" cy="22" r="7"/><circle cx="24" cy="22" r="3"/><path d="M32 14 L36 10"/><path d="M10 36 L10 42 L18 42"/><path d="M38 36 L38 42 L30 42"/></svg>
       </div>
       <h3>HEADSHOT</h3>
-      <p class="cn">èå</p>
-      <p>ä¸ä¸åå¡èåãèä¸å½¢è±¡ç§ãä¸ªäººåçç§ãç²¾åå¸åï¼æææå·è¯´æåçé¢å®¹ï¼å©åèä¸å½¢è±¡åçº§ã</p>
-      <div class="service-price">Â¥<span id="priceHeadshot">880</span> èµ·</div>
+      <p class="cn">肖像</p>
+      <p>专业商务肖像、职业形象照、个人品牌照。精准布光，捕捉最具说服力的面容，助力职业形象升级。</p>
+      <div class="service-price">¥<span id="priceHeadshot">880</span> 起</div>
     </div>
   </div>
 </section>
@@ -878,32 +877,32 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <section class="section process">
   <p class="section-eyebrow reveal" id="procEyebrow">Process</p>
   <h2 class="section-title reveal" id="procTitle">How It Works</h2>
-  <p class="section-title-cn reveal" id="procTitleCn">æ æ æµ ç¨</p>
+  <p class="section-title-cn reveal" id="procTitleCn">拍 摄 流 程</p>
   <div class="section-divider reveal"></div>
   <div class="process-track">
     <div class="process-step reveal reveal-delay-1">
       <div class="process-num">1</div>
       <h4>CONSULT</h4>
-      <p class="cn">éæ±æ²é</p>
-      <p>æ·±å¥äºè§£æ¨çææéæ±ãé£æ ¼åå¥½ä¸ææï¼éèº«å®å¶æææ¹æ¡ã</p>
+      <p class="cn">需求沟通</p>
+      <p>深入了解您的拍摄需求、风格偏好与期望，量身定制拍摄方案。</p>
     </div>
     <div class="process-step reveal reveal-delay-2">
       <div class="process-num">2</div>
       <h4>DESIGN</h4>
-      <p class="cn">æ¹æ¡è®¾è®¡</p>
-      <p>ç¡®å®åºæ¯ãæè£ãé åä¸ææèæ¬ï¼ç¡®ä¿æ¯ä¸ªç»èé½å°½åå°½ç¾ã</p>
+      <p class="cn">方案设计</p>
+      <p>确定场景、服装、造型与拍摄脚本，确保每个细节都尽善尽美。</p>
     </div>
     <div class="process-step reveal reveal-delay-3">
       <div class="process-num">3</div>
       <h4>SHOOT</h4>
-      <p class="cn">æ§è¡ææ</p>
-      <p>ä¸å±å¢éå¨ç¨æå¡ï¼æææèªç¶ãæå¨äººçç¬é´ã</p>
+      <p class="cn">执行拍摄</p>
+      <p>专属团队全程服务，捕捉最自然、最动人的瞬间。</p>
     </div>
     <div class="process-step reveal reveal-delay-4">
       <div class="process-num">4</div>
       <h4>DELIVER</h4>
-      <p class="cn">ç²¾ä¿®äº¤ä»</p>
-      <p>ä¸ä¸åæç²¾ä¿®ï¼15ä¸ªå·¥ä½æ¥åäº¤ä»æåï¼å«ç²¾è£ç¸åã</p>
+      <p class="cn">精修交付</p>
+      <p>专业后期精修，15个工作日内交付成品，含精装相册。</p>
     </div>
   </div>
 </section>
@@ -913,7 +912,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   <div id="testimonialsBgContainer"></div>
   <p class="section-eyebrow reveal" id="testiEyebrow">Testimonials</p>
   <h2 class="section-title reveal" id="testiTitle">Client Stories</h2>
-  <p class="section-title-cn reveal" id="testiTitleCn">å®¢ æ· å¿ å£°</p>
+  <p class="section-title-cn reveal" id="testiTitleCn">客 户 心 声</p>
   <div class="section-divider reveal"></div>
   <div class="testimonial-slider reveal" id="testimonialSlider">
     <!-- Rendered by JS -->
@@ -927,7 +926,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <section class="section booking" id="booking">
   <p class="section-eyebrow reveal" id="bookEyebrow">Book Now</p>
   <h2 class="section-title reveal" id="bookTitle">Start Your Story</h2>
-  <p class="section-title-cn reveal" id="bookTitleCn">å¨ è¯¢ å ä½</p>
+  <p class="section-title-cn reveal" id="bookTitleCn">咨 询 合 作</p>
   <div class="section-divider reveal"></div>
   <div class="booking-wrapper">
     <div class="booking-info reveal">
@@ -955,7 +954,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         </div>
         <div class="booking-info-text">
           <h4>STUDIO</h4>
-          <p id="siteAddress">ä¸æµ·å¸é»æµ¦åºå¤æ»©éèä¸­å¿<br>S2å¹¢ 36å±</p>
+          <p id="siteAddress">上海市黄浦区外滩金融中心<br>S2幢 36层</p>
         </div>
       </div>
       <div class="booking-info-item">
@@ -964,37 +963,37 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
         </div>
         <div class="booking-info-text">
           <h4>HOURS</h4>
-          <p id="siteHours">æ¯æ¥ 09:00 - 20:00<br>å¨å¹´æ ä¼ï¼éæåé¢çº¦ï¼</p>
+          <p id="siteHours">每日 09:00 - 20:00<br>全年无休（需提前预约）</p>
         </div>
       </div>
     </div>
     <form class="booking-form reveal" onsubmit="handleSubmit(event)">
       <div class="form-group">
         <input type="text" placeholder=" " required>
-        <label>æ¨çå§å</label>
+        <label>您的姓名</label>
       </div>
       <div class="form-group">
         <input type="tel" placeholder=" " required>
-        <label>èç³»çµè¯</label>
+        <label>联系电话</label>
       </div>
       <div class="form-group">
         <input type="text" placeholder=" ">
-        <label>æææææ¥æ</label>
+        <label>期望拍摄日期</label>
       </div>
       <div class="form-group">
         <select required>
-          <option value="" disabled selected>éæ©ææç±»å</option>
-          <option>ä¼ä¸å®£ä¼ ç</option>
-          <option>äººåæå</option>
-          <option>é¶åå¢</option>
-          <option>èå</option>
+          <option value="" disabled selected>选择拍摄类型</option>
+          <option>企业宣传片</option>
+          <option>人像摄像</option>
+          <option>银发团</option>
+          <option>肖像</option>
         </select>
       </div>
       <div class="form-group">
         <textarea placeholder=" "></textarea>
-        <label>æ¨çæ³æ³ä¸éæ±</label>
+        <label>您的想法与需求</label>
       </div>
-      <button type="submit" class="form-submit">æäº¤é¢çº¦</button>
+      <button type="submit" class="form-submit">提交预约</button>
     </form>
   </div>
 </section>
@@ -1002,25 +1001,25 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <!-- Suggestions -->
 <section class="section suggestions" id="suggestions">
   <p class="section-eyebrow reveal" id="sugstEyebrow">Your Voice</p>
-  <h2 class="section-title reveal" id="sugstTitle">å¯¹æä»¬çå»ºè®®</h2>
-  <p class="section-title-cn reveal" id="sugstTitleCn">æ¨ ç å£° é³ å¾ é è¦</p>
+  <h2 class="section-title reveal" id="sugstTitle">对我们的建议</h2>
+  <p class="section-title-cn reveal" id="sugstTitleCn">您 的 声 音 很 重 要</p>
   <div class="section-divider reveal"></div>
-  <p class="suggestions-intro reveal">æ¨çæ¯ä¸æ¡å»ºè®®ï¼é½æ¯æä»¬åå¾æ´å¥½ççç±ã<br>æ è®ºæ¯ææä½éªãæå¡ç»èï¼è¿æ¯æ¨æå¾çæ°æå¡ââ<span class="em">æä»¬é½è®¤çå¾å¬</spanã</p>
+  <p class="suggestions-intro reveal">您的每一条建议，都是我们变得更好的理由。<br>无论是拍摄体验、服务细节，还是您期待的新服务——<span class="em">我们都认真倾听</span。</p>
   <div class="suggestions-wrapper reveal">
     <div class="suggestion-card">
       <span class="quote-icon">"</span>
       <form class="suggestion-form" onsubmit="handleSuggestion(event)">
         <div class="form-group">
           <input type="text" class="suggestion-contact" placeholder=" ">
-          <label>èç³»æ¹å¼ï¼éå¡«ï¼æ¹ä¾¿æä»¬åå¤æ¨ï¼</label>
+          <label>联系方式（选填，方便我们回复您）</label>
         </div>
         <div class="form-group">
           <textarea class="suggestion-content" placeholder=" " required maxlength="2000"></textarea>
-          <label>æ¨çå»ºè®®ãæè§ææ³æ³â¦</label>
+          <label>您的建议、意见或想法…</label>
           <div class="char-count"><span class="current">0</span> / 2000</div>
         </div>
         <button type="submit" class="form-submit">
-          æäº¤å»ºè®®
+          提交建议
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </form>
@@ -1028,7 +1027,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
     <div class="suggestion-footer">
       <span class="lock">
         <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        æ¨çä¿¡æ¯ä»ç¨äºåå¤ï¼ç»ä¸å¤æ³
+        您的信息仅用于回复，绝不外泄
       </span>
     </div>
   </div>
@@ -1039,38 +1038,38 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   <div class="footer-top">
     <div class="footer-brand">
       <h3>BAILUYUAN</h3>
-      <p class="cn">ç½é¹¿ç¼æå½±å·¥ä½å®¤</p>
-      <p>ä¼ä¸å®£ä¼ çãäººåæåãé¶åå¢ãä¸ä¸èåãç¨å½±åè®²è¿°æ¯ä¸ä¸ªå¼å¾è¢«çè§çæäºã</p>
+      <p class="cn">白鹿缘摄影工作室</p>
+      <p>企业宣传片、人像摄像、银发团、专业肖像。用影像讲述每一个值得被看见的故事。</p>
     </div>
     <div class="footer-col">
       <h4>Navigate</h4>
-      <a href="#philosophy">åççå¿µ</a>
-      <a href="#portfolio">æå½±ä½å</a>
-      <a href="#services">æå¡é¡¹ç®</a>
-      <a href="#booking">å¨è¯¢åä½</a>
+      <a href="#philosophy">品牌理念</a>
+      <a href="#portfolio">摄影作品</a>
+      <a href="#services">服务项目</a>
+      <a href="#booking">咨询合作</a>
     </div>
     <div class="footer-col">
       <h4>Services</h4>
-      <a href="#">ä¼ä¸å®£ä¼ ç</a>
-      <a href="#">äººåæå</a>
-      <a href="#">é¶åå¢</a>
-      <a href="#">èå</a>
+      <a href="#">企业宣传片</a>
+      <a href="#">人像摄像</a>
+      <a href="#">银发团</a>
+      <a href="#">肖像</a>
     </div>
     <div class="footer-col">
       <h4>Follow</h4>
-      <a href="#">å°çº¢ä¹¦</a>
-      <a href="#">æé³</a>
-      <a href="#">å¾®å</a>
+      <a href="#">小红书</a>
+      <a href="#">抖音</a>
+      <a href="#">微博</a>
       <a href="#">Instagram</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>Â© 2026 ç½é¹¿ç¼æå½± BAILUYUAN STUDIO. All rights reserved.</span>
+    <span>© 2026 白鹿缘摄影 BAILUYUAN STUDIO. All rights reserved.</span>
     <div class="footer-social">
-      <a href="#" title="å°çº¢ä¹¦">çº¢</a>
-      <a href="#" title="æé³">æ</a>
-      <a href="#" title="å¾®å">å¾®</a>
-      <a href="/admin/" title="ç®¡çåå°" style="font-size:.55rem;letter-spacing:1px">ç®¡ç</a>
+      <a href="#" title="小红书">红</a>
+      <a href="#" title="抖音">抖</a>
+      <a href="#" title="微博">微</a>
+      <a href="/admin/" title="管理后台" style="font-size:.55rem;letter-spacing:1px">管理</a>
     </div>
   </div>
 </footer>
@@ -1078,73 +1077,73 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 <!-- Login Modal -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-modal">
-    <div class="login-close" onclick="closeLoginModal()">Ã</div>
+    <div class="login-close" onclick="closeLoginModal()">×</div>
     <div class="login-header">
       <div class="login-icon">
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <div class="login-brand">BAILUYUAN</div>
-      <div class="login-brand-cn">ç½é¹¿ç¼æå½±</div>
-      <p class="login-sub">é¢çº¦æå¡éè¦ç»å½è´¦æ·</p>
+      <div class="login-brand-cn">白鹿缘摄影</div>
+      <p class="login-sub">预约服务需要登录账户</p>
     </div>
     <div class="login-tabs">
-      <button class="login-tab active" onclick="switchAuthTab('login')">ç»å½</button>
-      <button class="login-tab" onclick="switchAuthTab('register')">æ³¨å</button>
+      <button class="login-tab active" onclick="switchAuthTab('login')">登录</button>
+      <button class="login-tab" onclick="switchAuthTab('register')">注册</button>
     </div>
     <div class="login-body">
       <!-- Login Form -->
       <form class="login-form active" id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
-          <input type="text" id="loginUser" placeholder="ç¨æ·å" required>
+          <input type="text" id="loginUser" placeholder="用户名" required>
         </div>
         <div class="form-group">
-          <input type="password" id="loginPass" placeholder="å¯ç " required>
+          <input type="password" id="loginPass" placeholder="密码" required>
         </div>
-        <button type="submit" class="login-btn" id="loginBtn">ç» å½</button>
+        <button type="submit" class="login-btn" id="loginBtn">登 录</button>
         <p class="login-error" id="loginError"></p>
       </form>
       <!-- Register Form -->
       <form class="login-form" id="registerForm" onsubmit="handleRegister(event)">
         <div class="form-group">
-          <input type="text" id="regUser" placeholder="ç¨æ·åï¼2-30 ä¸ªå­ç¬¦ï¼" required>
+          <input type="text" id="regUser" placeholder="用户名（2-30 个字符）" required>
         </div>
         <div class="form-group">
-          <input type="password" id="regPass" placeholder="å¯ç ï¼è³å° 6 ä½ï¼" required>
+          <input type="password" id="regPass" placeholder="密码（至少 6 位）" required>
         </div>
         <div class="form-group">
-          <input type="password" id="regPass2" placeholder="ç¡®è®¤å¯ç " required>
+          <input type="password" id="regPass2" placeholder="确认密码" required>
         </div>
-        <button type="submit" class="login-btn" id="regBtn">æ³¨ å</button>
+        <button type="submit" class="login-btn" id="regBtn">注 册</button>
         <p class="login-error" id="regError"></p>
       </form>
     </div>
-    <p class="login-hint">çè¨å»ºè®®æ éç»å½ Â· é¢çº¦æå¡éåæ³¨å</p>
+    <p class="login-hint">留言建议无需登录 · 预约服务需先注册</p>
   </div>
 </div>
 
 <!-- Change Password Modal -->
 <div class="login-overlay" id="changePassOverlay">
   <div class="login-modal">
-    <div class="login-close" onclick="closeChangePassModal()">Ã</div>
+    <div class="login-close" onclick="closeChangePassModal()">×</div>
     <div class="login-header">
       <div class="login-icon">
         <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
-      <div class="login-brand">ä¿®æ¹å¯ç </div>
-      <p class="login-sub">è¯·è¾å¥æ§å¯ç åæ°å¯ç </p>
+      <div class="login-brand">修改密码</div>
+      <p class="login-sub">请输入旧密码和新密码</p>
     </div>
     <div class="login-body">
       <form id="changePassForm" onsubmit="handleChangePassword(event)">
         <div class="form-group">
-          <input type="password" id="oldPass" placeholder="å½åå¯ç " required>
+          <input type="password" id="oldPass" placeholder="当前密码" required>
         </div>
         <div class="form-group">
-          <input type="password" id="newPass" placeholder="æ°å¯ç ï¼è³å° 6 ä½ï¼" required minlength="6">
+          <input type="password" id="newPass" placeholder="新密码（至少 6 位）" required minlength="6">
         </div>
         <div class="form-group">
-          <input type="password" id="newPass2" placeholder="ç¡®è®¤æ°å¯ç " required>
+          <input type="password" id="newPass2" placeholder="确认新密码" required>
         </div>
-        <button type="submit" class="login-btn" id="changePassBtn">ç¡®è®¤ä¿®æ¹</button>
+        <button type="submit" class="login-btn" id="changePassBtn">确认修改</button>
         <p class="login-error" id="changePassError"></p>
       </form>
     </div>
@@ -1152,7 +1151,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
 </div>
 
 <!-- Back to Top -->
-<button class="back-top" id="backTop">â</button>
+<button class="back-top" id="backTop">↑</button>
 
 <script>
 // ===== Utilities =====
@@ -1169,22 +1168,22 @@ function photoSVG(category) {
   return icons[category] || icons.portrait;
 }
 
-// ââââââââââââââââââââââââââââââââââââââââââââââ
-// â ï¸  é¨ç½²åè¯·ä¿®æ¹æ­¤å°åä¸ºä½ ç Worker å°å
-// ââââââââââââââââââââââââââââââââââââââââââââââ
+// ══════════════════════════════════════════════
+// ⚠️  部署后请修改此地址为你的 Worker 地址
+// ══════════════════════════════════════════════
 const API_BASE = 'https://api.bailuyuan.fun';
 
 // ===== Portfolio Static Fallback Data =====
 const worksStatic = [
-  { name:'Brand Rising', cn:'åçå´èµ·', category:'corporate', detail:'ä¼ä¸å½¢è±¡ Â· åçå®£ä¼ ç', cls:'photo-1' },
-  { name:'True Self', cn:'çæ', category:'portrait', detail:'ä¸ªäººå½¢è±¡ Â· çæ´»çºªå½', cls:'photo-2' },
-  { name:'Golden Years', cn:'éè²å¹´å', category:'silver', detail:'é¶åå®¶åº­ Â· éå©çºªå¿µ', cls:'photo-3' },
-  { name:'Professional', cn:'ä¸ä¸å½¢è±¡', category:'headshot', detail:'åå¡èå Â· èä¸å½¢è±¡ç§', cls:'photo-4' },
-  { name:'Visionary', cn:'è¿è§', category:'corporate', detail:'ä¼ä¸æå Â· CEOè®¿è°', cls:'photo-5' },
-  { name:'Moments', cn:'æµå¹´', category:'portrait', detail:'æé¿å½±å Â· äº²å­çºªå½', cls:'photo-6' },
-  { name:'Together', cn:'å¨ä¸èµ·', category:'silver', detail:'å®¶åº­åå½± Â· éä¼çºªå¿µ', cls:'photo-7' },
-  { name:'First Impression', cn:'ç¬¬ä¸å°è±¡', category:'headshot', detail:'ä¸ªäººåç Â· ç¤¾äº¤å½¢è±¡', cls:'photo-8' },
-  { name:'Impact', cn:'å½±åå', category:'corporate', detail:'äº§ååå¸ Â· æ´»å¨çºªå½', cls:'photo-9' },
+  { name:'Brand Rising', cn:'品牌崛起', category:'corporate', detail:'企业形象 · 品牌宣传片', cls:'photo-1' },
+  { name:'True Self', cn:'真我', category:'portrait', detail:'个人形象 · 生活纪录', cls:'photo-2' },
+  { name:'Golden Years', cn:'金色年华', category:'silver', detail:'银发家庭 · 金婚纪念', cls:'photo-3' },
+  { name:'Professional', cn:'专业形象', category:'headshot', detail:'商务肖像 · 职业形象照', cls:'photo-4' },
+  { name:'Visionary', cn:'远见', category:'corporate', detail:'企业文化 · CEO访谈', cls:'photo-5' },
+  { name:'Moments', cn:'流年', category:'portrait', detail:'成长影像 · 亲子纪录', cls:'photo-6' },
+  { name:'Together', cn:'在一起', category:'silver', detail:'家庭合影 · 退休纪念', cls:'photo-7' },
+  { name:'First Impression', cn:'第一印象', category:'headshot', detail:'个人品牌 · 社交形象', cls:'photo-8' },
+  { name:'Impact', cn:'影响力', category:'corporate', detail:'产品发布 · 活动纪录', cls:'photo-9' },
 ];
 let works = [];
 let worksLoaded = false;
@@ -1239,9 +1238,9 @@ let carouselStartTime = 0;
 
 // Fallback banners when API is empty
 const bannersFallback = [
-  { title: 'åçè§è§å¤§ç', subtitle: 'çµå½±çº§ç»é¢ï¼å®ä¹åçæ°é«åº¦', cls: 'photo-1' },
-  { title: 'çå®ä¸æ¸©åº¦', subtitle: 'ææé¶åå²ææå¨äººçç¬é´', cls: 'photo-3' },
-  { title: 'ä¸ä¸èåå®å¶', subtitle: 'ä¸å¼ ç§çï¼èè¿åè¨ä¸è¯­', cls: 'photo-5' },
+  { title: '品牌视觉大片', subtitle: '电影级画面，定义品牌新高度', cls: 'photo-1' },
+  { title: '真实与温度', subtitle: '捕捉银发岁月最动人的瞬间', cls: 'photo-3' },
+  { title: '专业肖像定制', subtitle: '一张照片，胜过千言万语', cls: 'photo-5' },
 ];
 
 function renderCarousel() {
@@ -1249,7 +1248,7 @@ function renderCarousel() {
   const dots = document.getElementById('carouselDots');
   const source = banners.length > 0 ? banners : bannersFallback;
 
-  // Build slides â absolutely positioned for crossfade
+  // Build slides — absolutely positioned for crossfade
   track.innerHTML = source.map((b, i) => {
     const hasImage = b.image_key;
     const imgSrc = hasImage ? `${API_BASE}/api/image/${encodeURIComponent(b.image_key)}` : '';
@@ -1286,8 +1285,8 @@ function updateCarouselContent(index) {
   const subtitleEl = document.getElementById('carouselSubtitle');
   const ctaEl = document.getElementById('carouselCta');
 
-  titleEl.textContent = b.title || 'ç½é¹¿ç¼æå½±';
-  subtitleEl.textContent = b.subtitle || 'ä»¥åå½±ä¸ºç¬ï¼ä»¥éå¤´ä¸ºå¢¨';
+  titleEl.textContent = b.title || '白鹿缘摄影';
+  subtitleEl.textContent = b.subtitle || '以光影为笔，以镜头为墨';
   if (b.link) {
     ctaEl.href = b.link;
   } else {
@@ -1528,7 +1527,7 @@ function createShowcaseSparks() {
   const container = document.getElementById('showcaseSparks');
   if (!container) return;
   const types = ['gold', 'white', 'ember'];
-  // 7å x 5è¡åååå¸
+  // 7列 x 5行均匀分布
   const cols = 7, rows = 5;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -1536,7 +1535,7 @@ function createShowcaseSparks() {
       const type = types[Math.floor(Math.random() * types.length)];
       spark.className = `showcase-spark ${type}`;
       const size = 1.5 + Math.random() * 2.5;
-      // å¨æ¯ä¸ªæ ¼å­åéæºåç§»
+      // 在每个格子内随机偏移
       const x = (c / cols) * 100 + (Math.random() * (100 / cols));
       const y = (r / rows) * 100 + (Math.random() * (100 / rows));
       const drift = (Math.random() - 0.5) * 60;
@@ -1641,9 +1640,9 @@ let currentSlide = 0;
 let testimonialTimer = null;
 
 const testimonialsFallback = [
-  { quote:'ç½é¹¿ç¼ä¸ºæä»¬å¬å¸æçä¼ä¸å®£ä¼ çææè¿è¶é¢æãä»èæ¬ç­åå°æææ§è¡éå¸¸ä¸ä¸ï¼æçå¨è¡ä¸å±ä¼ä¸æ­æ¾æ¶ååå¾å¥½ï¼åçå½¢è±¡æåäºä¸ä¸ªæ¡£æ¬¡ã', author:'Zhang Wei Â· ç§æå¬å¸ CEO', detail:'2025å¹´11æ Â· ä¼ä¸å®£ä¼ ç', stars:5, bg_key:'' },
-  { quote:'ç»ç¸å¦æäºä¸ç»é¶åå¢çºªå¿µç§ï¼æå½±å¸ç¹å«èå¿ï¼éå¾ä¸¤ä½èäººç¬å¾å¾èªç¶ãçå°æçé£ä¸å»ç¹å«æå¨ï¼è°¢è°¢ç½é¹¿ç¼çä½äºè¿ä¹æ¸©æçç»é¢ã', author:'Liu Fang', detail:'2025å¹´9æ Â· é¶åå¢', stars:5, bg_key:'' },
-  { quote:'å¬å¸éè¦ç»å¢éç»ä¸æèä¸èåï¼ç½é¹¿ç¼ä¸é¨æå¡ï¼æçé«ãåºçå¥½ãæ¯å¼ ç§çé½å¾ä¸ä¸åæäº²ååï¼åäºä»¬é½éå¸¸æ»¡æã', author:'Chen Jie Â· äººåèµæºæ»ç', detail:'2025å¹´æç»­åä½ Â· èå', stars:5, bg_key:'' },
+  { quote:'白鹿缘为我们公司拍的企业宣传片效果远超预期。从脚本策划到拍摄执行非常专业，成片在行业展会上播放时反响很好，品牌形象提升了一个档次。', author:'Zhang Wei · 科技公司 CEO', detail:'2025年11月 · 企业宣传片', stars:5, bg_key:'' },
+  { quote:'给爸妈拍了一组银发团纪念照，摄影师特别耐心，逗得两位老人笑得很自然。看到成片那一刻特别感动，谢谢白鹿缘留住了这么温暖的画面。', author:'Liu Fang', detail:'2025年9月 · 银发团', stars:5, bg_key:'' },
+  { quote:'公司需要给团队统一拍职业肖像，白鹿缘上门服务，效率高、出片好。每张照片都很专业又有亲和力，同事们都非常满意。', author:'Chen Jie · 人力资源总监', detail:'2025年持续合作 · 肖像', stars:5, bg_key:'' },
 ];
 
 async function fetchTestimonials() {
@@ -1663,14 +1662,14 @@ function renderTestimonials() {
   const dotsContainer = document.getElementById('testimonialDots');
   const bgContainer = document.getElementById('testimonialsBgContainer');
 
-  // ç­éåºæèæ¯å¾çå®¢æ·å¿å£°
+  // 筛选出有背景图的客户心声
   const withBg = source.filter(t => t.bg_key);
-  // æèæ¯å¾çç´¢å¼éå
+  // 有背景图的索引集合
   const bgIndices = new Set(withBg.map(t => source.indexOf(t)));
 
-  // Render slides â ææå¿å£°é½æ¾ç¤ºï¼ä½åªææèæ¯çåä¸è½®æ­
+  // Render slides — 所有心声都显示，但只有有背景的参与轮播
   slider.innerHTML = source.map((t, i) => {
-    const starsStr = 'â '.repeat(t.stars || 5).trim();
+    const starsStr = '★ '.repeat(t.stars || 5).trim();
     const isActive = withBg.length > 0 ? bgIndices.has(i) && i === [...bgIndices][0] : i === 0;
     return `
     <div class="testimonial-item ${isActive ? 'active' : ''}" data-index="${i}">
@@ -1681,7 +1680,7 @@ function renderTestimonials() {
     </div>`;
   }).join('');
 
-  // Render dots â åªæè¶è¿1æ¡æèæ¯å¾æ¶ææ¾ç¤ºè½®æ­ç¹
+  // Render dots — 只有超过1条有背景图时才显示轮播点
   if (withBg.length > 1) {
     dotsContainer.innerHTML = withBg.map((_, i) =>
       `<div class="testimonial-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
@@ -1690,7 +1689,7 @@ function renderTestimonials() {
     dotsContainer.innerHTML = '';
   }
 
-  // Render background layers â åªææèæ¯å¾çææ¸²æ
+  // Render background layers — 只有有背景图的才渲染
   if (withBg.length > 0) {
     bgContainer.innerHTML = withBg.map((t, i) =>
       `<div class="testimonials-bg ${i === 0 ? 'active' : ''}" data-index="${i}"><img src="${API_BASE}/api/image/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy"></div>`
@@ -1738,7 +1737,7 @@ function startTestimonialAutoplay() {
   clearInterval(testimonialTimer);
   const source = testimonialsData.length > 0 ? testimonialsData : testimonialsFallback;
   const withBg = source.filter(t => t.bg_key);
-  // åªæè¶è¿1æ¡æèæ¯å¾æ¶æè½®æ­ï¼ä»1æ¡ææ èæ¯åä¸è½®æ­
+  // 只有超过1条有背景图时才轮播，仅1条或无背景则不轮播
   if (withBg.length <= 1) return;
   testimonialTimer = setInterval(() => showTestimonialSlide(currentSlide + 1), 6000);
 }
@@ -1767,15 +1766,15 @@ function updateAuthUI() {
   const dropdownUsername = document.getElementById('dropdownUsername');
   if (token) {
     btn.classList.add('logged-in');
-    const username = localStorage.getItem('bailuyuan_username') || 'å·²ç»å½';
+    const username = localStorage.getItem('bailuyuan_username') || '已登录';
     text.textContent = username;
     if (dropdownUsername) dropdownUsername.textContent = username;
-    if (mobileLink) mobileLink.textContent = 'éåºç»å½';
+    if (mobileLink) mobileLink.textContent = '退出登录';
   } else {
     btn.classList.remove('logged-in');
-    text.textContent = 'ç»å½';
-    if (dropdownUsername) dropdownUsername.textContent = 'ç¨æ·';
-    if (mobileLink) mobileLink.textContent = 'ç»å½';
+    text.textContent = '登录';
+    if (dropdownUsername) dropdownUsername.textContent = '用户';
+    if (mobileLink) mobileLink.textContent = '登录';
     closeUserMenu();
   }
 }
@@ -1824,18 +1823,18 @@ async function handleChangePassword(e) {
   const newPassword2 = document.getElementById('newPass2').value.trim();
 
   if (newPassword !== newPassword2) {
-    errEl.textContent = 'ä¸¤æ¬¡è¾å¥çæ°å¯ç ä¸ä¸è´';
+    errEl.textContent = '两次输入的新密码不一致';
     errEl.style.display = 'block';
     return;
   }
   if (newPassword.length < 6) {
-    errEl.textContent = 'æ°å¯ç è³å°éè¦ 6 ä¸ªå­ç¬¦';
+    errEl.textContent = '新密码至少需要 6 个字符';
     errEl.style.display = 'block';
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = 'ä¿®æ¹ä¸­...';
+  btn.textContent = '修改中...';
   errEl.style.display = 'none';
 
   try {
@@ -1848,16 +1847,16 @@ async function handleChangePassword(e) {
       body: JSON.stringify({ oldPassword, newPassword })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'ä¿®æ¹å¤±è´¥');
+    if (!res.ok) throw new Error(data.error || '修改失败');
     closeChangePassModal();
-    alert('å¯ç ä¿®æ¹æåï¼è¯·éæ°ç»å½');
+    alert('密码修改成功，请重新登录');
     logoutUser();
   } catch (err) {
     errEl.textContent = err.message;
     errEl.style.display = 'block';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'ç¡®è®¤ä¿®æ¹';
+    btn.textContent = '确认修改';
   }
 }
 
@@ -1884,7 +1883,7 @@ async function handleLogin(e) {
   const errEl = document.getElementById('loginError');
   const username = document.getElementById('loginUser').value.trim();
   const password = document.getElementById('loginPass').value.trim();
-  btn.disabled = true; btn.textContent = 'ç»å½ä¸­...'; errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = '登录中...'; errEl.style.display = 'none';
   try {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
@@ -1892,7 +1891,7 @@ async function handleLogin(e) {
       body: JSON.stringify({ username, password })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'ç»å½å¤±è´¥');
+    if (!res.ok) throw new Error(data.error || '登录失败');
     setAuthToken(data.token);
     localStorage.setItem('bailuyuan_role', data.role || 'user');
     localStorage.setItem('bailuyuan_username', data.username || username);
@@ -1906,7 +1905,7 @@ async function handleLogin(e) {
     errEl.textContent = err.message;
     errEl.style.display = 'block';
   } finally {
-    btn.disabled = false; btn.textContent = 'ç» å½';
+    btn.disabled = false; btn.textContent = '登 录';
   }
 }
 
@@ -1917,12 +1916,12 @@ async function handleRegister(e) {
   const username = document.getElementById('regUser').value.trim();
   const password = document.getElementById('regPass').value.trim();
   const password2 = document.getElementById('regPass2').value.trim();
-  btn.disabled = true; btn.textContent = 'æ³¨åä¸­...'; errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = '注册中...'; errEl.style.display = 'none';
 
   if (password !== password2) {
-    errEl.textContent = 'ä¸¤æ¬¡è¾å¥çå¯ç ä¸ä¸è´';
+    errEl.textContent = '两次输入的密码不一致';
     errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'æ³¨ å';
+    btn.disabled = false; btn.textContent = '注 册';
     return;
   }
 
@@ -1933,7 +1932,7 @@ async function handleRegister(e) {
       body: JSON.stringify({ username, password })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'æ³¨åå¤±è´¥');
+    if (!res.ok) throw new Error(data.error || '注册失败');
     setAuthToken(data.token);
     localStorage.setItem('bailuyuan_role', data.role || 'user');
     localStorage.setItem('bailuyuan_username', data.username || username);
@@ -1947,7 +1946,7 @@ async function handleRegister(e) {
     errEl.textContent = err.message;
     errEl.style.display = 'block';
   } finally {
-    btn.disabled = false; btn.textContent = 'æ³¨ å';
+    btn.disabled = false; btn.textContent = '注 册';
   }
 }
 
@@ -1969,7 +1968,7 @@ async function handleSubmit(e) {
   const type = inputs[3].value;
   const message = inputs[4].value.trim();
 
-  if (!name || !phone || !type) { alert('è¯·å¡«åå§åãçµè¯åææç±»å'); return; }
+  if (!name || !phone || !type) { alert('请填写姓名、电话和拍摄类型'); return; }
 
   // Check auth
   if (!getAuthToken()) {
@@ -1984,7 +1983,7 @@ async function handleSubmit(e) {
 async function submitBookingWithAuth(data) {
   const form = document.querySelector('.booking-form');
   const btn = form.querySelector('.form-submit');
-  btn.textContent = 'æäº¤ä¸­...';
+  btn.textContent = '提交中...';
   btn.disabled = true;
   try {
     const res = await fetch(`${API_BASE}/api/bookings`, {
@@ -2000,15 +1999,15 @@ async function submitBookingWithAuth(data) {
       updateAuthUI();
       pendingBooking = data;
       openLoginModal();
-      throw new Error('ç»å½å·²è¿æï¼è¯·éæ°ç»å½');
+      throw new Error('登录已过期，请重新登录');
     }
-    if (!res.ok) throw new Error('æäº¤å¤±è´¥');
-    btn.textContent = 'é¢çº¦æå â';
+    if (!res.ok) throw new Error('提交失败');
+    btn.textContent = '预约成功 ✓';
     btn.style.background = 'var(--gold)';
     btn.style.color = 'var(--white)';
     btn.style.borderColor = 'var(--gold)';
     setTimeout(() => {
-      btn.textContent = 'æäº¤é¢çº¦';
+      btn.textContent = '提交预约';
       btn.style.background = '';
       btn.style.color = '';
       btn.style.borderColor = '';
@@ -2016,10 +2015,10 @@ async function submitBookingWithAuth(data) {
       form.reset();
     }, 3000);
   } catch (err) {
-    btn.textContent = err.message || 'æäº¤å¤±è´¥ï¼è¯·éè¯';
+    btn.textContent = err.message || '提交失败，请重试';
     btn.style.borderColor = 'var(--rose)';
     setTimeout(() => {
-      btn.textContent = 'æäº¤é¢çº¦';
+      btn.textContent = '提交预约';
       btn.style.borderColor = '';
       btn.disabled = false;
     }, 3000);
@@ -2034,8 +2033,8 @@ async function handleSuggestion(e) {
   const contact = form.querySelector('.suggestion-contact').value.trim();
   const content = form.querySelector('.suggestion-content').value.trim();
 
-  if (!content) { alert('è¯·è¾å¥æ¨çå»ºè®®'); return; }
-  btn.textContent = 'æäº¤ä¸­...';
+  if (!content) { alert('请输入您的建议'); return; }
+  btn.textContent = '提交中...';
   btn.disabled = true;
   try {
     const res = await fetch(`${API_BASE}/api/suggestions`, {
@@ -2043,13 +2042,13 @@ async function handleSuggestion(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contact, content })
     });
-    if (!res.ok) throw new Error('æäº¤å¤±è´¥');
-    btn.textContent = 'æè°¢æ¨çå»ºè®® â';
+    if (!res.ok) throw new Error('提交失败');
+    btn.textContent = '感谢您的建议 ✓';
     btn.style.background = 'var(--gold)';
     btn.style.color = 'var(--white)';
     btn.style.borderColor = 'var(--gold)';
     setTimeout(() => {
-      btn.textContent = 'æäº¤å»ºè®®';
+      btn.textContent = '提交建议';
       btn.style.background = '';
       btn.style.color = '';
       btn.style.borderColor = '';
@@ -2057,10 +2056,10 @@ async function handleSuggestion(e) {
       form.reset();
     }, 3000);
   } catch (err) {
-    btn.textContent = 'æäº¤å¤±è´¥ï¼è¯·éè¯';
+    btn.textContent = '提交失败，请重试';
     btn.style.borderColor = 'var(--rose)';
     setTimeout(() => {
-      btn.textContent = 'æäº¤å»ºè®®';
+      btn.textContent = '提交建议';
       btn.style.borderColor = '';
       btn.disabled = false;
     }, 3000);
