@@ -40,6 +40,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 /* Loader */
 .loader{position:fixed;inset:0;background:#0d0b09;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s var(--ease),visibility .8s}
 .loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loader.done{display:none}
 .loader-inner{text-align:center}
 .loader-logo{width:64px;height:64px;margin:0 auto 32px;position:relative}
 .loader-logo svg{width:100%;height:100%;animation:loaderLogoIn 1.2s var(--ease) forwards;opacity:0;transform:scale(.8)}
@@ -49,9 +50,9 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .loader-bar{width:160px;height:1px;background:rgba(255,255,255,.06);margin:0 auto;position:relative;overflow:visible;opacity:0;animation:loaderTextIn .6s var(--ease) .8s forwards}
 .loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light),var(--gold-dark));animation:loaderFill 2s var(--ease) .8s forwards;box-shadow:0 0 8px rgba(184,151,106,.6),0 0 20px rgba(184,151,106,.3)}
 .loader-sparks{position:absolute;left:0;top:-2px;width:160px;height:60px;pointer-events:none;opacity:0;animation:loaderTextIn .6s var(--ease) .8s forwards}
-.spark{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--gold-light);box-shadow:0 0 4px var(--gold),0 0 8px rgba(184,151,106,.5);animation:sparkFly var(--spark-dur,.8s) var(--spark-delay,0s) ease-out infinite}
-.spark:nth-child(odd){width:1.5px;height:1.5px;background:#fff;box-shadow:0 0 3px var(--gold-light),0 0 6px var(--gold)}
-.spark:nth-child(3n){width:3px;height:3px;background:var(--gold);box-shadow:0 0 6px var(--gold),0 0 12px rgba(184,151,106,.4)}
+.spark{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--gold-light);animation:sparkFly var(--spark-dur,.8s) var(--spark-delay,0s) ease-out infinite}
+.spark:nth-child(odd){width:1.5px;height:1.5px;background:#fff}
+.spark:nth-child(3n){width:3px;height:3px;background:var(--gold)}
 @keyframes sparkFly{
   0%{opacity:1;transform:translate(var(--spark-x,0),0) scale(1)}
   50%{opacity:.8}
@@ -69,13 +70,13 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 @keyframes beamSweep{0%{opacity:0;left:-30%}15%{opacity:1}70%{opacity:1}100%{opacity:0;left:90%}}
 @keyframes beamGlow{0%{opacity:0}40%{opacity:1}80%{opacity:1}100%{opacity:0}}
 
-/* Cursor glow effect */
-.cursor-glow{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(184,151,106,.06) 0%,transparent 70%);pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:opacity .3s;opacity:0}
+/* Cursor glow effect — uses transform for GPU compositing */
+.cursor-glow{position:fixed;top:0;left:0;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(184,151,106,.06) 0%,transparent 70%);pointer-events:none;z-index:1;will-change:transform,opacity;opacity:0;transition:opacity .3s}
 body:hover .cursor-glow{opacity:1}
 
 /* Nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:28px 60px;display:flex;align-items:center;justify-content:space-between;transition:all .6s var(--ease)}
-.nav.scrolled{background:rgba(250,248,243,.88);backdrop-filter:blur(32px) saturate(200%) brightness(1.05);-webkit-backdrop-filter:blur(32px) saturate(200%) brightness(1.05);padding:16px 60px;box-shadow:0 4px 30px rgba(0,0,0,.06),0 1px 0 rgba(184,151,106,.1)}
+.nav.scrolled{background:rgba(250,248,243,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:16px 60px;box-shadow:0 2px 20px rgba(0,0,0,.06)}
 .nav-logo{display:flex;align-items:center;gap:14px}
 .nav-logo-icon{width:36px;height:36px;position:relative}
 .nav-logo-icon svg{width:100%;height:100%}
@@ -126,11 +127,11 @@ body:hover .cursor-glow{opacity:1}
 
 /* ═══ Hero Ambient Glow ═══ */
 .hero-ambient{position:absolute;inset:0;pointer-events:none;z-index:1}
-.hero-ambient-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0;animation:ambientPulse 6s ease-in-out infinite}
-.hero-ambient-orb:nth-child(1){width:400px;height:400px;top:10%;left:15%;background:rgba(184,151,106,.04);animation-delay:0s}
-.hero-ambient-orb:nth-child(2){width:300px;height:300px;bottom:20%;right:10%;background:rgba(201,160,160,.03);animation-delay:2s}
-.hero-ambient-orb:nth-child(3){width:250px;height:250px;top:40%;left:50%;transform:translateX(-50%);background:rgba(184,151,106,.025);animation-delay:4s}
-@keyframes ambientPulse{0%,100%{opacity:0;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+.hero-ambient-orb{position:absolute;border-radius:50%;opacity:0;animation:ambientPulse 6s ease-in-out infinite;will-change:transform,opacity}
+.hero-ambient-orb:nth-child(1){width:400px;height:400px;top:10%;left:15%;background:radial-gradient(circle,rgba(184,151,106,.06) 0%,transparent 70%);animation-delay:0s}
+.hero-ambient-orb:nth-child(2){width:300px;height:300px;bottom:20%;right:10%;background:radial-gradient(circle,rgba(201,160,160,.04) 0%,transparent 70%);animation-delay:2s}
+.hero-ambient-orb:nth-child(3){width:250px;height:250px;top:40%;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(184,151,106,.04) 0%,transparent 70%);animation-delay:4s}
+@keyframes ambientPulse{0%,100%{opacity:0;transform:scale(.8)}50%{opacity:1;transform:scale(1.05)}}
 
 /* ═══ Hero Horizontal Light Ray ═══ */
 .hero-ray{position:absolute;top:50%;left:0;right:0;height:1px;z-index:1;pointer-events:none;overflow:hidden}
@@ -171,7 +172,7 @@ body:hover .cursor-glow{opacity:1}
 .hero-title-cn .char:nth-child(7){animation-delay:1.52s,3.12s}
 .hero-title-cn .char:nth-child(8){animation-delay:1.64s,3.24s}
 @keyframes charReveal{0%{opacity:0;transform:translateY(40px) rotateX(40deg)}60%{opacity:1;transform:translateY(-4px) rotateX(-5deg)}100%{opacity:1;transform:translateY(0) rotateX(0deg)}}
-@keyframes charShimmer{0%,100%{color:var(--gold-light);text-shadow:none}50%{color:var(--gold);text-shadow:0 0 20px rgba(184,151,106,.4),0 0 40px rgba(184,151,106,.15)}}
+@keyframes charShimmer{0%,100%{color:var(--gold-light)}50%{color:var(--gold)}}
 .hero-divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 40px;opacity:0;transform:scaleX(0);animation:scaleIn 1s var(--ease) 1.2s forwards}
 .hero-subtitle{font-family:var(--font-serif);font-size:clamp(.9rem,1.5vw,1.15rem);font-weight:300;letter-spacing:1.5px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto 56px;line-height:2;opacity:0;transform:translateY(20px);animation:fadeUp .8s var(--ease) 1.4s forwards}
 .hero-cta{display:inline-flex;align-items:center;gap:12px;padding:18px 52px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--font-sans);font-size:.72rem;font-weight:500;letter-spacing:4px;text-transform:uppercase;transition:all .5s var(--ease);opacity:0;transform:translateY(20px);animation:fadeUp .8s var(--ease) 1.6s forwards;position:relative;overflow:hidden}
@@ -188,13 +189,13 @@ body:hover .cursor-glow{opacity:1}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 @keyframes scaleIn{to{opacity:1;transform:scaleX(1)}}
 
-/* Floating particles */
+/* Floating particles — GPU-friendly: no box-shadow, use opacity only */
 .hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.particle{position:absolute;border-radius:50%;opacity:0;animation:float linear infinite}
-.particle.gold{background:var(--gold);box-shadow:0 0 4px rgba(184,151,106,.4)}
-.particle.white{background:#fff;box-shadow:0 0 3px rgba(255,255,255,.3)}
-.particle.ember{background:#e8a050;box-shadow:0 0 4px rgba(232,160,80,.3)}
-@keyframes float{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.5}50%{opacity:.3}90%{opacity:.4}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+.particle{position:absolute;border-radius:50%;opacity:0;animation:float linear infinite;will-change:transform,opacity}
+.particle.gold{background:rgba(184,151,106,.6)}
+.particle.white{background:rgba(255,255,255,.5)}
+.particle.ember{background:rgba(232,160,80,.5)}
+@keyframes float{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.4}50%{opacity:.25}90%{opacity:.35}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
 
 /* Section Common */
 .section{padding:140px 60px;position:relative}
@@ -374,9 +375,9 @@ body:hover .cursor-glow{opacity:1}
 .showcase-content cite{font-family:var(--font-cn);font-size:.8rem;letter-spacing:4px;color:var(--gold-light);font-style:normal}
 .showcase-sparks{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
 .showcase-spark{position:absolute;border-radius:50%;opacity:0;animation:showcaseSpark var(--sk-dur,3s) var(--sk-delay,0s) ease-out infinite}
-.showcase-spark.gold{background:var(--gold);box-shadow:0 0 6px var(--gold),0 0 12px rgba(184,151,106,.3)}
-.showcase-spark.white{background:#fff;box-shadow:0 0 4px rgba(255,255,255,.6),0 0 8px rgba(184,151,106,.2)}
-.showcase-spark.ember{background:#e8a050;box-shadow:0 0 5px #e8a050,0 0 10px rgba(232,160,80,.3)}
+.showcase-spark.gold{background:rgba(184,151,106,.7)}
+.showcase-spark.white{background:rgba(255,255,255,.6)}
+.showcase-spark.ember{background:rgba(232,160,80,.6)}
 @keyframes showcaseSpark{
   0%{opacity:0;transform:translate(0,0) scale(0)}
   10%{opacity:1;transform:scale(1)}
@@ -1559,19 +1560,20 @@ async function fetchWorks() {
 // ===== Enhanced Particles =====
 function createParticles() {
   const container = document.getElementById('particles');
+  const frag = document.createDocumentFragment();
   const types = ['gold', 'white', 'ember'];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 35; i++) {
     const p = document.createElement('div');
     const type = types[Math.floor(Math.random() * types.length)];
     p.className = `particle ${type}`;
     p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (6 + Math.random() * 16) + 's';
-    p.style.animationDelay = Math.random() * 14 + 's';
-    const size = type === 'ember' ? (1 + Math.random() * 2) : (1 + Math.random() * 3);
+    p.style.animationDuration = (8 + Math.random() * 14) + 's';
+    p.style.animationDelay = Math.random() * 12 + 's';
+    const size = 1 + Math.random() * 2.5;
     p.style.width = p.style.height = size + 'px';
-    p.style.opacity = (0.12 + Math.random() * 0.3).toString();
-    container.appendChild(p);
+    frag.appendChild(p);
   }
+  container.appendChild(frag);
 }
 
 // ===== Mouse Parallax & Glow =====
@@ -1579,34 +1581,35 @@ const cursorGlow = document.getElementById('cursorGlow');
 const heroMouseGlow = document.getElementById('heroMouseGlow');
 const heroBg = document.getElementById('heroBg');
 const heroLight = document.getElementById('heroLight');
-let mouseX = 0, mouseY = 0, rafId = null;
+const heroSection = document.getElementById('hero');
+let mouseX = 0, mouseY = 0, rafId = null, heroVisible = true;
+
+// Track hero visibility
+const heroObserver = new IntersectionObserver(([e]) => {
+  heroVisible = e.isIntersecting;
+}, { threshold: 0.1 });
+heroObserver.observe(heroSection);
 
 document.addEventListener('mousemove', e => {
   mouseX = e.clientX;
   mouseY = e.clientY;
-  cursorGlow.style.left = e.clientX + 'px';
-  cursorGlow.style.top = e.clientY + 'px';
-  heroMouseGlow.style.left = e.clientX + 'px';
-  heroMouseGlow.style.top = e.clientY + 'px';
-
-  // Only run parallax when hero is visible
-  if (window.scrollY < window.innerHeight && !rafId) {
+  if (!rafId && heroVisible) {
     rafId = requestAnimationFrame(updateParallax);
   }
-});
+}, { passive: true });
 
 function updateParallax() {
   const cx = (mouseX / window.innerWidth - 0.5) * 2;
   const cy = (mouseY / window.innerHeight - 0.5) * 2;
-  heroBg.style.transform = `translate(${cx * -6}px, ${cy * -4}px) scale(1.02)`;
-  heroLight.style.transform = `translate(${cx * 15}px, ${cy * 10}px)`;
+  heroBg.style.transform = `translate(${cx * -5}px, ${cy * -3}px) scale(1.02)`;
+  heroLight.style.transform = `translate(${cx * 12}px, ${cy * 8}px)`;
+  heroMouseGlow.style.transform = `translate(${mouseX - 250}px, ${mouseY - 250}px)`;
+  cursorGlow.style.transform = `translate(${mouseX - 150}px, ${mouseY - 150}px)`;
   rafId = null;
 }
 
-// Show hero mouse glow only when over hero
-const heroSection = document.getElementById('hero');
-heroSection.addEventListener('mouseenter', () => heroMouseGlow.classList.add('active'));
-heroSection.addEventListener('mouseleave', () => heroMouseGlow.classList.remove('active'));
+heroSection.addEventListener('mouseenter', () => heroMouseGlow.classList.add('active'), { passive: true });
+heroSection.addEventListener('mouseleave', () => heroMouseGlow.classList.remove('active'), { passive: true });
 
 // ===== Loader Sparks =====
 function createLoaderSparks() {
@@ -1655,7 +1658,11 @@ function createShowcaseSparks() {
 window.addEventListener('load', async () => {
   createLoaderSparks();
   createShowcaseSparks();
-  setTimeout(() => document.getElementById('loader').classList.add('hide'), 2200);
+  const loaderEl = document.getElementById('loader');
+  setTimeout(() => {
+    loaderEl.classList.add('hide');
+    loaderEl.addEventListener('transitionend', () => loaderEl.classList.add('done'), { once: true });
+  }, 2200);
   createParticles();
   updateAuthUI();
   await Promise.all([fetchBanners(), fetchWorks(), fetchSettings(), fetchTestimonials()]);
@@ -1682,11 +1689,18 @@ function updateActiveNav() {
   });
 }
 
+let scrollTicking = false;
 window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 60);
-  document.getElementById('backTop').classList.toggle('show', window.scrollY > 600);
-  updateActiveNav();
-});
+  if (!scrollTicking) {
+    scrollTicking = true;
+    requestAnimationFrame(() => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+      document.getElementById('backTop').classList.toggle('show', window.scrollY > 600);
+      updateActiveNav();
+      scrollTicking = false;
+    });
+  }
+}, { passive: true });
 
 function closeMobileMenu() {
   document.getElementById('hamburger').classList.remove('active');
