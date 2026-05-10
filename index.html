@@ -50,7 +50,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .loader-brand{font-family:var(--font-display);font-size:2.2rem;font-weight:400;letter-spacing:18px;color:var(--gold);margin-bottom:6px;opacity:0;animation:loaderTextIn .6s ease .3s forwards;text-shadow:0 0 40px rgba(201,168,124,.15)}
 .loader-brand-cn{font-family:var(--font-cn);font-size:.7rem;font-weight:200;letter-spacing:8px;color:rgba(201,168,124,.35);margin-bottom:36px;opacity:0;animation:loaderTextIn .6s ease .5s forwards}
 .loader-bar{width:160px;height:1px;background:rgba(255,255,255,.04);margin:0 auto;position:relative;overflow:hidden;opacity:0;animation:loaderTextIn .4s ease .6s forwards}
-.loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,transparent,var(--gold-light),transparent);animation:loaderFill 1.5s ease .6s forwards}
+.loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,transparent,var(--gold-light),transparent);animation:loaderFill 2.5s ease .6s forwards}
 @keyframes loaderFill{to{width:100%}}
 @keyframes loaderTextIn{to{opacity:1}}
 
@@ -1740,13 +1740,36 @@ function createShowcaseSparks() {
 // ===== Loader =====
 window.addEventListener('load', async () => {
   createShowcaseSparks(); createWaterDroplets(); createRippleRings();
-  const loaderEl = document.getElementById('loader');
-  setTimeout(() => { loaderEl.classList.add('hide'); loaderEl.addEventListener('transitionend', () => loaderEl.classList.add('done'), { once: true }); }, 1500);
   createParticles(); updateAuthUI();
+  const loaderEl = document.getElementById('loader');
+  const loaderStart = Date.now();
+  const MIN_SHOW = 2000;   // 最少展示 2 秒
+  const MAX_WAIT = 12000;  // 最多等 12 秒，超时也放行
+
+  // 1. 拉取所有 API 数据
   await Promise.all([fetchBanners(), fetchWorks(), fetchCategories(), fetchSettings(), fetchTestimonials()]);
   applySettings();
+
+  // 2. 预渲染内容（让浏览器开始加载图片）
   if (banners.length > 0 && banners[0].image_key) { const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image'; link.href = `${IMAGE_BASE}/${encodeURIComponent(banners[0].image_key)}`; document.head.appendChild(link); }
   renderCarousel(); renderPortfolio(); renderTestimonials();
+
+  // 3. 等待首屏关键图片加载完成（轮播第一张 + 作品前几张）
+  const criticalImgs = [
+    ...document.querySelectorAll('.carousel-slide.active .carousel-slide-img'),
+    ...document.querySelectorAll('.portfolio-card:nth-child(-n+4) .img-ready')
+  ];
+  const imgPromises = criticalImgs.map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; }));
+  const timeout = new Promise(res => setTimeout(res, MAX_WAIT));
+  await Promise.race([Promise.all(imgPromises), timeout]);
+
+  // 4. 保证最少展示时长
+  const elapsed = Date.now() - loaderStart;
+  if (elapsed < MIN_SHOW) await new Promise(res => setTimeout(res, MIN_SHOW - elapsed));
+
+  // 5. 淡出
+  loaderEl.classList.add('hide');
+  loaderEl.addEventListener('transitionend', () => loaderEl.classList.add('done'), { once: true });
 });
 
 // ===== Nav Scroll =====
