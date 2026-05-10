@@ -338,6 +338,15 @@ body:hover .cursor-glow{opacity:1}
 .portfolio-card.visible{opacity:1;transform:translateY(0)}
 .portfolio-card:nth-child(2),.portfolio-card:nth-child(5){grid-row:span 2}
 .portfolio-img{width:100%;height:100%;min-height:300px;position:relative;overflow:hidden;transition:transform .8s var(--ease)}
+/* Image shimmer skeleton */
+.img-shimmer{position:absolute;inset:0;background:linear-gradient(110deg,#1a1714 8%,#2a2520 18%,#1a1714 33%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;z-index:1}
+.img-shimmer::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border:1.5px solid rgba(201,168,124,.15);border-top-color:rgba(201,168,124,.5);border-radius:50%;animation:shimmer-spin .8s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes shimmer-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.img-ready{opacity:0;transition:opacity .6s ease}
+.img-ready.loaded{opacity:1}
+.carousel-slide .img-shimmer{z-index:0}
+.carousel-slide .img-ready{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .portfolio-card:nth-child(2) .portfolio-img,.portfolio-card:nth-child(5) .portfolio-img{min-height:620px}
 .portfolio-card:hover .portfolio-img{transform:scale(1.05)}
 .photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
@@ -1540,7 +1549,7 @@ function renderPortfolio(filter='all') {
     const hasImage = w.image_key && worksLoaded;
     const imgSrc = hasImage ? `${IMAGE_BASE}/${encodeURIComponent(w.image_key)}` : '';
     const imgHtml = hasImage
-      ? `<img src="${imgSrc}" alt="${w.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)" loading="lazy" onerror="this.style.display='none'">`
+      ? `<div class="img-shimmer"></div><img class="img-ready" src="${imgSrc}" alt="${w.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)" loading="lazy" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="photo-placeholder ${w.cls || ''}"><div class="photo-icon">${photoSVG(w.category)}<span>${getCategoryName(w.category)}</span></div></div>`;
     return `<div class="portfolio-card" data-category="${w.category}" style="transition-delay:${i * .08}s"><div class="portfolio-img">${imgHtml}<div class="portfolio-overlay"><span class="tag">${getCategoryName(w.category)}</span><h3>${w.name}</h3><p class="cn">${w.cn}</p><p class="detail">${w.detail}</p><span class="view">View Project<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></div></div></div>`;
   }).join('');
@@ -1568,7 +1577,7 @@ function renderCarousel() {
     const hasImage = b.image_key;
     const imgSrc = hasImage ? `${IMAGE_BASE}/${encodeURIComponent(b.image_key)}` : '';
     const content = hasImage
-      ? `<img class="carousel-slide-img" src="${imgSrc}" alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" onerror="this.style.display='none'">`
+      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${imgSrc}" alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
     return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
   }).join('');
