@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.bailuyuan.fun" crossorigin>
+<link rel="preconnect" href="https://api.bailuyuan.fun" crossorigin>
+<link rel="dns-prefetch" href="https://images.bailuyuan.fun">
+<link rel="dns-prefetch" href="https://api.bailuyuan.fun">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -29,6 +32,8 @@
 }
 html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--gold-light) transparent;-webkit-text-size-adjust:100%}
 body{font-family:var(--font-serif);background:var(--ivory);color:var(--charcoal);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+body.page-ready .hero-content{animation:pageEntrance 1.2s cubic-bezier(.23,1,.32,1) forwards}
+@keyframes pageEntrance{from{opacity:.7;transform:translateY(10px)}to{opacity:1;transform:none}}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--gold-light);border-radius:3px}
@@ -256,7 +261,7 @@ body:hover .cursor-glow{opacity:1}
 @keyframes float{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.4}50%{opacity:.25}90%{opacity:.35}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
 
 /* Section Common — Premium Feel */
-.section{padding:140px 60px;position:relative}
+.section{padding:140px 60px;position:relative;content-visibility:auto;contain-intrinsic-size:auto 800px}
 .section-eyebrow{font-family:var(--font-sans);font-size:.65rem;letter-spacing:6px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:16px;opacity:.7}
 .section-title{font-family:var(--font-display);font-size:clamp(2rem,4.5vw,3.5rem);font-weight:400;text-align:center;letter-spacing:4px;margin-bottom:8px;color:var(--charcoal)}
 .section-title-cn{font-family:var(--font-cn);font-size:.85rem;font-weight:200;letter-spacing:8px;color:var(--text-light);text-align:center;margin-bottom:24px}
@@ -365,8 +370,8 @@ body:hover .cursor-glow{opacity:1}
 .filter-btn::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .3s var(--ease)}
 .filter-btn.active,.filter-btn:hover{color:var(--gold)}
 .filter-btn.active::after,.filter-btn:hover::after{transform:scaleX(1)}
-.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1300px;margin:0 auto}
-.portfolio-card{position:relative;overflow:hidden;cursor:pointer;border-radius:6px;opacity:0;transform:translateY(30px);transition:all .6s var(--ease-smooth)}
+.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1300px;margin:0 auto;contain:layout style}
+.portfolio-card{position:relative;overflow:hidden;cursor:pointer;border-radius:6px;opacity:0;transform:translateY(30px);transition:all .7s cubic-bezier(.23,1,.32,1);contain:layout style}
 .portfolio-card:hover{box-shadow:0 24px 64px rgba(0,0,0,.15),0 8px 24px rgba(0,0,0,.1);transform:translateY(-4px)}
 .portfolio-card.visible{opacity:1;transform:translateY(0)}
 .portfolio-card:nth-child(2),.portfolio-card:nth-child(5){grid-row:span 2}
@@ -534,12 +539,12 @@ body:hover .cursor-glow{opacity:1}
 .back-top:hover{background:var(--gold);color:var(--white);border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 24px rgba(201,168,124,.3)}
 
 /* Scroll Animations — Smooth Premium */
-.reveal{opacity:0;transform:translateY(30px);transition:all 1s var(--ease-out)}
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.23,1,.32,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-delay-1{transition-delay:.15s}
-.reveal-delay-2{transition-delay:.3s}
-.reveal-delay-3{transition-delay:.45s}
-.reveal-delay-4{transition-delay:.6s}
+.reveal-delay-1{transition-delay:.12s}
+.reveal-delay-2{transition-delay:.24s}
+.reveal-delay-3{transition-delay:.36s}
+.reveal-delay-4{transition-delay:.48s}
 
 /* Suggestions */
 .suggestions{background:var(--ivory);position:relative;overflow:hidden}
@@ -1594,7 +1599,7 @@ function renderPortfolio(filter='all') {
     const hasImage = w.image_key && worksLoaded;
     const imgSrc = hasImage ? `${IMAGE_BASE}/${encodeURIComponent(w.image_key)}` : '';
     const imgHtml = hasImage
-      ? `<div class="img-shimmer"></div><img class="img-ready" src="${imgSrc}" alt="${w.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)" loading="lazy" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="img-ready" src="${imgSrc}" alt="${w.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)" loading="lazy" decoding="async" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="photo-placeholder ${w.cls || ''}"><div class="photo-icon">${photoSVG(w.category)}<span>${getCategoryName(w.category)}</span></div></div>`;
     return `<div class="portfolio-card" data-category="${w.category}" style="transition-delay:${i * .08}s"><div class="portfolio-img">${imgHtml}<div class="portfolio-overlay"><span class="tag">${getCategoryName(w.category)}</span><h3>${w.name}</h3><p class="cn">${w.cn}</p><p class="detail">${w.detail}</p><span class="view">View Project<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></div></div></div>`;
   }).join('');
@@ -1622,7 +1627,7 @@ function renderCarousel() {
     const hasImage = b.image_key;
     const imgSrc = hasImage ? `${IMAGE_BASE}/${encodeURIComponent(b.image_key)}` : '';
     const content = hasImage
-      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${imgSrc}" alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${imgSrc}" alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${i === 0 ? 'high' : 'auto'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
     return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
   }).join('');
@@ -1876,7 +1881,17 @@ window.addEventListener('load', async () => {
   // Fade out
   await new Promise(res => setTimeout(res, 400));
   loaderEl.classList.add('hide');
+  document.body.classList.add('page-ready');
   loaderEl.addEventListener('transitionend', () => loaderEl.classList.add('done'), { once: true });
+
+  // Prefetch remaining portfolio images in idle time
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      document.querySelectorAll('.portfolio-card .img-ready:not(.loaded)').forEach(img => {
+        if (!img.complete && img.loading === 'lazy') img.loading = 'eager';
+      });
+    }, { timeout: 2000 });
+  }
 });
 
 // ===== Nav Scroll =====
@@ -1921,7 +1936,7 @@ function renderTestimonials() {
   const firstBgIdx = bgIndices.size > 0 ? [...bgIndices][0] : -1;
   slider.innerHTML = source.map((t, i) => { const starsStr = '★ '.repeat(t.stars || 5).trim(); const isActive = cachedWithBg.length > 0 ? bgIndices.has(i) && i === firstBgIdx : i === 0; return `<div class="testimonial-item ${isActive ? 'active' : ''}" data-index="${i}"><div class="testimonial-stars">${starsStr}</div><p class="testimonial-quote">${esc(t.quote)}</p><p class="testimonial-author">${esc(t.author)}</p><p class="testimonial-detail">${esc(t.detail)}</p></div>`; }).join('');
   if (cachedWithBg.length > 1) { dotsContainer.innerHTML = cachedWithBg.map((_, i) => `<div class="testimonial-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`).join(''); } else { dotsContainer.innerHTML = ''; }
-  if (cachedWithBg.length > 0) { bgContainer.innerHTML = cachedWithBg.map((t, i) => `<div class="testimonials-bg ${i === 0 ? 'active' : ''}" data-index="${i}"><img src="${IMAGE_BASE}/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy" onerror="this.style.display='none'"></div>`).join(''); } else { bgContainer.innerHTML = ''; }
+  if (cachedWithBg.length > 0) { bgContainer.innerHTML = cachedWithBg.map((t, i) => `<div class="testimonials-bg ${i === 0 ? 'active' : ''}" data-index="${i}"><img src="${IMAGE_BASE}/${encodeURIComponent(t.bg_key)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'"></div>`).join(''); } else { bgContainer.innerHTML = ''; }
   testimonialBgs = bgContainer.querySelectorAll('.testimonials-bg');
   dotsContainer.querySelectorAll('.testimonial-dot').forEach(d => { d.addEventListener('click', () => showTestimonialSlide(+d.dataset.index)); });
   currentSlide = 0; startTestimonialAutoplay();
@@ -1946,7 +1961,7 @@ function showTestimonialSlide(n) {
 function startTestimonialAutoplay() { clearInterval(testimonialTimer); if (!cachedWithBg || cachedWithBg.length <= 1) return; testimonialTimer = setInterval(() => showTestimonialSlide(currentSlide + 1), 6000); }
 
 // ===== Scroll Reveal =====
-const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ===== Auth Management =====
