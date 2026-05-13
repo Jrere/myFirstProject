@@ -14,6 +14,25 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // ─── images.bailuyuan.fun 直接图片服务 ───
+    if (url.hostname === 'images.bailuyuan.fun' && method === 'GET') {
+      const key = decodeURIComponent(pathname.slice(1)); // 去掉开头的 /
+      if (!key) return new Response('Missing image key', { status: 400 });
+      const obj = await env.R2.get(key);
+      if (!obj) return new Response('Image not found', { status: 404 });
+      const headers = new Headers();
+      obj.writeHttpMetadata(headers);
+      if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
+        const ext = key.split('.').pop().toLowerCase();
+        const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
+        headers.set('content-type', mimeMap[ext] || 'image/jpeg');
+      }
+      headers.set('etag', obj.httpEtag);
+      headers.set('cache-control', 'public, max-age=604800, immutable');
+      headers.set('access-control-allow-origin', '*');
+      return new Response(obj.body, { headers });
+    }
+
     try {
       // ─── 健康检查 ───
       if (pathname === '/api/health' && method === 'GET') {
