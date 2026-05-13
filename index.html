@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://api.bailuyuan.fun" crossorigin>
 <link rel="dns-prefetch" href="https://images.bailuyuan.fun">
 <link rel="dns-prefetch" href="https://api.bailuyuan.fun">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -1788,7 +1788,7 @@ function createShowcaseSparks() {
 }
 
 // ===== Loader =====
-window.addEventListener('load', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
   createShowcaseSparks(); createWaterDroplets(); createRippleRings();
   createParticles(); updateAuthUI();
 
@@ -1799,8 +1799,8 @@ window.addEventListener('load', async () => {
   const loaderTip = document.getElementById('loaderTip');
   const loaderDust = document.getElementById('loaderDust');
   const loaderStart = Date.now();
-  const MIN_SHOW = 2500;
-  const MAX_WAIT = 12000;
+  const MIN_SHOW = 800;
+  const MAX_WAIT = 6000;
   const circumference = 2 * Math.PI * 20; // r=20
 
   // Floating dust particles
@@ -1841,7 +1841,7 @@ window.addEventListener('load', async () => {
     loaderPct.textContent = Math.round(progress) + '%';
   }
 
-  // Phase 1: API fetch (0-40%)
+  // Phase 1: API fetch — 并行请求，逐个渲染
   setProgress(5);
   await Promise.all([fetchBanners(), fetchWorks(), fetchCategories(), fetchSettings(), fetchTestimonials()]);
   applySettings();
@@ -1855,10 +1855,9 @@ window.addEventListener('load', async () => {
   renderCarousel(); renderPortfolio(); renderTestimonials();
   setProgress(60);
 
-  // Phase 3: Wait for critical images (60-95%)
+  // Phase 3: Wait for critical images (60-95%) — 只等首屏轮播图
   const criticalImgs = [
     ...document.querySelectorAll('.carousel-slide.active .carousel-slide-img'),
-    ...document.querySelectorAll('.portfolio-card:nth-child(-n+4) .img-ready')
   ];
   let loaded = 0;
   const total = criticalImgs.length || 1;
