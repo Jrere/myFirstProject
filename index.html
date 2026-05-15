@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://api.bailuyuan.fun" crossorigin>
 <link rel="dns-prefetch" href="https://images.bailuyuan.fun">
 <link rel="dns-prefetch" href="https://api.bailuyuan.fun">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+SC:wght@300;400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -659,6 +659,23 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   .login-modal .form-group{margin-bottom:14px}
   .login-modal .form-group input{padding:11px 12px;font-size:.8rem}
   .login-modal .login-btn{padding:13px;font-size:.65rem;letter-spacing:2px}
+}
+/* 手机端减少 GPU 负担 */
+@media(max-width:768px){
+  .droplet,.ripple-ring,.hero-ambient-orb,.particle,.showcase-spark{animation-duration:0s!important;animation:none!important}
+  .hero-frame span{animation:none!important;opacity:1!important;transform:none!important}
+  .hero-ray::before{animation:none!important;opacity:0!important}
+  .loader-dust span{animation:none!important;opacity:0!important}
+  .loader-logo-ring{animation:none!important}
+  .loader-brand::after{animation:none!important}
+  .carousel-slide-img{animation:none!important}
+  .hero-content{animation:none!important;opacity:1!important;transform:none!important}
+  *{-webkit-tap-highlight-color:transparent}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+  .loader{display:none!important}
+  body{opacity:1!important}
 }
 </style>
 </head>
@@ -1504,6 +1521,10 @@ function imgSrcset(key, quality) {
 const SIZES_HERO = '100vw';
 // portfolio 卡片用的 sizes
 const SIZES_CARD = '(max-width:600px) 100vw, (max-width:1024px) 50vw, 33vw';
+// 首屏轮播图最大宽度（手机用小图）
+function heroMaxWidth() {
+  return window.innerWidth <= 768 ? 800 : 1600;
+}
 
 // ===== Portfolio Static Fallback Data =====
 const worksStatic = [
@@ -1525,6 +1546,7 @@ let siteSettings = {};
 function createWaterDroplets() {
   const container = document.getElementById('heroDroplets');
   if (!container) return;
+  if (window.innerWidth < 768) return; // 手机跳过
   const frag = document.createDocumentFragment();
   const count = window.innerWidth < 768 ? 5 : 10;
   for (let i = 0; i < count; i++) {
@@ -1547,6 +1569,7 @@ function createWaterDroplets() {
 function createRippleRings() {
   const container = document.getElementById('heroRippleRings');
   if (!container) return;
+  if (window.innerWidth < 768) return; // 手机跳过
   const frag = document.createDocumentFragment();
   const count = window.innerWidth < 768 ? 3 : 5;
   for (let i = 0; i < count; i++) {
@@ -1607,7 +1630,8 @@ function renderCarousel() {
   const source = banners.length > 0 ? banners : bannersFallback;
   track.innerHTML = source.map((b, i) => {
     const hasImage = b.image_key;
-    const optimizedSrc = hasImage ? imgSrc(b.image_key, 1600, 85) : '';
+    const heroW = heroMaxWidth();
+    const optimizedSrc = hasImage ? imgSrc(b.image_key, heroW, 85) : '';
     const srcset = hasImage ? imgSrcset(b.image_key, 85) : '';
     const content = hasImage
       ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${optimizedSrc}" ${srcset ? `srcset="${srcset}" sizes="${SIZES_HERO}"` : ''} alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${i === 0 ? 'high' : 'auto'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
@@ -1715,7 +1739,10 @@ function createParticles() {
   if (!container) return;
   const frag = document.createDocumentFragment();
   const types = ['gold', 'white', 'ember'];
-  const count = window.innerWidth < 768 ? 8 : 15;
+  const isMobile = window.innerWidth < 768;
+  const count = isMobile ? 4 : 15;
+  // 手机上跳过粒子动画以节省 GPU
+  if (isMobile && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
     p.className = `particle ${types[Math.floor(Math.random() * types.length)]}`;
@@ -1760,7 +1787,9 @@ function createShowcaseSparks() {
   if (!container) return;
   const types = ['gold', 'white', 'ember'];
   const isMobile = window.innerWidth < 768;
-  const cols = isMobile ? 3 : 5, rows = isMobile ? 2 : 3;
+  // 手机上减少或跳过装饰粒子
+  if (isMobile && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cols = isMobile ? 2 : 5, rows = isMobile ? 1 : 3;
   for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) {
     const spark = document.createElement('div');
     spark.className = `showcase-spark ${types[Math.floor(Math.random() * types.length)]}`;
@@ -1786,8 +1815,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const MAX_WAIT = 6000;
   const circumference = 2 * Math.PI * 20; // r=20
 
-  // Floating dust particles
-  for (let i = 0; i < 30; i++) {
+  // Floating dust particles — 手机上减少
+  const dustCount = window.innerWidth < 768 ? 8 : 30;
+  for (let i = 0; i < dustCount; i++) {
     const p = document.createElement('span');
     const x = Math.random() * 100;
     const dur = 4 + Math.random() * 6;
@@ -1824,17 +1854,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     loaderPct.textContent = Math.round(progress) + '%';
   }
 
-  // Phase 1: API fetch — 并行请求，逐个渲染
+  // Phase 1: API fetch — 只等首屏关键数据，其余后台加载
   setProgress(5);
-  await Promise.all([fetchBanners(), fetchWorks(), fetchCategories(), fetchSettings()]);
-  applySettings();
+  // 首屏只需要 banners + works，其余后台异步
+  await Promise.all([fetchBanners(), fetchWorks()]);
+  // settings 和 categories 不阻塞首屏，后台加载完成后自动应用
+  fetchCategories().then(() => buildFilterButtons()).catch(() => {});
+  fetchSettings().then(() => applySettings()).catch(() => {});
   setProgress(40);
 
   // Phase 2: Render (40-60%)
   if (banners.length > 0 && banners[0].image_key) {
     const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
-    link.href = imgSrc(banners[0].image_key, 1600, 85);
-    link.type = 'image/webp';
+    const heroW = heroMaxWidth();
+    link.href = imgSrc(banners[0].image_key, heroW, 85);
     link.imagesrcset = imgSrcset(banners[0].image_key, 85);
     link.imagesizes = SIZES_HERO;
     document.head.appendChild(link);
