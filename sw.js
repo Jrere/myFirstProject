@@ -1,5 +1,5 @@
-const CACHE = 'bailuyuan-v2';
-const IMG_CACHE = 'bailuyuan-img-v1';
+const CACHE = 'bailuyuan-v3';
+const IMG_CACHE = 'bailuyuan-img-v2';
 const PRECACHE = ['/', '/index.html', '/logo.svg'];
 
 self.addEventListener('install', e => {
