@@ -1665,16 +1665,13 @@ function renderCarousel() {
   const track = document.getElementById('carouselTrack');
   const dots = document.getElementById('carouselDots');
   const source = banners.length > 0 ? banners : bannersFallback;
+  // ALL slides use direct R2 URL — skip Worker transform entirely
+  // Only 3-5 images, small enough to all load eagerly
   track.innerHTML = source.map((b, i) => {
     const hasImage = b.image_key;
-    const heroW = heroMaxWidth();
-    const heroQ = window.innerWidth <= 768 ? 70 : 85;
-    // First slide: direct R2 URL (skip Worker transform for fastest load)
-    // Other slides: optimized URL with transform (they load lazily anyway)
-    const optimizedSrc = hasImage ? (i === 0 ? imgSrcDirect(b.image_key) : imgSrc(b.image_key, heroW, heroQ)) : '';
-    const srcset = hasImage ? (i === 0 ? '' : imgSrcset(b.image_key, heroQ)) : '';
+    const directSrc = hasImage ? imgSrcDirect(b.image_key) : '';
     const content = hasImage
-      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" ${i === 0 ? `src="${optimizedSrc}"` : `data-src="${optimizedSrc}"`} ${srcset ? `${i === 0 ? 'srcset' : 'data-srcset'}="${srcset}" sizes="${SIZES_HERO}"` : ''} alt="${b.title || ''}" loading="lazy" decoding="async" fetchpriority="${i === 0 ? 'high' : 'low'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${directSrc}" alt="${b.title || ''}" decoding="async" fetchpriority="${i === 0 ? 'high' : 'low'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
     return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
   }).join('');
@@ -1685,19 +1682,6 @@ function renderCarousel() {
   updateCarouselContent(0);
   startAutoplay();
   dots.querySelectorAll('.carousel-dot').forEach(dot => { dot.addEventListener('click', () => goToSlide(+dot.dataset.index)); });
-  // After first slide loads, prefetch second slide
-  const firstImg = track.querySelector('.carousel-slide.active .img-ready');
-  if (firstImg) {
-    const prefetchNext = () => {
-      const secondSlide = track.querySelectorAll('.carousel-slide')[1];
-      if (secondSlide) {
-        const img = secondSlide.querySelector('img[data-src]');
-        if (img) { img.src = img.dataset.src; if (img.dataset.srcset) img.srcset = img.dataset.srcset; img.removeAttribute('data-src'); img.removeAttribute('data-srcset'); }
-      }
-    };
-    if (firstImg.complete) prefetchNext();
-    else firstImg.addEventListener('load', prefetchNext, { once: true });
-  }
 }
 
 function updateCarouselContent(index) {
@@ -1718,19 +1702,6 @@ function goToSlide(index) {
   if (index < 0) index = total - 1;
   if (index >= total) index = 0;
   if (index === carouselIndex) return;
-  // Prefetch next slide image if not loaded yet
-  const nextIdx = (index + 1) % total;
-  const nextSlide = document.querySelectorAll('.carousel-slide')[nextIdx];
-  if (nextSlide) {
-    const img = nextSlide.querySelector('img[data-src]');
-    if (img) { img.src = img.dataset.src; if (img.dataset.srcset) img.srcset = img.dataset.srcset; img.removeAttribute('data-src'); img.removeAttribute('data-srcset'); }
-  }
-  // Also trigger current slide image if lazy
-  const currSlide = document.querySelectorAll('.carousel-slide')[index];
-  if (currSlide) {
-    const img = currSlide.querySelector('img[data-src]');
-    if (img) { img.src = img.dataset.src; if (img.dataset.srcset) img.srcset = img.dataset.srcset; img.removeAttribute('data-src'); img.removeAttribute('data-srcset'); }
-  }
   const crossfade = document.getElementById('carouselCrossfade');
   const sweep = document.getElementById('carouselSweep');
   crossfade.classList.add('active');
@@ -1886,8 +1857,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loaderDust = document.getElementById('loaderDust');
   const loaderStart = Date.now();
   const isMobile = window.innerWidth < 768;
-  const MIN_SHOW = isMobile ? 200 : 800;
-  const MAX_WAIT = isMobile ? 2000 : 6000;
+  const MIN_SHOW = isMobile ? 200 : 500;
+  const MAX_WAIT = isMobile ? 1500 : 4000;
   const circumference = 2 * Math.PI * 20; // r=20
 
   // Floating dust particles — 手机上跳过
