@@ -1,5 +1,6 @@
 const CACHE = 'bailuyuan-v4';
 const IMG_CACHE = 'bailuyuan-img-v3';
+const IMG_MAX = 60; // 最多缓存 60 张图片
 const PRECACHE = ['/', '/index.html', '/logo.svg'];
 
 self.addEventListener('install', e => {
@@ -14,17 +15,30 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// 图片缓存淘汰：超过上限时删除最旧的
+async function evictOldImages() {
+  const cache = await caches.open(IMG_CACHE);
+  const keys = await cache.keys();
+  if (keys.length <= IMG_MAX) return;
+  // 删除最旧的（FIFO）
+  const toDelete = keys.slice(0, keys.length - IMG_MAX);
+  await Promise.all(toDelete.map(k => cache.delete(k)));
+}
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
 
-  // Cross-origin images from images.bailuyuan.fun: cache-first with long TTL
+  // Cross-origin images from images.bailuyuan.fun: cache-first with eviction
   if (url.hostname === 'images.bailuyuan.fun') {
     e.respondWith(caches.open(IMG_CACHE).then(cache =>
       cache.match(e.request).then(r => {
         if (r) return r;
         return fetch(e.request).then(resp => {
-          if (resp.ok) cache.put(e.request, resp.clone());
+          if (resp.ok) {
+            cache.put(e.request, resp.clone());
+            evictOldImages(); // 异步清理，不阻塞响应
+          }
           return resp;
         }).catch(() => new Response('', { status: 408 }));
       })
