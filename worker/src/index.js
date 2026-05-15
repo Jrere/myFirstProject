@@ -94,6 +94,24 @@ export default {
         return json({ status: 'ok', time: new Date().toISOString() }, corsHeaders);
       }
 
+      // ─── API 边缘缓存层（公开 GET 接口，数据变化频率低）───
+      const apiCacheTTL = {
+        '/api/settings': 300,    // 5 分钟
+        '/api/categories': 300,  // 5 分钟
+        '/api/works': 60,        // 1 分钟
+        '/api/banners': 120,     // 2 分钟
+        '/api/testimonials': 300 // 5 分钟
+      };
+      if (method === 'GET' && apiCacheTTL[pathname] && !pathname.includes('/api/works/')) {
+        const cache = caches.default;
+        const cacheKey = new Request(url.toString(), request);
+        const cached = await cache.match(cacheKey);
+        if (cached) return cached;
+        // 标记需要缓存（在 return 前写入）
+        request._apiCacheKey = cacheKey;
+        request._apiCacheTTL = apiCacheTTL[pathname];
+      }
+
       // ═══════════════════════════════════════════
       // ─── 认证 (Auth) ───
       // ═══════════════════════════════════════════
@@ -203,7 +221,7 @@ export default {
         const { results } = await env.DB.prepare(
           'SELECT * FROM categories ORDER BY sort_order ASC, created_at ASC'
         ).all();
-        return json(results, corsHeaders);
+        return cachedJson(results, corsHeaders, request);
       }
 
       if (pathname.match(/^\/api\/categories\/([^/]+)$/) && method === 'GET') {
@@ -218,7 +236,7 @@ export default {
         const { results } = await env.DB.prepare(
           'SELECT * FROM works ORDER BY sort_order ASC, created_at ASC'
         ).all();
-        return json(results, corsHeaders);
+        return cachedJson(results, corsHeaders, request);
       }
 
       // ─── 获取单个作品 ───
@@ -256,7 +274,7 @@ export default {
         if (activeOnly === '1') query += ' WHERE active = 1';
         query += ' ORDER BY sort_order ASC, created_at ASC';
         const { results } = await env.DB.prepare(query).all();
-        return json(results, corsHeaders);
+        return cachedJson(results, corsHeaders, request);
       }
 
       if (pathname.match(/^\/api\/banners\/([^/]+)$/) && method === 'GET') {
@@ -273,7 +291,7 @@ export default {
         if (activeOnly === '1') query += ' WHERE active = 1';
         query += ' ORDER BY sort_order ASC, created_at ASC';
         const { results } = await env.DB.prepare(query).all();
-        return json(results, corsHeaders);
+        return cachedJson(results, corsHeaders, request);
       }
 
       // ─── 获取设置 (公开) ───
@@ -281,7 +299,7 @@ export default {
         const { results } = await env.DB.prepare('SELECT * FROM settings').all();
         const map = {};
         results.forEach(r => { map[r.key] = r.value; });
-        return json(map, corsHeaders);
+        return cachedJson(map, corsHeaders, request);
       }
 
       // ─── 提交建议（前台，无需登录）───
@@ -792,4 +810,20 @@ function json(data, corsHeaders, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
+}
+
+// 带边缘缓存的 JSON 响应
+async function cachedJson(data, corsHeaders, request, status = 200) {
+  const resp = new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+  });
+  if (request._apiCacheKey) {
+    const ttl = request._apiCacheTTL || 60;
+    const toCache = new Response(resp.body, resp);
+    toCache.headers.set('cache-control', `public, max-age=${ttl}, stale-while-revalidate=${ttl * 2}`);
+    try { await caches.default.put(request._apiCacheKey, toCache.clone()); } catch (e) {}
+    return toCache;
+  }
+  return resp;
 }
