@@ -1929,7 +1929,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateCarouselWithBanners();
     }
   }).catch(() => {});
-  const worksPromise = fetchWorks().catch(() => {});
+  const worksPromise = fetchWorks().then(() => {
+    if (works.length > 0) renderPortfolio();
+  }).catch(() => {});
   // settings 和 categories 也不阻塞
   fetchCategories().then(() => buildFilterButtons()).catch(() => {});
   fetchSettings().then(() => applySettings()).catch(() => {});
