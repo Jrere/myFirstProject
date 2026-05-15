@@ -30,7 +30,7 @@
   --ease:cubic-bezier(.25,.46,.45,.94);
   --ease-smooth:cubic-bezier(.4,0,.2,1);
 }
-html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--gold-light) transparent;-webkit-text-size-adjust:100%}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--gold-light) transparent;-webkit-text-size-adjust:100%;-webkit-overflow-scrolling:touch}
 body{font-family:var(--font-serif);background:var(--ivory);color:var(--charcoal);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body.page-ready .hero-content{animation:pageEntrance 1.2s cubic-bezier(.23,1,.32,1) forwards}
 @keyframes pageEntrance{from{opacity:.7;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -46,7 +46,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
    ═══════════════════════════════════════════════ */
 
 /* Loader — Premium Cinematic */
-.loader{position:fixed;inset:0;background:#050403;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 1s ease,visibility 1s ease;overflow:hidden}
+.loader{position:fixed;inset:0;background:#050403;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .6s ease,visibility .6s ease;overflow:hidden}
 .loader.hide{opacity:0;visibility:hidden;pointer-events:none}
 .loader.done{display:none}
 .loader-inner{text-align:center;position:relative;z-index:2}
@@ -134,7 +134,7 @@ body:hover .cursor-glow{opacity:1}
 .nav-hamburger.active span:nth-child(3){transform:rotate(-45deg) translateY(-5px)}
 
 /* Mobile Menu */
-.mobile-menu{position:fixed;inset:0;background:var(--charcoal);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;opacity:0;visibility:hidden;transition:all .6s var(--ease)}
+.mobile-menu{position:fixed;inset:0;background:var(--charcoal);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;opacity:0;visibility:hidden;transition:all .4s cubic-bezier(.4,0,.2,1);will-change:opacity,visibility}
 .mobile-menu.active{opacity:1;visibility:visible}
 .mobile-menu a{font-family:var(--font-display);font-size:1.5rem;letter-spacing:8px;text-transform:uppercase;color:var(--gold-light);transition:color .3s;position:relative}
 .mobile-menu a::before{content:attr(data-cn);position:absolute;top:24px;left:50%;transform:translateX(-50%);font-family:var(--font-cn);font-size:.7rem;letter-spacing:4px;color:var(--text-light)}
@@ -269,9 +269,9 @@ body:hover .cursor-glow{opacity:1}
 
 /* ═══ Banner Carousel ═══ */
 .carousel-section{position:relative;width:100%;contain:content}
-.carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal)}
+.carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal);touch-action:pan-y}
 .carousel-track{position:relative;width:100%;height:100%}
-.carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:none;overflow:hidden}
+.carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:opacity .8s cubic-bezier(.4,0,.2,1);overflow:hidden;will-change:opacity,transform;transform:translateZ(0)}
 .carousel-slide.active{opacity:1;z-index:1}
 .carousel-slide-img{position:absolute;min-width:100%;min-height:100%;width:100%;height:100%;object-fit:cover;object-position:center center;will-change:transform}
 .carousel-slide.active .carousel-slide-img{animation:kbZoom1 8s ease-out forwards}
@@ -281,8 +281,8 @@ body:hover .cursor-glow{opacity:1}
 .carousel-slide:nth-child(5).active .carousel-slide-img{animation:kbZoom5 8s ease-out forwards}
 .carousel-slide-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .carousel-slide-placeholder .photo-placeholder{width:100%;height:100%}
-.carousel-crossfade{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;background:var(--charcoal);transition:opacity .6s cubic-bezier(.4,0,.2,1)}
-.carousel-crossfade.active{opacity:1}
+.carousel-crossfade{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;background:var(--charcoal);transition:opacity .4s cubic-bezier(.4,0,.2,1)}
+.carousel-crossfade.active{opacity:0}
 @keyframes kbZoom1{0%{transform:scale(1)}100%{transform:scale(1.12) translate(-1%,-0.5%)}}
 @keyframes kbZoom2{0%{transform:scale(1.06)}100%{transform:scale(1) translate(1%,0.5%)}}
 @keyframes kbZoom3{0%{transform:scale(1) translateY(-1%)}100%{transform:scale(1.1) translate(0.5%,1%)}}
@@ -668,6 +668,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   .loader-logo-ring{animation:none!important}
   .loader-brand::after{animation:none!important}
   .carousel-slide-img{animation:none!important}
+  .carousel-slide{transition-duration:.5s}
   .hero-content{animation:none!important;opacity:1!important;transform:none!important}
   .hero-water-surface{display:none!important}
   .hero-ambient{display:none!important}
@@ -681,7 +682,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   .hero-grain{opacity:0!important}
   *{-webkit-tap-highlight-color:transparent}
   /* Simplify transitions for smoother scrolling */
-  .portfolio-card{transform:translateZ(0);-webkit-transform:translateZ(0);transition:none!important}
+  .portfolio-card{transform:translateZ(0);-webkit-transform:translateZ(0);transition:opacity .4s var(--ease)!important;will-change:opacity}
   .portfolio-card:hover{transform:none!important;box-shadow:none!important}
   .portfolio-card:hover .portfolio-img{transform:none!important}
   .portfolio-card:hover .portfolio-overlay{opacity:1!important}
@@ -1712,18 +1713,15 @@ function goToSlide(index) {
   if (index < 0) index = total - 1;
   if (index >= total) index = 0;
   if (index === carouselIndex) return;
-  const crossfade = document.getElementById('carouselCrossfade');
   const sweep = document.getElementById('carouselSweep');
-  crossfade.classList.add('active');
-  setTimeout(() => {
-    document.querySelectorAll('.carousel-slide').forEach((s, i) => { s.classList.toggle('active', i === index); });
-    document.querySelectorAll('.carousel-dot').forEach((d, i) => { d.classList.toggle('active', i === index); if (i === index) { d.style.animation = 'none'; void d.offsetWidth; d.style.animation = ''; } });
-    carouselIndex = index;
-    document.getElementById('carouselCurrent').textContent = String(index + 1).padStart(2, '0');
-    updateCarouselContent(index);
-    resetProgress();
-    setTimeout(() => { crossfade.classList.remove('active'); sweep.classList.remove('sweeping'); void sweep.offsetWidth; sweep.classList.add('sweeping'); }, 100);
-  }, 400);
+  // 直接用 CSS transition 切换，不再用 setTimeout 黑屏闪烁
+  document.querySelectorAll('.carousel-slide').forEach((s, i) => { s.classList.toggle('active', i === index); });
+  document.querySelectorAll('.carousel-dot').forEach((d, i) => { d.classList.toggle('active', i === index); if (i === index) { d.style.animation = 'none'; void d.offsetWidth; d.style.animation = ''; } });
+  carouselIndex = index;
+  document.getElementById('carouselCurrent').textContent = String(index + 1).padStart(2, '0');
+  updateCarouselContent(index);
+  resetProgress();
+  sweep.classList.remove('sweeping'); void sweep.offsetWidth; sweep.classList.add('sweeping');
 }
 
 function startAutoplay() { stopAutoplay(); carouselStartTime = Date.now(); carouselTimer = setInterval(() => goToSlide(carouselIndex + 1), AUTOPLAY_INTERVAL); animateProgress(); }
@@ -1924,7 +1922,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const firstKey = banners[0].image_key;
       if (firstKey) {
         const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
-        link.href = imgSrcDirect(firstKey);
+        link.href = imgSrc(firstKey, heroMaxWidth(), 80);
         link.fetchpriority = 'high';
         document.head.appendChild(link);
       }
@@ -1963,7 +1961,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   clearInterval(tipTimer);
 
   // Fade out
-  await new Promise(res => setTimeout(res, 400));
+  await new Promise(res => setTimeout(res, isMobile ? 200 : 400));
   loaderEl.classList.add('hide');
   document.body.classList.add('page-ready');
   loaderEl.addEventListener('transitionend', () => loaderEl.classList.add('done'), { once: true });
