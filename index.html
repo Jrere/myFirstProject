@@ -1468,6 +1468,43 @@ function photoSVG(category) {
 const API_BASE = 'https://api.bailuyuan.fun';
 const IMAGE_BASE = 'https://images.bailuyuan.fun';
 
+// ===== 图片优化工具 =====
+// 检测浏览器是否支持 WebP/AVIF（结果缓存）
+const _fmtSupport = {};
+function detectFormat(fmt) {
+  if (_fmtSupport[fmt] !== undefined) return _fmtSupport[fmt];
+  const c = document.createElement('canvas');
+  c.width = c.height = 1;
+  _fmtSupport[fmt] = c.toDataURL(`image/${fmt}`).indexOf(`image/${fmt}`) === 5;
+  return _fmtSupport[fmt];
+}
+function bestFormat() {
+  if (detectFormat('avif')) return 'avif';
+  if (detectFormat('webp')) return 'webp';
+  return 'origin';
+}
+// 生成优化图片 URL：带宽度和质量参数
+function imgSrc(key, width, quality) {
+  if (!key) return '';
+  const base = `${IMAGE_BASE}/${encodeURIComponent(key)}`;
+  const fmt = bestFormat();
+  const params = [];
+  if (width) params.push(`w=${width}`);
+  if (quality) params.push(`q=${quality}`);
+  if (fmt !== 'origin') params.push(`f=${fmt}`);
+  return params.length ? `${base}?${params.join('&')}` : base;
+}
+// 生成 srcset 属性
+function imgSrcset(key, quality) {
+  if (!key) return '';
+  const widths = [400, 800, 1200, 1600];
+  return widths.map(w => `${imgSrc(key, w, quality)} ${w}w`).join(', ');
+}
+// hero / carousel 用的 sizes
+const SIZES_HERO = '100vw';
+// portfolio 卡片用的 sizes
+const SIZES_CARD = '(max-width:600px) 100vw, (max-width:1024px) 50vw, 33vw';
+
 // ===== Portfolio Static Fallback Data =====
 const worksStatic = [
   { name:'Brand Rising', cn:'品牌崛起', category:'corporate', detail:'企业形象 · 品牌宣传片', cls:'photo-1' },
@@ -1541,9 +1578,10 @@ function renderPortfolio(filter='all') {
   const filtered = filter === 'all' ? source : source.filter(w => w.category === filter);
   grid.innerHTML = filtered.map((w, i) => {
     const hasImage = w.image_key && worksLoaded;
-    const imgSrc = hasImage ? `${IMAGE_BASE}/${encodeURIComponent(w.image_key)}` : '';
+    const optimizedSrc = hasImage ? imgSrc(w.image_key, 800, 80) : '';
+    const srcset = hasImage ? imgSrcset(w.image_key, 80) : '';
     const imgHtml = hasImage
-      ? `<div class="img-shimmer"></div><img class="img-ready" src="${imgSrc}" alt="${w.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)" loading="lazy" decoding="async" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="img-ready" src="${optimizedSrc}" ${srcset ? `srcset="${srcset}" sizes="${SIZES_CARD}"` : ''} alt="${w.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)" loading="lazy" decoding="async" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="photo-placeholder ${w.cls || ''}"><div class="photo-icon">${photoSVG(w.category)}<span>${getCategoryName(w.category)}</span></div></div>`;
     return `<div class="portfolio-card" data-category="${w.category}" style="transition-delay:${i * .08}s"><div class="portfolio-img">${imgHtml}<div class="portfolio-overlay"><span class="tag">${getCategoryName(w.category)}</span><h3>${w.name}</h3><p class="cn">${w.cn}</p><p class="detail">${w.detail}</p><span class="view">View Project<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></div></div></div>`;
   }).join('');
@@ -1569,9 +1607,10 @@ function renderCarousel() {
   const source = banners.length > 0 ? banners : bannersFallback;
   track.innerHTML = source.map((b, i) => {
     const hasImage = b.image_key;
-    const imgSrc = hasImage ? `${IMAGE_BASE}/${encodeURIComponent(b.image_key)}` : '';
+    const optimizedSrc = hasImage ? imgSrc(b.image_key, 1600, 85) : '';
+    const srcset = hasImage ? imgSrcset(b.image_key, 85) : '';
     const content = hasImage
-      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${imgSrc}" alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${i === 0 ? 'high' : 'auto'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${optimizedSrc}" ${srcset ? `srcset="${srcset}" sizes="${SIZES_HERO}"` : ''} alt="${b.title || ''}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${i === 0 ? 'high' : 'auto'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
     return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
   }).join('');
@@ -1794,7 +1833,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Phase 2: Render (40-60%)
   if (banners.length > 0 && banners[0].image_key) {
     const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
-    link.href = `${IMAGE_BASE}/${encodeURIComponent(banners[0].image_key)}`; document.head.appendChild(link);
+    link.href = imgSrc(banners[0].image_key, 1600, 85);
+    link.type = 'image/webp';
+    link.imagesrcset = imgSrcset(banners[0].image_key, 85);
+    link.imagesizes = SIZES_HERO;
+    document.head.appendChild(link);
   }
   renderCarousel(); renderPortfolio();
   setProgress(60);

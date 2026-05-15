@@ -14,22 +14,87 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // ─── images.bailuyuan.fun 直接图片服务 ───
+    // ─── images.bailuyuan.fun 图片服务（支持自动压缩/格式转换）───
     if (url.hostname === 'images.bailuyuan.fun' && method === 'GET') {
-      const key = decodeURIComponent(pathname.slice(1)); // 去掉开头的 /
-      if (!key) return new Response('Missing image key', { status: 400 });
-      const obj = await env.R2.get(key);
+      // 解析 key：去掉开头的 /，并分离查询参数
+      const rawPath = decodeURIComponent(pathname.slice(1));
+      if (!rawPath) return new Response('Missing image key', { status: 400 });
+
+      // 查询参数：w=宽度, q=质量(1-100), f=格式(auto/webp/avif/origin)
+      const width = parseInt(url.searchParams.get('w')) || 0;
+      const quality = parseInt(url.searchParams.get('q')) || 82;
+      const fmt = url.searchParams.get('f') || 'auto';
+
+      const obj = await env.R2.get(rawPath);
       if (!obj) return new Response('Image not found', { status: 404 });
+
       const headers = new Headers();
       obj.writeHttpMetadata(headers);
+
+      // 设置正确的 Content-Type
+      const ext = rawPath.split('.').pop().toLowerCase();
+      const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
       if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
-        const ext = key.split('.').pop().toLowerCase();
-        const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
         headers.set('content-type', mimeMap[ext] || 'image/jpeg');
       }
-      headers.set('etag', obj.httpEtag);
+
       headers.set('cache-control', 'public, max-age=604800, immutable');
       headers.set('access-control-allow-origin', '*');
+      headers.set('vary', 'Accept');
+
+      // 如果请求了压缩参数，尝试使用 Cloudflare Image Resizing
+      const needResize = width > 0;
+      const needConvert = fmt === 'auto' || fmt === 'webp' || fmt === 'avif';
+
+      if (needResize || fmt !== 'origin') {
+        // 检测浏览器支持的格式（Accept 头）
+        const accept = request.headers.get('accept') || '';
+        let targetFormat = fmt;
+        if (fmt === 'auto') {
+          if (accept.includes('image/avif')) targetFormat = 'avif';
+          else if (accept.includes('image/webp')) targetFormat = 'webp';
+          else targetFormat = 'origin';
+        }
+
+        // 构建 cf.image 选项
+        const cfImage = {};
+        if (width > 0) {
+          cfImage.width = width;
+          cfImage.fit = 'scale-down';
+          cfImage.quality = quality;
+        }
+        if (targetFormat === 'webp') cfImage.format = 'webp';
+        else if (targetFormat === 'avif') cfImage.format = 'avif';
+
+        // 尝试使用 cf.image（需要 Cloudflare Pro/Biz/Enterprise 或 Image Resizing 订阅）
+        if (Object.keys(cfImage).length > 0) {
+          try {
+            const resizedResponse = new Response(obj.body, {
+              headers: { 'content-type': mimeMap[ext] || 'image/jpeg' }
+            });
+            const cfFetch = new Request(request.url, {
+              headers: request.headers
+            });
+            // cf.image 在 Workers Paid 计划中可用
+            const optimized = await fetch(cfFetch, {
+              cf: { image: cfImage }
+            });
+            if (optimized.ok) {
+              const resp = new Response(optimized.body, optimized);
+              resp.headers.set('cache-control', 'public, max-age=604800, immutable');
+              resp.headers.set('access-control-allow-origin', '*');
+              resp.headers.set('vary', 'Accept');
+              return resp;
+            }
+          } catch (e) {
+            // cf.image 不可用，降级到原图
+            console.log('Image resizing unavailable, serving original:', e.message);
+          }
+        }
+      }
+
+      // 降级：返回原图
+      headers.set('etag', obj.httpEtag);
       return new Response(obj.body, { headers });
     }
 
