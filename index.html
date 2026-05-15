@@ -1447,13 +1447,13 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
     }
     lastFrameTime = timestamp;
     ctx.clearRect(0, 0, width, height);
-    // Update and draw ripples
+    // Update and draw ripples — cap at 8 max
     ripples = ripples.filter(r => {
       r.draw(ctx);
       return r.update();
     });
-    // Add new ripples randomly
-    if (Math.random() < 0.015) {
+    // Add new ripples randomly — only if under cap
+    if (ripples.length < 8 && Math.random() < 0.015) {
       ripples.push(new Ripple(
         Math.random() * width,
         Math.random() * height,
@@ -1580,7 +1580,7 @@ function createWaterDroplets() {
   if (!container) return;
   if (window.innerWidth < 768) return; // 手机跳过
   const frag = document.createDocumentFragment();
-  const count = window.innerWidth < 768 ? 5 : 10;
+  const count = 5; // reduced from 10
   for (let i = 0; i < count; i++) {
     const drop = document.createElement('div');
     drop.className = 'droplet';
@@ -1603,7 +1603,7 @@ function createRippleRings() {
   if (!container) return;
   if (window.innerWidth < 768) return; // 手机跳过
   const frag = document.createDocumentFragment();
-  const count = window.innerWidth < 768 ? 3 : 5;
+  const count = 3; // reduced from 5
   for (let i = 0; i < count; i++) {
     const ring = document.createElement('div');
     ring.className = 'ripple-ring';
@@ -1754,6 +1754,12 @@ document.getElementById('carousel').addEventListener('mouseenter', () => { stopA
 document.getElementById('carousel').addEventListener('mouseleave', () => startAutoplay());
 document.getElementById('carouselPrev').addEventListener('click', () => { goToSlide(carouselIndex - 1); startAutoplay(); });
 document.getElementById('carouselNext').addEventListener('click', () => { goToSlide(carouselIndex + 1); startAutoplay(); });
+// Pause carousel when not visible
+const carouselObserver = new IntersectionObserver(([entry]) => {
+  if (entry.isIntersecting) startAutoplay();
+  else stopAutoplay();
+}, { threshold: 0.1 });
+carouselObserver.observe(document.getElementById('carousel'));
 document.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') { goToSlide(carouselIndex - 1); startAutoplay(); } if (e.key === 'ArrowRight') { goToSlide(carouselIndex + 1); startAutoplay(); } });
 
 let touchStartX = 0;
@@ -1812,7 +1818,7 @@ function createParticles() {
   const frag = document.createDocumentFragment();
   const types = ['gold', 'white', 'ember'];
   const isMobile = window.innerWidth < 768;
-  const count = isMobile ? 4 : 15;
+  const count = 8; // reduced from 15
   // 手机上跳过粒子动画以节省 GPU
   if (isMobile && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   for (let i = 0; i < count; i++) {
@@ -1857,7 +1863,7 @@ function createShowcaseSparks() {
   if (!container) return;
   if (window.innerWidth < 768) return; // Skip on mobile
   const types = ['gold', 'white', 'ember'];
-  const cols = isMobile ? 2 : 5, rows = isMobile ? 1 : 3;
+  const cols = 3, rows = 2; // reduced from 5x3
   for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) {
     const spark = document.createElement('div');
     spark.className = `showcase-spark ${types[Math.floor(Math.random() * types.length)]}`;
@@ -1971,33 +1977,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   loaderEl.classList.add('hide');
   document.body.classList.add('page-ready');
   loaderEl.addEventListener('transitionend', () => loaderEl.classList.add('done'), { once: true });
-
-  // Prefetch remaining portfolio images in idle time
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      document.querySelectorAll('.portfolio-card .img-ready:not(.loaded)').forEach(img => {
-        if (!img.complete && img.loading === 'lazy') img.loading = 'eager';
-      });
-    }, { timeout: 2000 });
-  }
 });
 
 // ===== Nav Scroll =====
 const nav = document.getElementById('nav');
 const navLinks = document.querySelectorAll('.nav-links a');
 const sections = ['philosophy', 'portfolio', 'services', 'booking'];
-function updateActiveNav() { const scrollY = window.scrollY + 200; let current = ''; for (const id of sections) { const el = document.getElementById(id); if (el && el.offsetTop <= scrollY) current = id; } navLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); }); }
+let _lastActiveNav = '';
+function updateActiveNav() { const scrollY = window.scrollY + 200; let current = ''; for (const id of sections) { const el = document.getElementById(id); if (el && el.offsetTop <= scrollY) current = id; } if (current === _lastActiveNav) return; _lastActiveNav = current; navLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); }); }
 
 let scrollTicking = false;
 let lastScrollY = 0;
+let lastNavState = '';
+let lastBackTopState = '';
 window.addEventListener('scroll', () => {
   lastScrollY = window.scrollY;
   if (!scrollTicking) {
     scrollTicking = true;
     requestAnimationFrame(() => {
       const y = lastScrollY;
-      nav.classList.toggle('scrolled', y > 60);
-      document.getElementById('backTop').classList.toggle('show', y > 600);
+      const navState = y > 60 ? 'scrolled' : '';
+      const backTopState = y > 600 ? 'show' : '';
+      if (navState !== lastNavState) { nav.classList.toggle('scrolled', navState === 'scrolled'); lastNavState = navState; }
+      if (backTopState !== lastBackTopState) { document.getElementById('backTop').classList.toggle('show', backTopState === 'show'); lastBackTopState = backTopState; }
       updateActiveNav();
       scrollTicking = false;
     });

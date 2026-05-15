@@ -43,6 +43,14 @@ export default {
       headers.set('cache-control', 'public, max-age=604800, immutable');
       headers.set('access-control-allow-origin', '*');
       headers.set('vary', 'Accept');
+      headers.set('etag', obj.httpEtag);
+
+      // 无参数请求：直接返回 R2 原图，跳过 transform（最快路径）
+      if (!url.searchParams.has('w') && !url.searchParams.has('q') && !url.searchParams.has('f')) {
+        const direct = new Response(obj.body, { headers });
+        await cache.put(cacheKey, direct.clone());
+        return direct;
+      }
 
       // 尝试使用 Images Binding 进行实时变换（免费计划可用）
       const accept = request.headers.get('accept') || '';
