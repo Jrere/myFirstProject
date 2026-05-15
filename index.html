@@ -19,8 +19,8 @@
 :root{
   --ivory:#faf8f3;--cream:#f3ede4;--warm:#ebe3d5;
   --gold:#c9a87c;--gold-light:#dfc5a0;--gold-dark:#a8865e;
-  --rose:#e8d5c4;--rose-light:#f0e4d8;
-  --charcoal:#0a0a0a;--soft-black:#141414;
+  --rose:#e8d5c4;
+  --charcoal:#0a0a0a;
   --text:#b0a898;--text-light:#8a8078;--text-dark:#d6cfc5;
   --white:#f5f0e8;
   --font-display:'Playfair Display','Noto Serif SC',Georgia,serif;
@@ -28,10 +28,7 @@
   --font-cn:'Noto Serif SC',SimSun,serif;
   --font-sans:'Inter','Noto Serif SC',system-ui,-apple-system,sans-serif;
   --ease:cubic-bezier(.25,.46,.45,.94);
-  --ease-out:cubic-bezier(.16,1,.3,1);
-  --ease-spring:cubic-bezier(.34,1.56,.64,1);
   --ease-smooth:cubic-bezier(.4,0,.2,1);
-  --ease-bounce:cubic-bezier(.68,-.55,.27,1.55);
 }
 html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--gold-light) transparent;-webkit-text-size-adjust:100%}
 body{font-family:var(--font-serif);background:var(--ivory);color:var(--charcoal);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
@@ -97,7 +94,6 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 
 .cursor-glow{position:fixed;top:0;left:0;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,124,.04) 0%,transparent 70%);pointer-events:none;z-index:1;will-change:transform,opacity;opacity:0;transition:opacity .3s}
 body:hover .cursor-glow{opacity:1}
-@media(hover:none){.cursor-glow{display:none}}
 
 /* Nav — Premium Glass */
 .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:32px 60px;display:flex;align-items:center;justify-content:space-between;transition:all .6s var(--ease)}
@@ -373,8 +369,8 @@ body:hover .cursor-glow{opacity:1}
 .filter-btn::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .3s var(--ease)}
 .filter-btn.active,.filter-btn:hover{color:var(--gold)}
 .filter-btn.active::after,.filter-btn:hover::after{transform:scaleX(1)}
-.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1300px;margin:0 auto;contain:layout style}
-.portfolio-card{position:relative;overflow:hidden;cursor:pointer;border-radius:6px;opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.23,1,.32,1),transform .7s cubic-bezier(.23,1,.32,1),box-shadow .3s;contain:layout style}
+.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1300px;margin:0 auto}
+.portfolio-card{position:relative;overflow:hidden;cursor:pointer;border-radius:6px;opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.23,1,.32,1),transform .7s cubic-bezier(.23,1,.32,1),box-shadow .3s}
 .portfolio-card:hover{box-shadow:0 24px 64px rgba(0,0,0,.15),0 8px 24px rgba(0,0,0,.1);transform:translateY(-4px)}
 .portfolio-card.visible{opacity:1;transform:translateY(0)}
 .portfolio-card:nth-child(2),.portfolio-card:nth-child(5){grid-row:span 2}
@@ -389,7 +385,6 @@ body:hover .cursor-glow{opacity:1}
 .carousel-slide .img-shimmer{z-index:0}
 .carousel-slide .img-ready{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .portfolio-card:nth-child(2) .portfolio-img,.portfolio-card:nth-child(5) .portfolio-img{min-height:620px}
-.portfolio-card{}
 .portfolio-card:hover .portfolio-img{transform:scale(1.05)}
 .photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .photo-placeholder::before{content:'';position:absolute;inset:0;transition:transform 1.2s var(--ease)}
@@ -684,7 +679,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   #waterRippleCanvas{display:none!important}
   .carousel-grain{display:none!important}
   .hero-grain{opacity:0!important}
-  *{-webkit-tap-highlight-color:transform}
+  *{-webkit-tap-highlight-color:transparent}
   /* Reduce paint complexity */
   .portfolio-card{transform:translateZ(0);-webkit-transform:translateZ(0)}
   .carousel-slide{transform:translateZ(0);-webkit-transform:translateZ(0)}
@@ -1742,7 +1737,7 @@ function applySettings() {
   if (s.email) document.getElementById('siteEmail').textContent = s.email;
   if (s.address) document.getElementById('siteAddress').innerHTML = s.address;
   if (s.hours) document.getElementById('siteHours').innerHTML = s.hours;
-  const sectionMap = { phil:'phil', port:'port', svc:'svc', proc:'proc', testi:'testi', book:'book', sugst:'sugst' };
+  const sectionMap = { phil:'phil', port:'port', svc:'svc', proc:'proc', book:'book', sugst:'sugst' };
   for (const [k, id] of Object.entries(sectionMap)) {
     if (s[k+'_eyebrow']) document.getElementById(id+'Eyebrow').textContent = s[k+'_eyebrow'];
     if (s[k+'_title']) document.getElementById(id+'Title').textContent = s[k+'_title'];
@@ -1753,8 +1748,8 @@ function applySettings() {
   if (s.showcase_cite) document.getElementById('showcaseCite').textContent = s.showcase_cite;
 }
 
-async function fetchBanners() { try { const res = await fetchWithTimeout(`${API_BASE}/api/banners?active=1`); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) banners = data; } catch (e) { try { const res = await fetchWithTimeout(`${API_BASE}/api/banners?active=1`); if (res.ok) { const data = await res.json(); if (data && data.length > 0) banners = data; } } catch (e2) { console.log('Banners API unavailable:', e2.message); } } }
-async function fetchWorks() { try { const res = await fetchWithTimeout(`${API_BASE}/api/works`); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) { works = data; worksLoaded = true; } } catch (e) { try { const res = await fetchWithTimeout(`${API_BASE}/api/works`); if (res.ok) { const data = await res.json(); if (data && data.length > 0) { works = data; worksLoaded = true; } } } catch (e2) { console.log('Works API unavailable:', e2.message); } } }
+async function fetchBanners() { try { const res = await fetchWithTimeout(`${API_BASE}/api/banners?active=1`); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) banners = data; } catch (e) { console.log('Banners API unavailable:', e.message); } }
+async function fetchWorks() { try { const res = await fetchWithTimeout(`${API_BASE}/api/works`); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) { works = data; worksLoaded = true; } } catch (e) { console.log('Works API unavailable:', e.message); } }
 
 let categoriesData = [];
 async function fetchCategories() { try { const res = await fetchWithTimeout(`${API_BASE}/api/categories`, 4000); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) { categoriesData = data; buildFilterButtons(); } } catch (e) { console.log('Categories API unavailable, using hardcoded filters:', e.message); } }
@@ -1813,8 +1808,6 @@ function updateParallax() {
   cursorGlow.style.transform = `translate(${mouseX - 150}px, ${mouseY - 150}px)`;
   rafId = null;
 }
-
-function createLoaderSparks() { const container = document.getElementById('loaderSparks'); if (!container) return; for (let i = 0; i < 20; i++) { const spark = document.createElement('div'); spark.className = 'spark'; const x = Math.random() * 140 + 10; spark.style.cssText = `left:${x}px;bottom:0;--spark-drift:${(Math.random() - 0.5) * 30}px;--spark-height:${15 + Math.random() * 35}px;--spark-dur:${0.4 + Math.random() * 0.6}s;--spark-delay:${Math.random() * 1.5}s`; container.appendChild(spark); } }
 
 function createShowcaseSparks() {
   const container = document.getElementById('showcaseSparks');
