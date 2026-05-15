@@ -1536,6 +1536,11 @@ function imgSrc(key, width, quality) {
   if (fmt !== 'origin') params.push(`f=${fmt}`);
   return params.length ? `${base}?${params.join('&')}` : base;
 }
+// 首屏关键图：绕过 Worker transform，直接 R2 原图（首次加载最快）
+function imgSrcDirect(key) {
+  if (!key) return '';
+  return `${IMAGE_BASE}/${encodeURIComponent(key)}`;
+}
 // 生成 srcset 属性
 function imgSrcset(key, quality) {
   if (!key) return '';
@@ -1664,8 +1669,10 @@ function renderCarousel() {
     const hasImage = b.image_key;
     const heroW = heroMaxWidth();
     const heroQ = window.innerWidth <= 768 ? 70 : 85;
-    const optimizedSrc = hasImage ? imgSrc(b.image_key, heroW, heroQ) : '';
-    const srcset = hasImage ? imgSrcset(b.image_key, heroQ) : '';
+    // First slide: direct R2 URL (skip Worker transform for fastest load)
+    // Other slides: optimized URL with transform (they load lazily anyway)
+    const optimizedSrc = hasImage ? (i === 0 ? imgSrcDirect(b.image_key) : imgSrc(b.image_key, heroW, heroQ)) : '';
+    const srcset = hasImage ? (i === 0 ? '' : imgSrcset(b.image_key, heroQ)) : '';
     const content = hasImage
       ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" ${i === 0 ? `src="${optimizedSrc}"` : `data-src="${optimizedSrc}"`} ${srcset ? `${i === 0 ? 'srcset' : 'data-srcset'}="${srcset}" sizes="${SIZES_HERO}"` : ''} alt="${b.title || ''}" loading="lazy" decoding="async" fetchpriority="${i === 0 ? 'high' : 'low'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
@@ -1926,15 +1933,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   setProgress(40);
 
   // Phase 2: Render (40-60%)
-  // Only preload FIRST carousel image for instant display
-  const heroW = heroMaxWidth();
-  const heroQ = isMobile ? 70 : 85;
+  // Only preload FIRST carousel image — direct R2 URL, skip Worker transform
   const sourceForPreload = banners.length > 0 ? banners : bannersFallback;
   if (sourceForPreload.length > 0 && sourceForPreload[0].image_key) {
     const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
-    link.href = imgSrc(sourceForPreload[0].image_key, heroW, heroQ);
-    link.imagesrcset = imgSrcset(sourceForPreload[0].image_key, heroQ);
-    link.imagesizes = SIZES_HERO;
+    link.href = imgSrcDirect(sourceForPreload[0].image_key);
     link.fetchpriority = 'high';
     document.head.appendChild(link);
   }
