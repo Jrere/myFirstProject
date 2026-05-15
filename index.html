@@ -1667,12 +1667,14 @@ function renderCarousel() {
   const source = banners.length > 0 ? banners : bannersFallback;
   track.innerHTML = source.map((b, i) => {
     const hasImage = b.image_key;
-    // 第一张立即加载，其余懒加载（进入视口才加载）
-    const directSrc = hasImage ? imgSrcDirect(b.image_key) : '';
+    // 所有轮播图都走 Worker 压缩/格式转换，避免加载过大原图
+    const heroW = heroMaxWidth();
+    const optimizedSrc = hasImage ? imgSrc(b.image_key, heroW, 80) : '';
+    const srcset = hasImage ? imgSrcset(b.image_key, 80) : '';
     const loadingAttr = i === 0 ? 'eager' : 'lazy';
     const fetchPri = i === 0 ? 'high' : 'low';
     const content = hasImage
-      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${directSrc}" alt="${b.title || ''}" decoding="async" loading="${loadingAttr}" fetchpriority="${fetchPri}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${optimizedSrc}" ${srcset ? `srcset="${srcset}" sizes="${SIZES_HERO}"` : ''} alt="${b.title || ''}" decoding="async" loading="${loadingAttr}" fetchpriority="${fetchPri}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
     return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
   }).join('');
