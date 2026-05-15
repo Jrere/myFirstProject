@@ -7,13 +7,13 @@
 <meta name="theme-color" content="#faf8f3" media="(prefers-color-scheme: light)">
 <meta name="format-detection" content="telephone=no">
 <title>白鹿缘摄影 · BAILUYUAN STUDIO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.loli.net" crossorigin>
 <link rel="preconnect" href="https://images.bailuyuan.fun" crossorigin>
 <link rel="preconnect" href="https://api.bailuyuan.fun" crossorigin>
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
 <link rel="dns-prefetch" href="https://images.bailuyuan.fun">
 <link rel="dns-prefetch" href="https://api.bailuyuan.fun">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+SC:wght@300;400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.loli.net/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+SC:wght@300;400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -1701,8 +1701,7 @@ carouselVP.addEventListener('touchstart', e => { touchStartX = e.touches[0].clie
 carouselVP.addEventListener('touchend', e => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { goToSlide(carouselIndex + (diff > 0 ? 1 : -1)); startAutoplay(); } }, { passive: true });
 
 function fetchWithTimeout(url, ms) {
-  // 手机用更短超时，快速降级到静态数据
-  if (!ms) ms = window.innerWidth < 768 ? 2500 : 4000;
+  if (!ms) ms = window.innerWidth < 768 ? 3000 : 5000;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), ms);
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
@@ -1731,8 +1730,8 @@ function applySettings() {
   if (s.showcase_cite) document.getElementById('showcaseCite').textContent = s.showcase_cite;
 }
 
-async function fetchBanners() { try { const res = await fetchWithTimeout(`${API_BASE}/api/banners?active=1`, 4000); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) banners = data; } catch (e) { console.log('Banners API unavailable, using fallback:', e.message); } }
-async function fetchWorks() { try { const res = await fetchWithTimeout(`${API_BASE}/api/works`, 4000); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) { works = data; worksLoaded = true; } } catch (e) { console.log('API unavailable, using static data:', e.message); } }
+async function fetchBanners() { try { const res = await fetchWithTimeout(`${API_BASE}/api/banners?active=1`); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) banners = data; } catch (e) { try { const res = await fetchWithTimeout(`${API_BASE}/api/banners?active=1`); if (res.ok) { const data = await res.json(); if (data && data.length > 0) banners = data; } } catch (e2) { console.log('Banners API unavailable:', e2.message); } } }
+async function fetchWorks() { try { const res = await fetchWithTimeout(`${API_BASE}/api/works`); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) { works = data; worksLoaded = true; } } catch (e) { try { const res = await fetchWithTimeout(`${API_BASE}/api/works`); if (res.ok) { const data = await res.json(); if (data && data.length > 0) { works = data; worksLoaded = true; } } } catch (e2) { console.log('Works API unavailable:', e2.message); } } }
 
 let categoriesData = [];
 async function fetchCategories() { try { const res = await fetchWithTimeout(`${API_BASE}/api/categories`, 4000); if (!res.ok) throw new Error('API error'); const data = await res.json(); if (data && data.length > 0) { categoriesData = data; buildFilterButtons(); } } catch (e) { console.log('Categories API unavailable, using hardcoded filters:', e.message); } }
@@ -2084,6 +2083,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('cli
 </script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}
+// 预热 API（防止 Worker 冷启动）
+fetch('https://api.bailuyuan.fun/api/health',{mode:'cors'}).catch(()=>{});
 </script>
 </body>
 </html>
