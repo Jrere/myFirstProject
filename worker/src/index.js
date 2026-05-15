@@ -16,14 +16,18 @@ export default {
 
     // ─── images.bailuyuan.fun 图片服务（支持自动压缩/格式转换）───
     if (url.hostname === 'images.bailuyuan.fun' && method === 'GET') {
-      // 解析 key：去掉开头的 /，并分离查询参数
       const rawPath = decodeURIComponent(pathname.slice(1));
       if (!rawPath) return new Response('Missing image key', { status: 400 });
 
-      // 查询参数：w=宽度, q=质量(1-100), f=格式(auto/webp/avif/origin)
       const width = parseInt(url.searchParams.get('w')) || 0;
       const quality = parseInt(url.searchParams.get('q')) || 82;
       const fmt = url.searchParams.get('f') || 'auto';
+
+      // 用 Cache API 缓存优化后的图片（边缘命中，不回源 R2）
+      const cache = caches.default;
+      const cacheKey = new Request(url.toString(), request);
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
 
       const obj = await env.R2.get(rawPath);
       if (!obj) return new Response('Image not found', { status: 404 });
@@ -31,71 +35,57 @@ export default {
       const headers = new Headers();
       obj.writeHttpMetadata(headers);
 
-      // 设置正确的 Content-Type
       const ext = rawPath.split('.').pop().toLowerCase();
       const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
       if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
         headers.set('content-type', mimeMap[ext] || 'image/jpeg');
       }
-
       headers.set('cache-control', 'public, max-age=604800, immutable');
       headers.set('access-control-allow-origin', '*');
       headers.set('vary', 'Accept');
 
-      // 如果请求了压缩参数，尝试使用 Cloudflare Image Resizing
-      const needResize = width > 0;
-      const needConvert = fmt === 'auto' || fmt === 'webp' || fmt === 'avif';
+      // 尝试使用 Images Binding 进行实时变换（免费计划可用）
+      const accept = request.headers.get('accept') || '';
+      let targetFormat = fmt;
+      if (fmt === 'auto') {
+        if (accept.includes('image/avif')) targetFormat = 'avif';
+        else if (accept.includes('image/webp')) targetFormat = 'webp';
+        else targetFormat = 'origin';
+      }
 
-      if (needResize || fmt !== 'origin') {
-        // 检测浏览器支持的格式（Accept 头）
-        const accept = request.headers.get('accept') || '';
-        let targetFormat = fmt;
-        if (fmt === 'auto') {
-          if (accept.includes('image/avif')) targetFormat = 'avif';
-          else if (accept.includes('image/webp')) targetFormat = 'webp';
-          else targetFormat = 'origin';
-        }
+      const needTransform = width > 0 || targetFormat !== 'origin';
 
-        // 构建 cf.image 选项
-        const cfImage = {};
-        if (width > 0) {
-          cfImage.width = width;
-          cfImage.fit = 'scale-down';
-          cfImage.quality = quality;
-        }
-        if (targetFormat === 'webp') cfImage.format = 'webp';
-        else if (targetFormat === 'avif') cfImage.format = 'avif';
+      if (needTransform && env.IMAGES) {
+        try {
+          const imageStream = obj.body;
+          const transforms = [];
+          if (width > 0) transforms.push({ width });
+          if (targetFormat === 'webp') transforms.push({ format: 'image/webp' });
+          else if (targetFormat === 'avif') transforms.push({ format: 'image/avif' });
 
-        // 尝试使用 cf.image（需要 Cloudflare Pro/Biz/Enterprise 或 Image Resizing 订阅）
-        if (Object.keys(cfImage).length > 0) {
-          try {
-            const resizedResponse = new Response(obj.body, {
-              headers: { 'content-type': mimeMap[ext] || 'image/jpeg' }
-            });
-            const cfFetch = new Request(request.url, {
-              headers: request.headers
-            });
-            // cf.image 在 Workers Paid 计划中可用
-            const optimized = await fetch(cfFetch, {
-              cf: { image: cfImage }
-            });
-            if (optimized.ok) {
-              const resp = new Response(optimized.body, optimized);
-              resp.headers.set('cache-control', 'public, max-age=604800, immutable');
-              resp.headers.set('access-control-allow-origin', '*');
-              resp.headers.set('vary', 'Accept');
-              return resp;
-            }
-          } catch (e) {
-            // cf.image 不可用，降级到原图
-            console.log('Image resizing unavailable, serving original:', e.message);
-          }
+          const result = await env.IMAGES.input(imageStream)
+            .transform(...transforms)
+            .output({ quality });
+
+          const outHeaders = new Headers();
+          outHeaders.set('content-type', targetFormat === 'webp' ? 'image/webp' : targetFormat === 'avif' ? 'image/avif' : (mimeMap[ext] || 'image/jpeg'));
+          outHeaders.set('cache-control', 'public, max-age=604800, immutable');
+          outHeaders.set('access-control-allow-origin', '*');
+          outHeaders.set('vary', 'Accept');
+
+          const resp = new Response(result.body, { headers: outHeaders });
+          await cache.put(cacheKey, resp.clone());
+          return resp;
+        } catch (e) {
+          // Images Binding 不可用或变换失败，降级
         }
       }
 
       // 降级：返回原图
       headers.set('etag', obj.httpEtag);
-      return new Response(obj.body, { headers });
+      const fallback = new Response(obj.body, { headers });
+      await cache.put(cacheKey, fallback.clone());
+      return fallback;
     }
 
     try {
