@@ -1665,13 +1665,14 @@ function renderCarousel() {
   const track = document.getElementById('carouselTrack');
   const dots = document.getElementById('carouselDots');
   const source = banners.length > 0 ? banners : bannersFallback;
-  // ALL slides use direct R2 URL — skip Worker transform entirely
-  // Only 3-5 images, small enough to all load eagerly
   track.innerHTML = source.map((b, i) => {
     const hasImage = b.image_key;
+    // 第一张立即加载，其余懒加载（进入视口才加载）
     const directSrc = hasImage ? imgSrcDirect(b.image_key) : '';
+    const loadingAttr = i === 0 ? 'eager' : 'lazy';
+    const fetchPri = i === 0 ? 'high' : 'low';
     const content = hasImage
-      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${directSrc}" alt="${b.title || ''}" decoding="async" fetchpriority="${i === 0 ? 'high' : 'low'}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
+      ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${directSrc}" alt="${b.title || ''}" decoding="async" loading="${loadingAttr}" fetchpriority="${fetchPri}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
     return `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">${content}</div>`;
   }).join('');
@@ -1682,6 +1683,13 @@ function renderCarousel() {
   updateCarouselContent(0);
   startAutoplay();
   dots.querySelectorAll('.carousel-dot').forEach(dot => { dot.addEventListener('click', () => goToSlide(+dot.dataset.index)); });
+}
+
+// API 返回后更新轮播图（仅在数据有变化时重新渲染）
+function updateCarouselWithBanners() {
+  if (banners.length === 0) return;
+  stopAutoplay();
+  renderCarousel();
 }
 
 function updateCarouselContent(index) {
@@ -1900,28 +1908,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     loaderPct.textContent = Math.round(progress) + '%';
   }
 
-  // Phase 1: API fetch — 只等首屏关键数据，其余后台加载
+  // Phase 1: 立即渲染轮播骨架屏（用 fallback 数据，不等 API）
   setProgress(5);
-  // 首屏只需要 banners + works，其余后台异步
-  await Promise.all([fetchBanners(), fetchWorks()]);
-  // settings 和 categories 不阻塞首屏，后台加载完成后自动应用
+  renderCarousel(); // 立即用 fallback 渲染，显示 shimmer 骨架
+  renderPortfolio();
+  setProgress(20);
+
+  // Phase 2: API fetch — 后台加载，不阻塞首屏渲染
+  // banners 和 works 并行请求，任一完成就更新对应区域
+  const bannersPromise = fetchBanners().then(() => {
+    if (banners.length > 0) {
+      // API 数据到了，预加载首图后更新轮播
+      const firstKey = banners[0].image_key;
+      if (firstKey) {
+        const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
+        link.href = imgSrcDirect(firstKey);
+        link.fetchpriority = 'high';
+        document.head.appendChild(link);
+      }
+      updateCarouselWithBanners();
+    }
+  }).catch(() => {});
+  const worksPromise = fetchWorks().catch(() => {});
+  // settings 和 categories 也不阻塞
   fetchCategories().then(() => buildFilterButtons()).catch(() => {});
   fetchSettings().then(() => applySettings()).catch(() => {});
-  setProgress(40);
 
-  // Phase 2: Render (40-60%)
-  // Only preload FIRST carousel image — direct R2 URL, skip Worker transform
-  const sourceForPreload = banners.length > 0 ? banners : bannersFallback;
-  if (sourceForPreload.length > 0 && sourceForPreload[0].image_key) {
-    const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
-    link.href = imgSrcDirect(sourceForPreload[0].image_key);
-    link.fetchpriority = 'high';
-    document.head.appendChild(link);
-  }
-  renderCarousel(); renderPortfolio();
+  // 等待 API 完成（有超时保护）
+  await Promise.race([Promise.all([bannersPromise, worksPromise]), new Promise(res => setTimeout(res, MAX_WAIT))]);
   setProgress(60);
 
-  // Phase 3: Wait for critical images (60-95%) — 只等首屏轮播图
+  // Phase 3: 等待首屏关键图片加载
   const criticalImgs = [
     ...document.querySelectorAll('.carousel-slide.active .carousel-slide-img'),
   ];
@@ -1933,8 +1950,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       img.onload = img.onerror = () => { loaded++; setProgress(60 + (loaded / total) * 35); res(); };
     });
   });
-  const timeout = new Promise(res => setTimeout(res, MAX_WAIT));
-  await Promise.race([Promise.all(imgPromises), timeout]);
+  const imgTimeout = new Promise(res => setTimeout(res, MAX_WAIT));
+  await Promise.race([Promise.all(imgPromises), imgTimeout]);
   setProgress(95);
 
   // Phase 4: Finish
