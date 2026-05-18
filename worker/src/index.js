@@ -14,57 +14,48 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // ─── images.bailuyuan.fun 图片服务（R2 直出 + 双层缓存）───
-    if (url.hostname === 'images.bailuyuan.fun' && method === 'GET') {
-      const rawPath = decodeURIComponent(pathname.slice(1));
-      if (!rawPath) return new Response('Missing image key', { status: 400 });
+    try {
+      // ─── 图片代理（最高优先级，跳过所有路由/认证）───
+      if (method === 'GET' && (pathname.startsWith('/api/image/') || (url.hostname === 'images.bailuyuan.fun' && pathname.length > 1))) {
+        const rawKey = url.hostname === 'images.bailuyuan.fun'
+          ? decodeURIComponent(pathname.slice(1))
+          : decodeURIComponent(pathname.replace(/^\/api\/image\//, ''));
+        if (!rawKey) return new Response('Missing image key', { status: 400 });
 
-      // ── 第 1 层：Worker Cache API（避免重复回源 R2）──
-      const cache = caches.default;
-      // 用纯 URL 做 cache key，不继承原始请求的 headers（避免 Vary 导致不命中）
-      const stableUrl = new URL(url);
-      stableUrl.search = '';
-      const cacheKey = new Request(stableUrl.toString());
-      const cached = await cache.match(cacheKey);
-      if (cached) {
-        // 加一个 header 标记 Cache API 命中，方便调试
-        const hitResp = new Response(cached.body, cached);
-        hitResp.headers.set('x-worker-cache', 'HIT');
-        return hitResp;
+        const cache = caches.default;
+        const stableUrl = new URL(url);
+        stableUrl.search = '';
+        const cacheKey = new Request(stableUrl.toString());
+        const cached = await cache.match(cacheKey);
+        if (cached) {
+          const hit = new Response(cached.body, cached);
+          hit.headers.set('x-worker-cache', 'HIT');
+          return hit;
+        }
+
+        const obj = await env.R2.get(rawKey);
+        if (!obj) return new Response('Image not found', { status: 404 });
+
+        const ext = rawKey.split('.').pop().toLowerCase();
+        const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
+        const ct = (obj.httpMetadata?.contentType && obj.httpMetadata.contentType !== 'application/octet-stream')
+          ? obj.httpMetadata.contentType : (mimeMap[ext] || 'image/jpeg');
+
+        const h = new Headers();
+        h.set('content-type', ct);
+        h.set('content-length', obj.size);
+        h.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
+        h.set('CDN-Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
+        h.set('access-control-allow-origin', '*');
+        h.set('etag', obj.httpEtag);
+        h.set('x-worker-cache', 'MISS');
+
+        const body = await obj.arrayBuffer();
+        const resp = new Response(body, { headers: h });
+        cache.put(cacheKey, new Response(body, { headers: h })).catch(() => {});
+        return resp;
       }
 
-      // ── 回源 R2 ──
-      const obj = await env.R2.get(rawPath);
-      if (!obj) return new Response('Image not found', { status: 404 });
-
-      const ext = rawPath.split('.').pop().toLowerCase();
-      const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
-      const contentType = (obj.httpMetadata?.contentType && obj.httpMetadata.contentType !== 'application/octet-stream')
-        ? obj.httpMetadata.contentType
-        : (mimeMap[ext] || 'image/jpeg');
-
-      const headers = new Headers();
-      headers.set('content-type', contentType);
-      headers.set('content-length', obj.size);
-      // 浏览器缓存 7 天；s-maxage 告知 CDN 边缘缓存 30 天
-      headers.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
-      headers.set('CDN-Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
-      headers.set('access-control-allow-origin', '*');
-      headers.set('etag', obj.httpEtag);
-      headers.set('x-worker-cache', 'MISS');
-
-      // 用 arrayBuffer 确保 body 可以被 clone 给 cache.put
-      const body = await obj.arrayBuffer();
-      const resp = new Response(body, { headers });
-
-      // 写入 Cache API（fire-and-forget，不阻塞响应）
-      const toCache = new Response(body, { headers });
-      cache.put(cacheKey, toCache).catch(() => {});
-
-      return resp;
-    }
-
-    try {
       // ─── 健康检查 ───
       if (pathname === '/api/health' && method === 'GET') {
         return json({ status: 'ok', time: new Date().toISOString() }, corsHeaders);
@@ -226,45 +217,6 @@ export default {
       }
 
       // ─── 图片代理 ───
-      const imageMatch = pathname.match(/^\/api\/image\/(.+)$/);
-      if (imageMatch && method === 'GET') {
-        const rawKey = decodeURIComponent(imageMatch[1]);
-        const imgCache = caches.default;
-        // 用纯 URL 做 cache key（不含 query 的版本，去掉 w/q/f 参数做缓存 key）
-        const imgUrl = new URL(url);
-        imgUrl.search = '';
-        const imgCacheKey = new Request(imgUrl.toString());
-        const imgCached = await imgCache.match(imgCacheKey);
-        if (imgCached) {
-          const hitResp = new Response(imgCached.body, imgCached);
-          hitResp.headers.set('x-worker-cache', 'HIT');
-          return hitResp;
-        }
-
-        const obj = await env.R2.get(rawKey);
-        if (!obj) return json({ error: 'Image not found' }, corsHeaders, 404);
-        const ext = rawKey.split('.').pop().toLowerCase();
-        const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
-        const contentType = (obj.httpMetadata?.contentType && obj.httpMetadata.contentType !== 'application/octet-stream')
-          ? obj.httpMetadata.contentType
-          : (mimeMap[ext] || 'image/jpeg');
-
-        const headers = new Headers();
-        headers.set('content-type', contentType);
-        headers.set('content-length', obj.size);
-        headers.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
-        headers.set('CDN-Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
-        headers.set('access-control-allow-origin', '*');
-        headers.set('etag', obj.httpEtag);
-        headers.set('x-worker-cache', 'MISS');
-
-        const body = await obj.arrayBuffer();
-        const resp = new Response(body, { headers });
-        const toCache = new Response(body, { headers });
-        imgCache.put(imgCacheKey, toCache).catch(() => {});
-        return resp;
-      }
-
       // ─── 轮播图 (公开) ───
       if (pathname === '/api/banners' && method === 'GET') {
         const activeOnly = url.searchParams.get('active');
