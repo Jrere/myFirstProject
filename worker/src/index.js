@@ -228,20 +228,41 @@ export default {
       // ─── 图片代理 ───
       const imageMatch = pathname.match(/^\/api\/image\/(.+)$/);
       if (imageMatch && method === 'GET') {
-        const key = decodeURIComponent(imageMatch[1]);
-        const obj = await env.R2.get(key);
-        if (!obj) return json({ error: 'Image not found' }, corsHeaders, 404);
-        const headers = new Headers(corsHeaders);
-        obj.writeHttpMetadata(headers);
-        // 如果缺少 content-type，根据扩展名推断
-        if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
-          const ext = key.split('.').pop().toLowerCase();
-          const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
-          headers.set('content-type', mimeMap[ext] || 'image/jpeg');
+        const rawKey = decodeURIComponent(imageMatch[1]);
+        const imgCache = caches.default;
+        // 用纯 URL 做 cache key（不含 query 的版本，去掉 w/q/f 参数做缓存 key）
+        const imgUrl = new URL(url);
+        imgUrl.search = '';
+        const imgCacheKey = new Request(imgUrl.toString());
+        const imgCached = await imgCache.match(imgCacheKey);
+        if (imgCached) {
+          const hitResp = new Response(imgCached.body, imgCached);
+          hitResp.headers.set('x-worker-cache', 'HIT');
+          return hitResp;
         }
+
+        const obj = await env.R2.get(rawKey);
+        if (!obj) return json({ error: 'Image not found' }, corsHeaders, 404);
+        const ext = rawKey.split('.').pop().toLowerCase();
+        const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
+        const contentType = (obj.httpMetadata?.contentType && obj.httpMetadata.contentType !== 'application/octet-stream')
+          ? obj.httpMetadata.contentType
+          : (mimeMap[ext] || 'image/jpeg');
+
+        const headers = new Headers();
+        headers.set('content-type', contentType);
+        headers.set('content-length', obj.size);
+        headers.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
+        headers.set('CDN-Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
+        headers.set('access-control-allow-origin', '*');
         headers.set('etag', obj.httpEtag);
-        headers.set('cache-control', 'public, max-age=604800, immutable');
-        return new Response(obj.body, { headers });
+        headers.set('x-worker-cache', 'MISS');
+
+        const body = await obj.arrayBuffer();
+        const resp = new Response(body, { headers });
+        const toCache = new Response(body, { headers });
+        imgCache.put(imgCacheKey, toCache).catch(() => {});
+        return resp;
       }
 
       // ─── 轮播图 (公开) ───
