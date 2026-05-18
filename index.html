@@ -279,11 +279,11 @@ body:hover .cursor-glow{opacity:1}
 
 /* ═══ Banner Carousel ═══ */
 .carousel-section{position:relative;width:100%;contain:content}
-.carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal);touch-action:pan-y;opacity:0;animation:carouselReveal 2s cubic-bezier(.4,0,.2,1) .3s forwards}
-@keyframes carouselReveal{0%{opacity:0;filter:brightness(0)}60%{opacity:1;filter:brightness(.6)}100%{opacity:1;filter:brightness(1)}}
+.carousel-viewport{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;background:var(--charcoal);touch-action:pan-y;opacity:0;animation:carouselReveal 2.8s cubic-bezier(.25,.46,.45,.94) .2s forwards}
+@keyframes carouselReveal{0%{opacity:0;filter:brightness(0) saturate(.6)}30%{opacity:.4;filter:brightness(.3) saturate(.8)}60%{opacity:.85;filter:brightness(.7) saturate(.95)}100%{opacity:1;filter:brightness(1) saturate(1)}}
 .carousel-track{position:relative;width:100%;height:100%}
-.carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:opacity 1.2s cubic-bezier(.4,0,.2,1),transform 1.2s cubic-bezier(.4,0,.2,1);overflow:hidden;will-change:opacity,transform;transform:translateZ(0) scale(1.02)}
-.carousel-slide.active{opacity:1;z-index:1;transform:translateZ(0) scale(1)}
+.carousel-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:0;transition:opacity 1.6s cubic-bezier(.25,.46,.45,.94),transform 1.8s cubic-bezier(.25,.46,.45,.94),filter 1.4s cubic-bezier(.25,.46,.45,.94);overflow:hidden;will-change:opacity,transform,filter;transform:translateZ(0) scale(1.04) translateY(8px);filter:brightness(.4) saturate(.7)}
+.carousel-slide.active{opacity:1;z-index:1;transform:translateZ(0) scale(1) translateY(0);filter:brightness(1) saturate(1)}
 .carousel-slide-img{position:absolute;min-width:100%;min-height:100%;width:100%;height:100%;object-fit:cover;object-position:center center;transition:transform 8s cubic-bezier(.25,.1,.25,1)}
 .carousel-slide.active .carousel-slide-img{animation:kbZoom1 8s ease-out forwards}
 .carousel-slide:nth-child(2).active .carousel-slide-img{animation:kbZoom2 8s ease-out forwards}
@@ -292,15 +292,15 @@ body:hover .cursor-glow{opacity:1}
 .carousel-slide:nth-child(5).active .carousel-slide-img{animation:kbZoom5 8s ease-out forwards}
 .carousel-slide-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .carousel-slide-placeholder .photo-placeholder{width:100%;height:100%}
-.carousel-crossfade{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;background:var(--charcoal);transition:opacity .4s cubic-bezier(.4,0,.2,1)}
+.carousel-crossfade{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;background:var(--charcoal);transition:opacity .8s cubic-bezier(.25,.46,.45,.94)}
 .carousel-crossfade.active{opacity:0}
 @keyframes kbZoom1{0%{transform:scale(1)}100%{transform:scale(1.12) translate(-1%,-0.5%)}}
 @keyframes kbZoom2{0%{transform:scale(1.06)}100%{transform:scale(1) translate(1%,0.5%)}}
 @keyframes kbZoom3{0%{transform:scale(1) translateY(-1%)}100%{transform:scale(1.1) translate(0.5%,1%)}}
 @keyframes kbZoom4{0%{transform:scale(1.08) translate(1%,0)}100%{transform:scale(1.14) translate(-0.5%,-1%)}}
 @keyframes kbZoom5{0%{transform:scale(1.04)}100%{transform:scale(1.1) translateY(0.5%)}}
-.carousel-light-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(184,151,106,.04) 45%,rgba(184,151,106,.08) 50%,rgba(184,151,106,.04) 55%,transparent 60%);opacity:0;transform:translateX(-100%);transition:none}
-.carousel-light-sweep.sweeping{opacity:1;animation:lightSweep 1.2s cubic-bezier(.4,0,.2,1) forwards}
+.carousel-light-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(184,151,106,.03) 45%,rgba(184,151,106,.06) 50%,rgba(184,151,106,.03) 55%,transparent 60%);opacity:0;transform:translateX(-100%);transition:none}
+.carousel-light-sweep.sweeping{opacity:1;animation:lightSweep 1.8s cubic-bezier(.25,.46,.45,.94) forwards}
 @keyframes lightSweep{to{transform:translateX(100%)}}
 .carousel-grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
 .carousel-overlay-top{position:absolute;top:0;left:0;right:0;height:30%;background:linear-gradient(to bottom,rgba(26,26,26,.5),transparent);z-index:4;pointer-events:none}
@@ -327,8 +327,8 @@ body:hover .cursor-glow{opacity:1}
 .story-char{display:inline-block;opacity:0;transform:translateY(12px);animation:storyCharIn .4s cubic-bezier(.16,1,.3,1) forwards}
 @keyframes storyCharIn{to{opacity:1;transform:translateY(0)}}
 /* ── 故事效果：转场增强 ── */
-.carousel-content{position:absolute;bottom:14%;left:60px;z-index:5;max-width:600px;opacity:0;animation:carouselContentIn 1.2s cubic-bezier(.16,1,.3,1) 1.8s forwards}
-@keyframes carouselContentIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.carousel-content{position:absolute;bottom:14%;left:60px;z-index:5;max-width:600px;opacity:0;animation:carouselContentIn 1.6s cubic-bezier(.16,1,.3,1) 2s forwards}
+@keyframes carouselContentIn{from{opacity:0;transform:translateY(40px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 .carousel-label{font-family:var(--font-sans);font-size:.6rem;letter-spacing:6px;text-transform:uppercase;color:var(--gold-light);margin-bottom:16px;opacity:0;transform:translateY(20px);animation:carouselFadeIn .8s var(--ease) .3s forwards}
 .carousel-title{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:400;color:var(--white);letter-spacing:4px;line-height:1.2;margin-bottom:12px;overflow:hidden}
 .carousel-title .story-line{display:block;overflow:hidden}
@@ -337,10 +337,10 @@ body:hover .cursor-glow{opacity:1}
 .carousel-cta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;transition:transform .3s var(--ease)}
 .carousel-cta:hover{background:var(--gold);color:var(--white);border-color:var(--gold);box-shadow:0 12px 36px rgba(184,151,106,.3)}
 .carousel-cta:hover svg{transform:translateX(4px)}
-@keyframes carouselFadeIn{to{opacity:1;transform:translateY(0)}}
-.carousel-content.slide-enter .carousel-label{animation:carouselFadeIn .6s cubic-bezier(.16,1,.3,1) .15s forwards;opacity:0;transform:translateY(15px)}
-.carousel-content.slide-enter .carousel-subtitle{animation:carouselFadeIn .6s cubic-bezier(.16,1,.3,1) .55s forwards;opacity:0;transform:translateY(15px)}
-.carousel-content.slide-enter .carousel-cta{animation:carouselFadeIn .6s cubic-bezier(.16,1,.3,1) .75s forwards;opacity:0;transform:translateY(15px)}
+@keyframes carouselFadeIn{to{opacity:1;transform:translateY(0);filter:blur(0)}}
+.carousel-content.slide-enter .carousel-label{animation:carouselFadeIn .8s cubic-bezier(.16,1,.3,1) .15s forwards;opacity:0;transform:translateY(15px);filter:blur(3px)}
+.carousel-content.slide-enter .carousel-subtitle{animation:carouselFadeIn .8s cubic-bezier(.16,1,.3,1) .55s forwards;opacity:0;transform:translateY(15px);filter:blur(3px)}
+.carousel-content.slide-enter .carousel-cta{animation:carouselFadeIn .8s cubic-bezier(.16,1,.3,1) .75s forwards;opacity:0;transform:translateY(15px);filter:blur(3px)}
 .carousel-btn{position:absolute;top:50%;z-index:6;width:52px;height:52px;border:1px solid rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);background:rgba(0,0,0,.15);backdrop-filter:blur(12px);cursor:pointer;transition:all .4s var(--ease);transform:translateY(-50%);opacity:0;animation:fadeSlideIn .6s cubic-bezier(.4,0,.2,1) 2s forwards}
 .carousel-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;transition:transform .3s var(--ease)}
 .carousel-btn:hover{background:var(--gold);border-color:var(--gold);transform:translateY(-50%) scale(1.1);box-shadow:0 8px 24px rgba(184,151,106,.3)}
@@ -706,7 +706,7 @@ button:active,.nav-cta:active,.hero-cta:active,.form-submit:active,.login-btn:ac
   .loader-logo-ring{animation:none!important}
   .loader-brand::after{animation:none!important}
   .carousel-slide-img{animation:none!important}
-  .carousel-slide{transition-duration:.5s}
+  .carousel-slide{transition-duration:.8s}
   .hero-content{animation:none!important;opacity:1!important;transform:none!important}
   .hero-water-surface{display:none!important}
   .hero-ambient{display:none!important}
