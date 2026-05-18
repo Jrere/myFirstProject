@@ -8,14 +8,16 @@
 <meta name="format-detection" content="telephone=no">
 <title>白鹿缘摄影 · BAILUYUAN STUDIO</title>
 <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+<link rel="preconnect" href="https://images.bailuyuan.fun" crossorigin>
 <link rel="preconnect" href="https://api.bailuyuan.fun" crossorigin>
+<link rel="dns-prefetch" href="https://images.bailuyuan.fun">
 <link rel="dns-prefetch" href="https://api.bailuyuan.fun">
 <!-- 预加载首张轮播图（与 API 请求并行，不阻塞） -->
 <script>
 (function(){
   var KEY='banners/8214695f-266e-415e-a359-02f97448efd1.jpg';
   var w=window.innerWidth<=480?640:window.innerWidth<=768?800:1600;
-  var src='https://api.bailuyuan.fun/image/'+encodeURIComponent(KEY)+'?w='+w+'&q=80';
+  var src='https://images.bailuyuan.fun/'+encodeURIComponent(KEY)+'?w='+w+'&q=80';
   var l=document.createElement('link');l.rel='preload';l.as='image';l.href=src;l.fetchPriority='high';
   document.head.appendChild(l);
   var img=new Image();img.fetchPriority='high';img.src=src;
@@ -1517,7 +1519,7 @@ function photoSVG(category) {
 }
 
 const API_BASE = 'https://api.bailuyuan.fun';
-const IMAGE_BASE = `${API_BASE}/image`;
+const IMAGE_BASE = 'https://images.bailuyuan.fun';
 
 // ===== 图片优化工具 =====
 // 检测浏览器是否支持 WebP/AVIF（结果缓存）
