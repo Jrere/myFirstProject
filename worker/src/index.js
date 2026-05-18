@@ -14,39 +14,53 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // ─── images.bailuyuan.fun 图片服务（R2 直出 + Cache API 缓存）───
+    // ─── images.bailuyuan.fun 图片服务（R2 直出 + 双层缓存）───
     if (url.hostname === 'images.bailuyuan.fun' && method === 'GET') {
       const rawPath = decodeURIComponent(pathname.slice(1));
       if (!rawPath) return new Response('Missing image key', { status: 400 });
 
-      // Cache API —— Worker 级缓存，避免重复回源 R2
+      // ── 第 1 层：Worker Cache API（避免重复回源 R2）──
       const cache = caches.default;
-      // 构建稳定的 cache key（忽略不生效的 transform 参数）
+      // 用纯 URL 做 cache key，不继承原始请求的 headers（避免 Vary 导致不命中）
       const stableUrl = new URL(url);
-      stableUrl.search = ''; // 图片 transform 当前不生效，用纯路径做 key
-      const cacheKey = new Request(stableUrl.toString(), request);
+      stableUrl.search = '';
+      const cacheKey = new Request(stableUrl.toString());
       const cached = await cache.match(cacheKey);
-      if (cached) return cached;
+      if (cached) {
+        // 加一个 header 标记 Cache API 命中，方便调试
+        const hitResp = new Response(cached.body, cached);
+        hitResp.headers.set('x-worker-cache', 'HIT');
+        return hitResp;
+      }
 
+      // ── 回源 R2 ──
       const obj = await env.R2.get(rawPath);
       if (!obj) return new Response('Image not found', { status: 404 });
 
-      const headers = new Headers();
-      obj.writeHttpMetadata(headers);
-
       const ext = rawPath.split('.').pop().toLowerCase();
       const mimeMap = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif' };
-      if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
-        headers.set('content-type', mimeMap[ext] || 'image/jpeg');
-      }
-      // 浏览器缓存 7 天，CDN 边缘缓存 30 天
+      const contentType = (obj.httpMetadata?.contentType && obj.httpMetadata.contentType !== 'application/octet-stream')
+        ? obj.httpMetadata.contentType
+        : (mimeMap[ext] || 'image/jpeg');
+
+      const headers = new Headers();
+      headers.set('content-type', contentType);
+      headers.set('content-length', obj.size);
+      // 浏览器缓存 7 天；s-maxage 告知 CDN 边缘缓存 30 天
       headers.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
-      headers.set('CDN-Cache-Control', 'max-age=2592000, stale-while-revalidate=86400');
+      headers.set('CDN-Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
       headers.set('access-control-allow-origin', '*');
       headers.set('etag', obj.httpEtag);
+      headers.set('x-worker-cache', 'MISS');
 
-      const resp = new Response(obj.body, { headers });
-      await cache.put(cacheKey, resp.clone());
+      // 用 arrayBuffer 确保 body 可以被 clone 给 cache.put
+      const body = await obj.arrayBuffer();
+      const resp = new Response(body, { headers });
+
+      // 写入 Cache API（fire-and-forget，不阻塞响应）
+      const toCache = new Response(body, { headers });
+      cache.put(cacheKey, toCache).catch(() => {});
+
       return resp;
     }
 
@@ -66,7 +80,8 @@ export default {
       };
       if (method === 'GET' && apiCacheTTL[pathname] && !pathname.includes('/api/works/')) {
         const cache = caches.default;
-        const cacheKey = new Request(url.toString(), request);
+        // 用纯 URL 做 key，不继承请求 headers（避免 Vary 导致缓存不命中）
+        const cacheKey = new Request(url.toString());
         const cached = await cache.match(cacheKey);
         if (cached) return cached;
         // 标记需要缓存（在 return 前写入）
@@ -776,16 +791,22 @@ function json(data, corsHeaders, status = 200) {
 
 // 带边缘缓存的 JSON 响应
 async function cachedJson(data, corsHeaders, request, status = 200) {
-  const resp = new Response(JSON.stringify(data), {
+  if (request._apiCacheKey) {
+    const ttl = request._apiCacheTTL || 60;
+    const body = JSON.stringify(data);
+    const headers = {
+      'Content-Type': 'application/json',
+      'cache-control': `public, max-age=${ttl}, s-maxage=${ttl}, stale-while-revalidate=${ttl * 2}`,
+      'CDN-Cache-Control': `public, max-age=${ttl}`,
+      ...corsHeaders,
+    };
+    const resp = new Response(body, { status, headers });
+    // 写入 Cache API（clone 保证 body 可读）
+    caches.default.put(request._apiCacheKey, resp.clone()).catch(() => {});
+    return resp;
+  }
+  return new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
-  if (request._apiCacheKey) {
-    const ttl = request._apiCacheTTL || 60;
-    const toCache = new Response(resp.body, resp);
-    toCache.headers.set('cache-control', `public, max-age=${ttl}, stale-while-revalidate=${ttl * 2}`);
-    try { await caches.default.put(request._apiCacheKey, toCache.clone()); } catch (e) {}
-    return toCache;
-  }
-  return resp;
 }
