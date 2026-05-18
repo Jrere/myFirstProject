@@ -1698,14 +1698,7 @@ function renderCarousel() {
 // API 返回后更新轮播图（仅在数据有变化时重新渲染）
 function updateCarouselWithBanners() {
   if (banners.length === 0) return;
-  // 如果 fallback 首图和 API 首图相同，跳过重渲染避免图片重新加载
-  var fallbackFirstKey = bannersFallback[0] && bannersFallback[0].image_key;
-  var apiFirstKey = banners[0] && banners[0].image_key;
-  if (fallbackFirstKey && apiFirstKey && fallbackFirstKey === apiFirstKey && banners.length === bannersFallback.length) {
-    // 首图已通过 fallback 渲染，只需更新文字内容
-    updateCarouselContent(0);
-    return;
-  }
+  // API 数据到了，直接重渲染（浏览器缓存会处理首图不重复下载）
   stopAutoplay();
   renderCarousel();
 }
