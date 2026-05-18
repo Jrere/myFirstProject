@@ -1678,8 +1678,9 @@ function renderCarousel() {
     const heroQ = window.innerWidth <= 768 ? 60 : 80;
     const optimizedSrc = hasImage ? imgSrc(b.image_key, heroW, heroQ) : '';
     const srcset = hasImage ? imgSrcset(b.image_key, heroQ) : '';
-    const loadingAttr = i === 0 ? 'eager' : 'lazy';
-    const fetchPri = i === 0 ? 'high' : 'low';
+    // 轮播图全部 eager 加载，前3张高优先级
+    const loadingAttr = 'eager';
+    const fetchPri = i < 3 ? 'high' : 'auto';
     const content = hasImage
       ? `<div class="img-shimmer"></div><img class="carousel-slide-img img-ready" src="${optimizedSrc}" ${srcset ? `srcset="${srcset}" sizes="${SIZES_HERO}"` : ''} alt="${b.title || ''}" decoding="async" loading="${loadingAttr}" fetchpriority="${fetchPri}" onload="this.classList.add('loaded');this.previousElementSibling&&this.previousElementSibling.remove()" onerror="this.style.display='none';this.previousElementSibling&&this.previousElementSibling.remove()">`
       : `<div class="carousel-slide-placeholder"><div class="photo-placeholder ${b.cls || 'photo-1'}"></div></div>`;
@@ -1727,6 +1728,9 @@ function goToSlide(index) {
   if (index < 0) index = total - 1;
   if (index >= total) index = 0;
   if (index === carouselIndex) return;
+  // 预加载下下张图片，确保切换时不卡
+  const nextNext = (index + 1) % total;
+  preloadSlideImage(nextNext);
   const sweep = document.getElementById('carouselSweep');
   // 直接用 CSS transition 切换，不再用 setTimeout 黑屏闪烁
   document.querySelectorAll('.carousel-slide').forEach((s, i) => { s.classList.toggle('active', i === index); });
@@ -1736,6 +1740,16 @@ function goToSlide(index) {
   updateCarouselContent(index);
   resetProgress();
   sweep.classList.remove('sweeping'); void sweep.offsetWidth; sweep.classList.add('sweeping');
+}
+// 预加载指定 slide 的图片（如果还没加载）
+function preloadSlideImage(idx) {
+  const slides = document.querySelectorAll('.carousel-slide');
+  if (!slides[idx]) return;
+  const img = slides[idx].querySelector('img');
+  if (!img || img.complete) return;
+  // 触发浏览器加载：去掉 lazy，设 src
+  if (img.loading === 'lazy') img.loading = 'eager';
+  if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
 }
 
 function startAutoplay() { stopAutoplay(); carouselStartTime = Date.now(); carouselTimer = setInterval(() => goToSlide(carouselIndex + 1), AUTOPLAY_INTERVAL); animateProgress(); }
