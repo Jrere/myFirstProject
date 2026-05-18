@@ -1559,8 +1559,8 @@ const SIZES_HERO = '100vw';
 const SIZES_CARD = '(max-width:600px) 100vw, (max-width:1024px) 50vw, 33vw';
 // 首屏轮播图最大宽度（手机用小图，节省带宽）
 function heroMaxWidth() {
-  if (window.innerWidth <= 480) return 640;
-  if (window.innerWidth <= 768) return 800;
+  if (window.innerWidth <= 480) return 480;
+  if (window.innerWidth <= 768) return 640;
   return 1600;
 }
 
@@ -1643,7 +1643,7 @@ function renderPortfolio(filter='all') {
   grid.innerHTML = displayList.map((w, i) => {
     const hasImage = w.image_key && worksLoaded;
     const cardW = window.innerWidth <= 768 ? 600 : 800;
-    const cardQ = window.innerWidth <= 768 ? 65 : 80;
+    const cardQ = window.innerWidth <= 768 ? 50 : 80;
     const optimizedSrc = hasImage ? imgSrc(w.image_key, cardW, cardQ) : '';
     const srcset = hasImage ? imgSrcset(w.image_key, cardQ) : '';
     const imgHtml = hasImage
@@ -1675,8 +1675,9 @@ function renderCarousel() {
     const hasImage = b.image_key;
     // 所有轮播图都走 Worker 压缩/格式转换，避免加载过大原图
     const heroW = heroMaxWidth();
-    const optimizedSrc = hasImage ? imgSrc(b.image_key, heroW, 80) : '';
-    const srcset = hasImage ? imgSrcset(b.image_key, 80) : '';
+    const heroQ = window.innerWidth <= 768 ? 60 : 80;
+    const optimizedSrc = hasImage ? imgSrc(b.image_key, heroW, heroQ) : '';
+    const srcset = hasImage ? imgSrcset(b.image_key, heroQ) : '';
     const loadingAttr = i === 0 ? 'eager' : 'lazy';
     const fetchPri = i === 0 ? 'high' : 'low';
     const content = hasImage
@@ -1935,7 +1936,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       // API 数据到了，立即预加载首图（不等 renderCarousel）
       const firstKey = banners[0].image_key;
       if (firstKey) {
-        const preloadSrc = imgSrc(firstKey, heroMaxWidth(), 80);
+        const preloadQ = window.innerWidth <= 768 ? 60 : 80;
+        const preloadSrc = imgSrc(firstKey, heroMaxWidth(), preloadQ);
         const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
         link.href = preloadSrc;
         link.fetchpriority = 'high';
