@@ -13,6 +13,17 @@
 <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 <link rel="dns-prefetch" href="https://images.bailuyuan.fun">
 <link rel="dns-prefetch" href="https://api.bailuyuan.fun">
+<!-- 预加载首张轮播图（与 API 请求并行，不阻塞） -->
+<script>
+(function(){
+  var KEY='banners/8214695f-266e-415e-a359-02f97448efd1.jpg';
+  var w=window.innerWidth<=480?640:window.innerWidth<=768?800:1600;
+  var src='https://images.bailuyuan.fun/'+encodeURIComponent(KEY)+'?w='+w+'&q=80';
+  var l=document.createElement('link');l.rel='preload';l.as='image';l.href=src;l.fetchPriority='high';
+  document.head.appendChild(l);
+  var img=new Image();img.fetchPriority='high';img.src=src;
+})();
+</script>
 <link href="https://fonts.loli.net/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+SC:wght@300;400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -1652,7 +1663,7 @@ let carouselTimer = null;
 let carouselProgressRAF = null;
 let carouselStartTime = 0;
 const bannersFallback = [
-  { title: '品牌视觉大片', subtitle: '电影级画面，定义品牌新高度', cls: 'photo-1' },
+  { title: '品牌视觉大片', subtitle: '电影级画面，定义品牌新高度', image_key: 'banners/8214695f-266e-415e-a359-02f97448efd1.jpg', cls: 'photo-1' },
   { title: '真实与温度', subtitle: '捕捉银发岁月最动人的瞬间', cls: 'photo-3' },
   { title: '专业肖像定制', subtitle: '一张照片，胜过千言万语', cls: 'photo-5' },
 ];
@@ -1686,6 +1697,14 @@ function renderCarousel() {
 // API 返回后更新轮播图（仅在数据有变化时重新渲染）
 function updateCarouselWithBanners() {
   if (banners.length === 0) return;
+  // 如果 fallback 首图和 API 首图相同，跳过重渲染避免图片重新加载
+  var fallbackFirstKey = bannersFallback[0] && bannersFallback[0].image_key;
+  var apiFirstKey = banners[0] && banners[0].image_key;
+  if (fallbackFirstKey && apiFirstKey && fallbackFirstKey === apiFirstKey && banners.length === bannersFallback.length) {
+    // 首图已通过 fallback 渲染，只需更新文字内容
+    updateCarouselContent(0);
+    return;
+  }
   stopAutoplay();
   renderCarousel();
 }
@@ -1911,16 +1930,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   setProgress(20);
 
   // Phase 2: API fetch — 后台加载，不阻塞首屏渲染
-  // banners 和 works 并行请求，任一完成就更新对应区域
+  // 提前发起 banners API 请求，拿到首图 key 后立即开始预加载图片
   const bannersPromise = fetchBanners().then(() => {
     if (banners.length > 0) {
-      // API 数据到了，预加载首图后更新轮播
+      // API 数据到了，立即预加载首图（不等 renderCarousel）
       const firstKey = banners[0].image_key;
       if (firstKey) {
+        const preloadSrc = imgSrc(firstKey, heroMaxWidth(), 80);
         const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image';
-        link.href = imgSrc(firstKey, heroMaxWidth(), 80);
+        link.href = preloadSrc;
         link.fetchpriority = 'high';
         document.head.appendChild(link);
+        // 同时用 Image 对象并行预加载（双保险）
+        const preloader = new Image();
+        preloader.fetchPriority = 'high';
+        preloader.src = preloadSrc;
       }
       updateCarouselWithBanners();
     }

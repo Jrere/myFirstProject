@@ -40,7 +40,9 @@ export default {
       if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
         headers.set('content-type', mimeMap[ext] || 'image/jpeg');
       }
-      headers.set('cache-control', 'public, max-age=604800, immutable');
+      // s-maxage 控制 Cloudflare 边缘缓存 TTL，stale-while-revalidate 允许过期后异步回源
+      headers.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
+      headers.set('CDN-Cache-Control', 'max-age=2592000, stale-while-revalidate=86400');
       headers.set('access-control-allow-origin', '*');
       headers.set('vary', 'Accept');
       headers.set('etag', obj.httpEtag);
@@ -77,7 +79,8 @@ export default {
 
           const outHeaders = new Headers();
           outHeaders.set('content-type', targetFormat === 'webp' ? 'image/webp' : targetFormat === 'avif' ? 'image/avif' : (mimeMap[ext] || 'image/jpeg'));
-          outHeaders.set('cache-control', 'public, max-age=604800, immutable');
+          outHeaders.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
+          outHeaders.set('CDN-Cache-Control', 'max-age=2592000, stale-while-revalidate=86400');
           outHeaders.set('access-control-allow-origin', '*');
           outHeaders.set('vary', 'Accept');
 
