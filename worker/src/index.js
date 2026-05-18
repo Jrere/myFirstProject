@@ -14,18 +14,17 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // ─── images.bailuyuan.fun 图片服务（支持自动压缩/格式转换）───
+    // ─── images.bailuyuan.fun 图片服务（R2 直出 + Cache API 缓存）───
     if (url.hostname === 'images.bailuyuan.fun' && method === 'GET') {
       const rawPath = decodeURIComponent(pathname.slice(1));
       if (!rawPath) return new Response('Missing image key', { status: 400 });
 
-      const width = parseInt(url.searchParams.get('w')) || 0;
-      const quality = parseInt(url.searchParams.get('q')) || 82;
-      const fmt = url.searchParams.get('f') || 'auto';
-
-      // 用 Cache API 缓存优化后的图片（边缘命中，不回源 R2）
+      // Cache API —— Worker 级缓存，避免重复回源 R2
       const cache = caches.default;
-      const cacheKey = new Request(url.toString(), request);
+      // 构建稳定的 cache key（忽略不生效的 transform 参数）
+      const stableUrl = new URL(url);
+      stableUrl.search = ''; // 图片 transform 当前不生效，用纯路径做 key
+      const cacheKey = new Request(stableUrl.toString(), request);
       const cached = await cache.match(cacheKey);
       if (cached) return cached;
 
@@ -40,63 +39,15 @@ export default {
       if (!headers.get('content-type') || headers.get('content-type') === 'application/octet-stream') {
         headers.set('content-type', mimeMap[ext] || 'image/jpeg');
       }
-      // s-maxage 控制 Cloudflare 边缘缓存 TTL，stale-while-revalidate 允许过期后异步回源
+      // 浏览器缓存 7 天，CDN 边缘缓存 30 天
       headers.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
       headers.set('CDN-Cache-Control', 'max-age=2592000, stale-while-revalidate=86400');
       headers.set('access-control-allow-origin', '*');
-      headers.set('vary', 'Accept');
       headers.set('etag', obj.httpEtag);
 
-      // 无参数请求：直接返回 R2 原图，跳过 transform（最快路径）
-      if (!url.searchParams.has('w') && !url.searchParams.has('q') && !url.searchParams.has('f')) {
-        const direct = new Response(obj.body, { headers });
-        await cache.put(cacheKey, direct.clone());
-        return direct;
-      }
-
-      // 尝试使用 Images Binding 进行实时变换（免费计划可用）
-      const accept = request.headers.get('accept') || '';
-      let targetFormat = fmt;
-      if (fmt === 'auto') {
-        if (accept.includes('image/avif')) targetFormat = 'avif';
-        else if (accept.includes('image/webp')) targetFormat = 'webp';
-        else targetFormat = 'origin';
-      }
-
-      const needTransform = width > 0 || targetFormat !== 'origin';
-
-      if (needTransform && env.IMAGES) {
-        try {
-          const imageStream = obj.body;
-          const transforms = [];
-          if (width > 0) transforms.push({ width });
-          if (targetFormat === 'webp') transforms.push({ format: 'image/webp' });
-          else if (targetFormat === 'avif') transforms.push({ format: 'image/avif' });
-
-          const result = await env.IMAGES.input(imageStream)
-            .transform(...transforms)
-            .output({ quality });
-
-          const outHeaders = new Headers();
-          outHeaders.set('content-type', targetFormat === 'webp' ? 'image/webp' : targetFormat === 'avif' ? 'image/avif' : (mimeMap[ext] || 'image/jpeg'));
-          outHeaders.set('cache-control', 'public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable');
-          outHeaders.set('CDN-Cache-Control', 'max-age=2592000, stale-while-revalidate=86400');
-          outHeaders.set('access-control-allow-origin', '*');
-          outHeaders.set('vary', 'Accept');
-
-          const resp = new Response(result.body, { headers: outHeaders });
-          await cache.put(cacheKey, resp.clone());
-          return resp;
-        } catch (e) {
-          // Images Binding 不可用或变换失败，降级
-        }
-      }
-
-      // 降级：返回原图
-      headers.set('etag', obj.httpEtag);
-      const fallback = new Response(obj.body, { headers });
-      await cache.put(cacheKey, fallback.clone());
-      return fallback;
+      const resp = new Response(obj.body, { headers });
+      await cache.put(cacheKey, resp.clone());
+      return resp;
     }
 
     try {
