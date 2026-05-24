@@ -537,12 +537,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="content page" id="pageBanners">
       <div class="panel">
         <div class="panel-header">
-          <span class="panel-title">🖼️ 轮播图管理</span>
+          <span class="panel-title">🖼️ 轮播图管理 <span id="bannerCountLabel" style="font-size:.75rem;color:var(--text-dim);font-weight:400;margin-left:4px"></span></span>
           <div class="panel-actions">
             <button class="btn btn-ghost btn-sm" onclick="loadBanners()">🔄 刷新</button>
-            <button class="btn btn-primary btn-sm" onclick="openBannerModal()">＋ 添加</button>
+            <button class="btn btn-primary btn-sm" id="bannerAddBtn" onclick="openBannerModal()">＋ 添加</button>
           </div>
         </div>
+        <div id="bannerLimitTip" style="display:none;padding:10px 16px;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--amber);background:var(--amber-bg)"></div>
         <div class="cards" id="bannerGrid"></div>
       </div>
     </div>
@@ -1222,6 +1223,21 @@ async function loadBanners() {
 
 function renderBanners() {
   const grid = document.getElementById('bannerGrid');
+  const BANNER_MAX = 5;
+  const count = banners.length;
+  // 更新数量标签
+  const label = document.getElementById('bannerCountLabel');
+  if (label) label.textContent = `(${count}/${BANNER_MAX})`;
+  // 更新添加按钮状态
+  const addBtn = document.getElementById('bannerAddBtn');
+  const limitTip = document.getElementById('bannerLimitTip');
+  if (count >= BANNER_MAX) {
+    if (addBtn) { addBtn.disabled = true; addBtn.style.opacity = '.4'; addBtn.style.cursor = 'not-allowed'; }
+    if (limitTip) { limitTip.textContent = `⚠️ 已达上限（${BANNER_MAX} 张），请删除旧图后再添加新轮播图`; limitTip.style.display = 'block'; }
+  } else {
+    if (addBtn) { addBtn.disabled = false; addBtn.style.opacity = ''; addBtn.style.cursor = ''; }
+    if (limitTip) limitTip.style.display = 'none';
+  }
   if (banners.length === 0) {
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="icon">🖼️</div><p>还没有轮播图</p><button class="btn btn-primary" onclick="openBannerModal()">＋ 添加</button></div>';
     return;

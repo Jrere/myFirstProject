@@ -450,6 +450,10 @@ export default {
 
       // ─── 轮播图 CRUD (管理) ───
       if (pathname === '/api/banners' && method === 'POST') {
+        // 限制最多 5 张轮播图
+        const { count: bannerCount } = await env.DB.prepare('SELECT COUNT(*) as count FROM banners').first();
+        if (bannerCount >= 5) return json({ error: '轮播图最多只能有 5 张，请先删除旧图再添加' }, corsHeaders, 400);
+
         const formData = await request.formData();
         const title = formData.get('title') || '';
         const subtitle = formData.get('subtitle') || '';
