@@ -415,7 +415,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="nav-item" data-page="suggestions" onclick="switchPage('suggestions')">
         <span class="icon">💬</span> 建议反馈 <span class="badge" id="suggestionsBadge">0</span>
       </div>
-      <div class="sidebar-section">展示</div>
+      <div class="sidebar-section">系统</div>
+      <div class="nav-item" data-page="users" onclick="switchPage('users')">
+        <span class="icon">👥</span> 用户管理 <span class="badge" id="usersBadge">0</span>
+      </div>
       <div class="nav-item" data-page="sections" onclick="switchPage('sections')">
         <span class="icon">📝</span> 内容管理
       </div>
@@ -697,6 +700,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         </div>
       </div>
     </div>
+
+    <!-- Users -->
+    <div class="content page" id="pageUsers">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">👥 用户管理</span>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" onclick="loadUsers()">🔄 刷新</button>
+          </div>
+        </div>
+        <div class="list-view" id="usersList"></div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -907,7 +923,7 @@ function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page' + capitalize(page)));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
   document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-  const titles = { dashboard:'仪表盘', categories:'分类管理', works:'作品管理', banners:'轮播图管理', bookings:'预约管理', suggestions:'建议反馈', sections:'内容管理', settings:'网站设置' };
+  const titles = { dashboard:'仪表盘', categories:'分类管理', works:'作品管理', banners:'轮播图管理', bookings:'预约管理', suggestions:'建议反馈', users:'用户管理', sections:'内容管理', settings:'网站设置' };
   document.getElementById('topbarTitle').textContent = titles[page] || '';
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('active');
@@ -923,7 +939,7 @@ function toggleSidebar() {
 // ═══ Load All ═══
 async function loadAll() {
   await loadCategories();
-  await Promise.all([loadWorks(), loadBanners(), loadBookings(), loadSuggestions(), loadSettings(), loadSectionContent()]);
+  await Promise.all([loadWorks(), loadBanners(), loadBookings(), loadSuggestions(), loadUsers(), loadSettings(), loadSectionContent()]);
   renderDashboard();
 }
 
@@ -1338,6 +1354,44 @@ async function updateSuggestion(id, status) {
 function deleteSuggestion(id) {
   showConfirm('确定删除这条建议？', async () => {
     try { await api(`/api/suggestions/${id}`, { method: 'DELETE' }); toast('已删除', 'success'); await loadSuggestions(); renderDashboard(); }
+    catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+// ═══ Users ═══
+async function loadUsers() {
+  try {
+    const data = await api('/api/users');
+    document.getElementById('usersBadge').textContent = data.length;
+    window._users = data;
+    renderUsers();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function renderUsers() {
+  const list = document.getElementById('usersList');
+  const data = window._users || [];
+  if (data.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon">👥</div><p>暂无注册用户</p></div>';
+    return;
+  }
+  list.innerHTML = data.map(u => `
+    <div class="list-item">
+      <div class="sidebar-avatar" style="width:40px;height:40px;font-size:.85rem;flex-shrink:0">${esc(u.username.charAt(0).toUpperCase())}</div>
+      <div class="info">
+        <h3>${esc(u.username)}</h3>
+        <div class="time">注册时间：${u.created_at}</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}','${esc(u.username)}')">🗑️ 删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteUser(id, name) {
+  showConfirm(`确定删除用户「${name}」？`, async () => {
+    try { await api(`/api/users/${id}`, { method: 'DELETE' }); toast('已删除', 'success'); await loadUsers(); }
     catch (e) { toast(e.message, 'error'); }
   });
 }

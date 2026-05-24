@@ -180,6 +180,27 @@ export default {
         return json({ success: true, message: '密码修改成功' }, corsHeaders);
       }
 
+      // ─── 用户管理 (管理员) ───
+      if (pathname === '/api/users' && method === 'GET') {
+        const auth = request.headers.get('Authorization') || '';
+        const payload = await verifyAuthPayload(auth, env);
+        if (!payload || payload.role !== 'admin') return json({ error: 'Forbidden' }, corsHeaders, 403);
+        const { results } = await env.DB.prepare('SELECT id, username, created_at FROM users ORDER BY created_at DESC').all();
+        return json(results, corsHeaders);
+      }
+
+      const userDeleteMatch = pathname.match(/^\/api\/users\/([^/]+)$/);
+      if (userDeleteMatch && method === 'DELETE') {
+        const auth = request.headers.get('Authorization') || '';
+        const payload = await verifyAuthPayload(auth, env);
+        if (!payload || payload.role !== 'admin') return json({ error: 'Forbidden' }, corsHeaders, 403);
+        const id = userDeleteMatch[1];
+        const existing = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+        if (!existing) return json({ error: 'Not found' }, corsHeaders, 404);
+        await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+        return json({ success: true }, corsHeaders);
+      }
+
       // ═══════════════════════════════════════════
       // ─── 公开 API (无需认证) ───
       // ═══════════════════════════════════════════

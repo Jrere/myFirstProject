@@ -19,6 +19,6 @@ bucket_name = "bailuyuan-images"
 
 # ─── 环境变量 ───
 [vars]
-ADMIN_USER = "admin"
-ADMIN_PASS = "admin123"
+ADMIN_USER = "bailuyuan"
+ADMIN_PASS = "123456"
 JWT_SECRET = "bailuyuan-admin-secret-2026"
