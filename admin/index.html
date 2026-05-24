@@ -268,10 +268,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
 }
 @media(max-width:768px){
-  .sidebar{display:none}
-  .main{margin-left:0;padding-bottom:72px}
-  .hamburger{display:none}
-  .bottom-nav{display:flex}
+  .sidebar{transform:translateX(-100%);width:240px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{display:none!important;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+  .sidebar-overlay.active{display:block!important}
+  .main{margin-left:0;padding-bottom:16px}
+  .hamburger{display:flex}
+  .bottom-nav{display:none}
   .topbar{padding:0 16px;height:56px}
   .topbar-title{font-size:.9rem}
   .content{padding:16px 12px}
@@ -376,7 +379,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <!-- ═══ App ═══ -->
 <div class="app" id="app">
   <!-- Sidebar overlay (mobile) - hidden, using bottom nav instead -->
-  <div class="sidebar-overlay" id="sidebarOverlay" style="display:none"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
